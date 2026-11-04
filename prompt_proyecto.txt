@@ -1,0 +1,3562 @@
+lib/main.dart
+---
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:provider/provider.dart' as prov;
+import 'package:senasgo/core/config/hive_config.dart';
+import 'package:senasgo/core/services/camera_service.dart';
+import 'package:senasgo/core/services/hive_service.dart';
+import 'package:senasgo/core/services/inference_service.dart';
+import 'package:senasgo/features/learning/presentation/views/lesson_list_view.dart';
+import 'package:senasgo/features/learning/presentation/views/lesson_view.dart';
+import 'package:senasgo/features/practice/presentation/controllers/practice_controller.dart';
+import 'package:senasgo/features/practice/presentation/views/practice_view.dart';
+import 'package:senasgo/features/store/presentation/views/store_view.dart';
+import 'package:senasgo/shared/models/user_model.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // Persistencia local (Hive) - 100% offline
+  await HiveConfig.init();
+  await HiveService.registerAdapters();
+  await HiveService.initBoxes();
+  await HiveService.seedIfEmpty();
+  if (HiveService.userBox.isEmpty) {
+    await HiveService.saveUser(UserModel.initial());
+  }
+
+  // Cámara disponible en el dispositivo (si falla, la app sigue navegable)
+  List<CameraDescription> cameras;
+  try {
+    cameras = await availableCameras();
+  } catch (_) {
+    cameras = <CameraDescription>[];
+  }
+
+  runApp(ProviderScope(child: MyApp(cameras: cameras)));
+}
+
+class MyApp extends StatelessWidget {
+  const MyApp({required this.cameras, super.key});
+
+  final List<CameraDescription> cameras;
+
+  @override
+  Widget build(BuildContext context) {
+    return ScreenUtilInit(
+      designSize: const Size(375, 812),
+      minTextAdapt: true,
+      splitScreenMode: true,
+      builder: (context, _) {
+        final router = GoRouter(
+          initialLocation: '/',
+          errorBuilder: (context, state) => Scaffold(
+            appBar: AppBar(title: const Text('SeñasGo')),
+            body: Center(child: Text('Pantalla no encontrada: ${state.uri}')),
+          ),
+          routes: [
+            GoRoute(
+              path: '/',
+              builder: (context, state) => HomeScreen(cameras: cameras),
+            ),
+            GoRoute(
+              path: '/library',
+              builder: (context, state) => const LessonListView(),
+            ),
+            GoRoute(
+              path: '/lesson/:id',
+              builder: (context, state) =>
+                  LessonView(lessonId: state.pathParameters['id']!),
+            ),
+            GoRoute(
+              path: '/store',
+              builder: (context, state) => const StoreView(),
+            ),
+            GoRoute(
+              path: '/practice',
+              builder: (context, state) => prov.MultiProvider(
+                providers: [
+                  prov.ChangeNotifierProvider(
+                    create: (_) => CameraService(cameras),
+                  ),
+                  prov.ChangeNotifierProvider(
+                    create: (_) => InferenceService(),
+                  ),
+                  prov.ChangeNotifierProxyProvider2<CameraService,
+                      InferenceService, PracticeController>(
+                    create: (context) => PracticeController(
+                      cameraService: context.read<CameraService>(),
+                      inferenceService: context.read<InferenceService>(),
+                    ),
+                    update: (context, camera, inference, previous) =>
+                        previous ??
+                        PracticeController(
+                          cameraService: camera,
+                          inferenceService: inference,
+                        ),
+                  ),
+                ],
+                child: PracticeView(
+                  lessonId: state.uri.queryParameters['lesson'],
+                ),
+              ),
+            ),
+          ],
+        );
+
+        return MaterialApp.router(
+          title: 'SeñasGo',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF4A90E2)),
+            useMaterial3: true,
+          ),
+          routerConfig: router,
+        );
+      },
+    );
+  }
+}
+
+/// Inicio: acceso al ciclo completo y estado de gamificación local.
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({required this.cameras, super.key});
+
+  final List<CameraDescription> cameras;
+
+  @override
+  Widget build(BuildContext context) {
+    final user = HiveService.currentUser;
+    final pendingLessons =
+        HiveService.lessons.where((l) => !l.isCompleted).length;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('SeñasGo'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              child: Row(
+                children: [
+                  const Icon(Icons.star, color: Colors.amber, size: 20),
+                  const SizedBox(width: 4),
+                  Text('${user.xp} XP · Nivel ${user.level}'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Text(
+            'Aprendé Lengua de Señas Paraguaya',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            '$pendingLessons lecciones pendientes',
+            style: const TextStyle(color: Colors.grey),
+          ),
+          const SizedBox(height: 20),
+
+          // Ciclo metodológico
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(14),
+              child: Column(
+                children: [
+                  const Text(
+                    'Ciclo de aprendizaje',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 12),
+                  const Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      _CycleStep(icon: Icons.school, label: 'Aprender'),
+                      _CycleStep(icon: Icons.center_focus_strong, label: 'Prepararse'),
+                      _CycleStep(icon: Icons.play_arrow, label: 'Practicar'),
+                      _CycleStep(icon: Icons.feedback, label: 'Feedback'),
+                      _CycleStep(icon: Icons.refresh, label: 'Corregir'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+
+          FilledButton.icon(
+            onPressed: () => context.go('/library'),
+            icon: const Icon(Icons.school),
+            label: const Text('EMPEZAR A APRENDER'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              textStyle: const TextStyle(fontSize: 16),
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          Row(
+            children: [
+              Expanded(
+                child: _HomeCard(
+                  icon: Icons.menu_book,
+                  title: 'Biblioteca',
+                  subtitle: 'Vocabulario',
+                  onTap: () => context.go('/library'),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _HomeCard(
+                  icon: Icons.storefront,
+                  title: 'Tienda',
+                  subtitle: 'Personalizá tu avatar',
+                  onTap: () => context.go('/store'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          _HomeCard(
+            icon: Icons.camera_alt,
+            title: 'Práctica libre',
+            subtitle: 'Ejecutá señas con la cámara',
+            onTap: () => context.go('/practice'),
+          ),
+          const SizedBox(height: 16),
+
+          // Fallback de permisos: la app sigue siendo navegable
+          OutlinedButton.icon(
+            onPressed: () async {
+              final messenger = ScaffoldMessenger.of(context);
+              final status = await Permission.camera.request();
+              messenger.showSnackBar(
+                SnackBar(
+                  content: Text(status.isGranted
+                      ? 'Permiso de cámara otorgado'
+                      : 'Sin permiso de cámara: podés seguir viendo la teoría'),
+                ),
+              );
+            },
+            icon: const Icon(Icons.security),
+            label: const Text('Verificar permiso de cámara'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HomeCard extends StatelessWidget {
+  const _HomeCard({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Icon(icon, color: Theme.of(context).colorScheme.primary),
+              const SizedBox(height: 8),
+              Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
+              Text(subtitle,
+                  style: const TextStyle(fontSize: 12, color: Colors.grey)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CycleStep extends StatelessWidget {
+  const _CycleStep({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        CircleAvatar(
+          backgroundColor:
+              Theme.of(context).colorScheme.primary.withValues(alpha: 0.12),
+          child: Icon(icon,
+              size: 18, color: Theme.of(context).colorScheme.primary),
+        ),
+        const SizedBox(height: 4),
+        Text(label, style: const TextStyle(fontSize: 9.5)),
+      ],
+    );
+  }
+}
+
+
+---
+lib/core/config/hive_config.dart
+---
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:path_provider/path_provider.dart';
+
+class HiveConfig {
+  static Future<void> init() async {
+    final dir = await getApplicationDocumentsDirectory();
+    await Hive.initFlutter(dir.path);
+
+    // Los adapters se registrarán con build_runner (TypeAdapters)
+  }
+
+  static Future<Box<T>> openBox<T>(String boxName) async {
+    if (!Hive.isBoxOpen(boxName)) {
+      return Hive.openBox<T>(boxName);
+    }
+    return Hive.box<T>(boxName);
+  }
+}
+
+---
+lib/core/constants/app_constants.dart
+---
+class AppConstants {
+  const AppConstants._();
+
+  // App Info
+  static const String appName = 'SeñasGo';
+  static const String appVersion = '0.1.0';
+
+  // Camera & Vision
+  static const int targetFpsMin = 10;
+  static const int targetFpsMax = 15;
+  static const double defaultMinHandConfidence = 0.5;
+  static const double defaultMinGestureConfidence = 0.6;
+
+  // Game
+  static const int xpPerCorrectSign = 10;
+  static const String hiveBoxUser = 'user_box';
+  static const String hiveBoxLessons = 'lessons_box';
+  static const String hiveBoxVocabulary = 'vocabulary_box';
+  static const String hiveBoxProgress = 'progress_box';
+  static const String hiveBoxStore = 'store_box';
+
+  // Levels
+  static const Map<int, double> levelThresholds = {
+    1: 0.6, // Beginner - más tolerante
+    2: 0.7, // Intermediate
+    3: 0.75, // Advanced
+    4: 0.8, // Pro
+  };
+}
+
+---
+lib/core/services/camera_service.dart
+---
+import 'dart:async';
+
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:senasgo/core/constants/app_constants.dart';
+
+class CameraService extends ChangeNotifier {
+  CameraService(this.cameras);
+
+  final List<CameraDescription> cameras;
+  CameraController? _controller;
+  bool _isInitialized = false;
+  bool _isDetecting = false;
+  bool _hasError = false;
+  String _errorMessage = '';
+  int _lastFrameTime = 0;
+  final Logger _logger = Logger();
+
+  CameraController? get controller => _controller;
+  bool get isInitialized => _isInitialized;
+  bool get isDetecting => _isDetecting;
+  bool get hasError => _hasError;
+  String get errorMessage => _errorMessage;
+
+  Future<void> initialize() async {
+    try {
+      if (cameras.isEmpty) {
+        _hasError = true;
+        _errorMessage = 'No se encontraron cámaras disponibles';
+        notifyListeners();
+        return;
+      }
+
+      _controller = CameraController(
+        cameras.firstWhere(
+          (c) => c.lensDirection == CameraLensDirection.front,
+          orElse: () => cameras.first,
+        ),
+        ResolutionPreset.medium,
+        enableAudio: false,
+        imageFormatGroup: ImageFormatGroup.yuv420,
+      );
+
+      await _controller!.initialize();
+
+      // Configurar para optimizar rendimiento y evitar sobrecalentamiento
+      await _controller!.setFocusMode(FocusMode.auto);
+      await _controller!.setExposureMode(ExposureMode.auto);
+
+      _isInitialized = true;
+      _hasError = false;
+      notifyListeners();
+    } catch (e) {
+      _logger.e('Error al inicializar cámara: $e');
+      _hasError = true;
+      _errorMessage = 'Error al acceder a la cámara: $e';
+      notifyListeners();
+    }
+  }
+
+  void startImageStream(void Function(CameraImage image) onImageAvailable) {
+    if (_controller == null || !_controller!.value.isInitialized) {
+      return;
+    }
+
+    _isDetecting = true;
+    _controller!.startImageStream((image) {
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+      // Limitar a 10-15 FPS (Throttle)
+      if (currentTime - _lastFrameTime < 1000 ~/ AppConstants.targetFpsMax) {
+        return;
+      }
+      _lastFrameTime = currentTime;
+      onImageAvailable(image);
+    });
+    notifyListeners();
+  }
+
+  void stopImageStream() {
+    if (_controller != null && _controller!.value.isStreamingImages) {
+      _controller!.stopImageStream();
+    }
+    _isDetecting = false;
+    notifyListeners();
+  }
+
+  Future<void> disposeController() async {
+    stopImageStream();
+    await _controller?.dispose();
+    _controller = null;
+    _isInitialized = false;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    disposeController();
+    super.dispose();
+  }
+}
+
+---
+lib/core/services/device_performance.dart
+---
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+
+/// Detecta la capacidad del dispositivo para decidir el nivel de detalle
+/// del avatar del profesor (Requerimiento: Fallback Visual por poca RAM).
+class DevicePerformance {
+  DevicePerformance._();
+
+  static bool? _cachedLowMemory;
+
+  /// Heurística de memoria disponible:
+  /// 1. En móvil, se lee RSS del proceso (resident set).
+  /// 2. Se considera "poca RAM" si el proceso supera el umbral o si el
+  ///    sistema reporta un perfil de gama baja.
+  static bool get isLowMemory {
+    if (kIsWeb) return false;
+    if (_cachedLowMemory != null) return _cachedLowMemory!;
+
+    var low = false;
+    try {
+      if (Platform.isAndroid || Platform.isIOS) {
+        // RSS aproximado en bytes del proceso de la app
+        final rss = ProcessInfo.currentRss; // resident set size
+        const lowRamThreshold = 300 * 1024 * 1024; // 300 MB de RSS
+        low = rss > lowRamThreshold;
+      }
+    } catch (_) {
+      // Si no se puede medir, se asume capacidad suficiente
+      low = false;
+    }
+
+    _cachedLowMemory = low;
+    return low;
+  }
+
+  /// FPS efectivo permitido (control térmico 10-15 FPS).
+  static int get targetFps => isLowMemory ? 10 : 15;
+}
+
+
+---
+lib/core/services/hive_service.dart
+---
+import 'package:hive/hive.dart';
+import 'package:senasgo/core/constants/app_constants.dart';
+import 'package:senasgo/features/learning/data/seed_data.dart';
+import 'package:senasgo/shared/models/lesson_model.dart';
+import 'package:senasgo/shared/models/progress_model.dart';
+import 'package:senasgo/shared/models/sign_model.dart';
+import 'package:senasgo/shared/models/store_item_model.dart';
+import 'package:senasgo/shared/models/user_model.dart';
+
+/// Acceso único a la persistencia local (Hive). 100% offline.
+class HiveService {
+  static Future<void> registerAdapters() async {
+    if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(UserModelAdapter());
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(LessonModelAdapter());
+    }
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(SignCategoryAdapter());
+    }
+    if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(SignModelAdapter());
+    if (!Hive.isAdapterRegistered(4)) {
+      Hive.registerAdapter(ProgressModelAdapter());
+    }
+    if (!Hive.isAdapterRegistered(5)) {
+      Hive.registerAdapter(StoreItemTypeAdapter());
+    }
+    if (!Hive.isAdapterRegistered(6)) {
+      Hive.registerAdapter(StoreItemModelAdapter());
+    }
+  }
+
+  static Future<void> initBoxes() async {
+    await Hive.openBox<UserModel>(AppConstants.hiveBoxUser);
+    await Hive.openBox<LessonModel>(AppConstants.hiveBoxLessons);
+    await Hive.openBox<SignModel>(AppConstants.hiveBoxVocabulary);
+    await Hive.openBox<ProgressModel>(AppConstants.hiveBoxProgress);
+    await Hive.openBox<StoreItemModel>(AppConstants.hiveBoxStore);
+  }
+
+  /// Inserta el vocabulario acotado y la tienda solo la primera vez.
+  static Future<void> seedIfEmpty() async {
+    if (lessonsBox.isEmpty) {
+      for (final lesson in SeedData.lessons) {
+        await lessonsBox.put(lesson.id, lesson);
+      }
+    }
+    if (vocabularyBox.isEmpty) {
+      for (final sign in SeedData.signs) {
+        await vocabularyBox.put(sign.id, sign);
+      }
+    }
+    if (storeBox.isEmpty) {
+      for (final item in SeedData.storeItems) {
+        await storeBox.put(item.id, item);
+      }
+    }
+  }
+
+  // ─────────────────────────── Boxes ───────────────────────────
+  static Box<UserModel> get userBox =>
+      Hive.box<UserModel>(AppConstants.hiveBoxUser);
+  static Box<LessonModel> get lessonsBox =>
+      Hive.box<LessonModel>(AppConstants.hiveBoxLessons);
+  static Box<SignModel> get vocabularyBox =>
+      Hive.box<SignModel>(AppConstants.hiveBoxVocabulary);
+  static Box<ProgressModel> get progressBox =>
+      Hive.box<ProgressModel>(AppConstants.hiveBoxProgress);
+  static Box<StoreItemModel> get storeBox =>
+      Hive.box<StoreItemModel>(AppConstants.hiveBoxStore);
+
+  // ─────────────────────────── Usuario ───────────────────────────
+  static UserModel get currentUser => userBox.values.isEmpty
+      ? UserModel.initial()
+      : userBox.values.first;
+
+  static Future<void> saveUser(UserModel user) async {
+    await userBox.clear();
+    await userBox.put(user.id, user);
+  }
+
+  /// Otorga XP locales (ciclo: Practicar -> Recibir Feedback).
+  static Future<UserModel> addXp(int amount) async {
+    final user = currentUser;
+    final newXp = user.xp + amount;
+    final updated = user.copyWith(
+      xp: newXp,
+      level: calculateLevel(newXp),
+      lastLogin: DateTime.now(),
+    );
+    await saveUser(updated);
+    return updated;
+  }
+
+  /// Nivel dinámico: a mayor nivel, más estricto el umbral de IA.
+  static int calculateLevel(int xp) {
+    if (xp < 100) return 1;
+    if (xp < 300) return 2;
+    if (xp < 600) return 3;
+    if (xp < 1000) return 4;
+    return 5;
+  }
+
+  // ─────────────────────────── Lecciones ───────────────────────────
+  static List<LessonModel> get lessons {
+    final list = lessonsBox.values.toList()
+      ..sort((a, b) => a.order.compareTo(b.order));
+    return list;
+  }
+
+  static Future<void> markLessonCompleted(String lessonId) async {
+    final lesson = lessonsBox.get(lessonId);
+    if (lesson == null || lesson.isCompleted) return;
+    await lessonsBox.put(lessonId, lesson.copyWith(isCompleted: true));
+
+    final user = currentUser;
+    if (!user.completedLessons.contains(lessonId)) {
+      await saveUser(user.copyWith(
+        completedLessons: [...user.completedLessons, lessonId],
+      ));
+    }
+  }
+
+  static SignModel? signById(String id) => vocabularyBox.get(id);
+
+  static List<SignModel> signsOf(String lessonId) {
+    final lesson = lessonsBox.get(lessonId);
+    if (lesson == null) return const [];
+    return lesson.signIds
+        .map((id) => vocabularyBox.get(id))
+        .whereType<SignModel>()
+        .toList();
+  }
+
+  // ─────────────────────────── Tienda ───────────────────────────
+  static List<StoreItemModel> get storeItems => storeBox.values.toList();
+
+  /// Compra con XP locales. Devuelve null si no alcanza.
+  static Future<StoreItemModel?> buyItem(String itemId) async {
+    final item = storeBox.get(itemId);
+    if (item == null || item.isUnlocked) return null;
+
+    final user = currentUser;
+    if (user.xp < item.priceXp) return null;
+
+    final updatedUser = user.copyWith(xp: user.xp - item.priceXp);
+    final unlocked = item.copyWith(isUnlocked: true, isEquipped: true);
+    await saveUser(updatedUser);
+    await storeBox.put(itemId, unlocked);
+    return unlocked;
+  }
+
+  /// Equipa/desequipa un ítem (solo uno por tipo).
+  static Future<StoreItemModel?> toggleEquip(String itemId) async {
+    final item = storeBox.get(itemId);
+    if (item == null || !item.isUnlocked) return null;
+
+    if (item.isEquipped) {
+      final off = item.copyWith(isEquipped: false);
+      await storeBox.put(itemId, off);
+      return off;
+    }
+
+    // Un solo ítem equipado por tipo
+    for (final other in storeBox.values) {
+      if (other.type == item.type && other.isEquipped) {
+        await storeBox.put(other.id, other.copyWith(isEquipped: false));
+      }
+    }
+    final on = item.copyWith(isEquipped: true);
+    await storeBox.put(itemId, on);
+    return on;
+  }
+
+  static StoreItemModel? equippedOf(StoreItemType type) {
+    for (final item in storeBox.values) {
+      if (item.type == type && item.isEquipped) return item;
+    }
+    return null;
+  }
+}
+
+
+---
+lib/core/services/inference_service.dart
+---
+import 'dart:async';
+import 'dart:math';
+
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:senasgo/core/constants/app_constants.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
+
+class InferenceResult {
+  const InferenceResult({
+    required this.isCorrect,
+    required this.confidence,
+    required this.feedback,
+    required this.parameters,
+  });
+
+  final bool isCorrect;
+  final double confidence;
+  final String feedback;
+  final Map<String, double> parameters; // manual, palm, place, movement, face
+}
+
+class InferenceService extends ChangeNotifier {
+  Interpreter? _interpreter;
+  bool _isLoaded = false;
+  bool _isBusy = false;
+  final Logger _logger = Logger();
+
+  bool get isLoaded => _isLoaded;
+  bool get isBusy => _isBusy;
+
+  Future<void> loadModel() async {
+    try {
+      _interpreter = await Interpreter.fromAsset('assets/models/gesture_model.tflite');
+      _isLoaded = true;
+      notifyListeners();
+    } catch (e) {
+      _logger.e('Error cargando modelo TFLite: $e');
+      _isLoaded = false;
+      notifyListeners();
+    }
+  }
+
+  double getDynamicThreshold(int userLevel) {
+    // Umbral dinámico: principiantes más tolerantes
+    final threshold = AppConstants.levelThresholds[userLevel] ??
+        AppConstants.levelThresholds[1]!;
+    return threshold;
+  }
+
+  Future<InferenceResult?> processFrame({
+    required CameraImage image,
+    required String targetLabel,
+    required int userLevel,
+  }) async {
+    if (!_isLoaded || _isBusy || _interpreter == null) {
+      return null;
+    }
+
+    _isBusy = true;
+
+    try {
+      // TODO: Implementar preprocesamiento real con MediaPipe Hands + TFLite
+      // Esta implementación es el scaffold para producción
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+
+      // Simulación para desarrollo (reemplazar con inferencia real)
+      final random = Random();
+      final confidence = 0.4 + random.nextDouble() * 0.5; // 0.4 - 0.9
+      final threshold = getDynamicThreshold(userLevel);
+
+      final params = {
+        'manualConfig': 0.7 + random.nextDouble() * 0.3,
+        'palmOrientation': 0.7 + random.nextDouble() * 0.3,
+        'articulationPlace': 0.7 + random.nextDouble() * 0.3,
+        'movement': 0.7 + random.nextDouble() * 0.3,
+        'facialExpression': 0.6 + random.nextDouble() * 0.3,
+      };
+
+      String feedback = '✕ Necesita mejorar: La posición de la mano no coincide con la guía';
+      bool isCorrect = false;
+
+      if (confidence >= threshold) {
+        // Verificar todos los parámetros formativos (>=0.6 heurístico)
+        final allOk = params.values.every((v) => v >= 0.6);
+        if (allOk) {
+          isCorrect = true;
+          feedback = '✓ ¡Excelente! Postura correcta';
+        } else {
+          // Identificar qué mejorar
+          final issues = <String>[];
+          if (params['manualConfig']! < 0.6) {
+            issues.add('la configuración manual');
+          }
+          if (params['palmOrientation']! < 0.6) {
+            issues.add('la orientación de la palma');
+          }
+          if (params['articulationPlace']! < 0.6) {
+            issues.add('el lugar de articulación');
+          }
+          if (params['movement']! < 0.6) {
+            issues.add('el movimiento');
+          }
+          if (params['facialExpression']! < 0.6) {
+            issues.add('la expresión facial');
+          }
+          if (issues.isNotEmpty) {
+            feedback =
+                '✕ Necesita mejorar: ${issues.join(', ')}. Revisa la guía.';
+          }
+        }
+      }
+
+      return InferenceResult(
+        isCorrect: isCorrect,
+        confidence: confidence,
+        feedback: feedback,
+        parameters: params,
+      );
+    } catch (e) {
+      _logger.e('Error procesando frame: $e');
+      return null;
+    } finally {
+      _isBusy = false;
+    }
+  }
+
+  Future<bool> checkCameraPermission() async {
+    final status = await Permission.camera.status;
+    if (status.isDenied) {
+      final result = await Permission.camera.request();
+      return result.isGranted;
+    }
+    return status.isGranted;
+  }
+
+  Future<bool> checkEnvironment({
+    required CameraController controller,
+    required CameraImage image,
+  }) async {
+    // TODO: Implementar verificación de iluminación real
+    // Contraluz fuerte o ambiente oscuro
+    await Future<void>.delayed(const Duration(milliseconds: 10));
+    return true; // Placeholder
+  }
+
+  @override
+  void dispose() {
+    _interpreter?.close();
+    super.dispose();
+  }
+}
+
+---
+lib/features/learning/data/seed_data.dart
+---
+import 'package:senasgo/shared/models/lesson_model.dart';
+import 'package:senasgo/shared/models/sign_model.dart';
+import 'package:senasgo/shared/models/store_item_model.dart';
+
+/// Catálogo inicial (vocabulario acotado LSPy).
+/// Se inserta en Hive una sola vez (seed) y de ahí se lee siempre local.
+class SeedData {
+  const SeedData._();
+
+  static final List<SignModel> signs = [
+    const SignModel(
+      id: 'saludo_hola',
+      name: 'Hola',
+      category: SignCategory.greetings,
+      description: 'Saludo con mano abierta que avanza desde la frente.',
+      assetImagePath: 'assets/images/saludo_hola.png',
+      assetAnimationPath: 'assets/animations/saludo_hola.json',
+      riveAssetPath: null,
+      keypointsLabel: 'saludo_hola',
+      isActive: true,
+      tags: ['saludo', 'hola', 'básico'],
+    ),
+    const SignModel(
+      id: 'saludo_chau',
+      name: 'Chau',
+      category: SignCategory.greetings,
+      description: 'Mano abierta que se mueve lateralmente en despedida.',
+      assetImagePath: 'assets/images/saludo_chau.png',
+      assetAnimationPath: null,
+      riveAssetPath: null,
+      keypointsLabel: 'saludo_chau',
+      isActive: true,
+      tags: ['despedida', 'chau'],
+    ),
+    const SignModel(
+      id: 'numero_uno',
+      name: 'Uno',
+      category: SignCategory.numbers,
+      description: 'Índice extendido hacia arriba.',
+      assetImagePath: 'assets/images/numero_uno.png',
+      assetAnimationPath: null,
+      riveAssetPath: null,
+      keypointsLabel: 'numero_uno',
+      isActive: true,
+      tags: ['número', '1'],
+    ),
+    const SignModel(
+      id: 'numero_dos',
+      name: 'Dos',
+      category: SignCategory.numbers,
+      description: 'Índice y medio extendidos en V hacia arriba.',
+      assetImagePath: 'assets/images/numero_dos.png',
+      assetAnimationPath: null,
+      riveAssetPath: null,
+      keypointsLabel: 'numero_dos',
+      isActive: true,
+      tags: ['número', '2'],
+    ),
+    const SignModel(
+      id: 'numero_tres',
+      name: 'Tres',
+      category: SignCategory.numbers,
+      description: 'Índice, medio y anular extendidos.',
+      assetImagePath: 'assets/images/numero_tres.png',
+      assetAnimationPath: null,
+      riveAssetPath: null,
+      keypointsLabel: 'numero_tres',
+      isActive: true,
+      tags: ['número', '3'],
+    ),
+    const SignModel(
+      id: 'basico_gracias',
+      name: 'Gracias',
+      category: SignCategory.basics,
+      description: 'Mano plana desde el mentón hacia adelante.',
+      assetImagePath: 'assets/images/basico_gracias.png',
+      assetAnimationPath: null,
+      riveAssetPath: null,
+      keypointsLabel: 'basico_gracias',
+      isActive: true,
+      tags: ['cortesía', 'gracias'],
+    ),
+    const SignModel(
+      id: 'basico_si',
+      name: 'Sí',
+      category: SignCategory.basics,
+      description: 'Puño cerrado que asiente verticalmente.',
+      assetImagePath: 'assets/images/basico_si.png',
+      assetAnimationPath: null,
+      riveAssetPath: null,
+      keypointsLabel: 'basico_si',
+      isActive: true,
+      tags: ['afirmación', 'sí'],
+    ),
+    const SignModel(
+      id: 'basico_no',
+      name: 'No',
+      category: SignCategory.basics,
+      description: 'Índice y medio que se abren y cierran lateralmente.',
+      assetImagePath: 'assets/images/basico_no.png',
+      assetAnimationPath: null,
+      riveAssetPath: null,
+      keypointsLabel: 'basico_no',
+      isActive: true,
+      tags: ['negación', 'no'],
+    ),
+    const SignModel(
+      id: 'basico_por_favor',
+      name: 'Por favor',
+      category: SignCategory.basics,
+      description: 'Mano plana sobre el pecho con movimiento circular.',
+      assetImagePath: 'assets/images/basico_por_favor.png',
+      assetAnimationPath: null,
+      riveAssetPath: null,
+      keypointsLabel: 'basico_por_favor',
+      isActive: true,
+      tags: ['cortesía', 'por favor'],
+    ),
+  ];
+
+  static final List<LessonModel> lessons = [
+    const LessonModel(
+      id: 'leccion_saludos',
+      title: 'Saludos',
+      description: 'Aprendé a saludar y despedirte en LSPy.',
+      signIds: ['saludo_hola', 'saludo_chau'],
+      isCompleted: false,
+      difficulty: 1,
+      order: 1,
+    ),
+    const LessonModel(
+      id: 'leccion_numeros',
+      title: 'Números',
+      description: 'Contá del 1 al 3 con las manos.',
+      signIds: ['numero_uno', 'numero_dos', 'numero_tres'],
+      isCompleted: false,
+      difficulty: 1,
+      order: 2,
+    ),
+    const LessonModel(
+      id: 'leccion_basicas',
+      title: 'Palabras Básicas',
+      description: 'Frases de uso cotidiano: gracias, sí, no, por favor.',
+      signIds: ['basico_gracias', 'basico_si', 'basico_no', 'basico_por_favor'],
+      isCompleted: false,
+      difficulty: 2,
+      order: 3,
+    ),
+  ];
+
+  static final List<StoreItemModel> storeItems = [
+    const StoreItemModel(
+      id: 'gorra_azul',
+      name: 'Gorra Azul',
+      description: 'Gorra deportiva para el profesor.',
+      type: StoreItemType.hat,
+      priceXp: 50,
+      assetPath: 'assets/images/store/gorra_azul.png',
+      isUnlocked: false,
+      isEquipped: false,
+      rarity: 'común',
+    ),
+    const StoreItemModel(
+      id: 'remera_verde',
+      name: 'Remera Verde',
+      description: 'Remera cómoda para dar clases.',
+      type: StoreItemType.shirt,
+      priceXp: 80,
+      assetPath: 'assets/images/store/remera_verde.png',
+      isUnlocked: false,
+      isEquipped: false,
+      rarity: 'común',
+    ),
+    const StoreItemModel(
+      id: 'lentes_trending',
+      name: 'Lentes Trending',
+      description: 'Accesorio con estilo para el avatar.',
+      type: StoreItemType.accessory,
+      priceXp: 120,
+      assetPath: 'assets/images/store/lentes.png',
+      isUnlocked: false,
+      isEquipped: false,
+      rarity: 'raro',
+    ),
+    const StoreItemModel(
+      id: 'color_dorado',
+      name: 'Color Dorado',
+      description: 'Color especial de ropa para el profesor.',
+      type: StoreItemType.color,
+      priceXp: 200,
+      assetPath: 'assets/images/store/color_dorado.png',
+      isUnlocked: false,
+      isEquipped: false,
+      rarity: 'épico',
+    ),
+    const StoreItemModel(
+      id: 'tenis_rojos',
+      name: 'Tenis Rojos',
+      description: 'Zapatillas llamativas.',
+      type: StoreItemType.shoes,
+      priceXp: 60,
+      assetPath: 'assets/images/store/tenis.png',
+      isUnlocked: false,
+      isEquipped: false,
+      rarity: 'común',
+    ),
+  ];
+}
+
+
+---
+lib/features/learning/presentation/views/lesson_list_view.dart
+---
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:senasgo/core/services/hive_service.dart';
+import 'package:senasgo/shared/models/lesson_model.dart';
+
+/// Módulo "Aprender": biblioteca de lecciones del vocabulario acotado.
+class LessonListView extends StatefulWidget {
+  const LessonListView({super.key});
+
+  @override
+  State<LessonListView> createState() => _LessonListViewState();
+}
+
+class _LessonListViewState extends State<LessonListView> {
+  late List<LessonModel> _lessons;
+
+  @override
+  void initState() {
+    super.initState();
+    _lessons = HiveService.lessons;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final user = HiveService.currentUser;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Aprender'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              child: Row(
+                children: [
+                  const Icon(Icons.star, color: Colors.amber, size: 20),
+                  const SizedBox(width: 4),
+                  Text('${user.xp} XP'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: _lessons.isEmpty
+          ? const Center(child: Text('No hay lecciones disponibles.'))
+          : ListView.separated(
+              padding: const EdgeInsets.all(16),
+              itemCount: _lessons.length,
+              separatorBuilder: (_, __) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final lesson = _lessons[index];
+                return Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: ListTile(
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                    leading: CircleAvatar(
+                      backgroundColor: lesson.isCompleted
+                          ? Colors.green.withValues(alpha: 0.15)
+                          : Colors.blue.withValues(alpha: 0.15),
+                      child: Icon(
+                        lesson.isCompleted ? Icons.check : Icons.school,
+                        color: lesson.isCompleted ? Colors.green : Colors.blue,
+                      ),
+                    ),
+                    title: Text(
+                      lesson.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    subtitle: Text(
+                      '${lesson.description}\n'
+                      '${lesson.signIds.length} señas · Nivel ${lesson.difficulty}',
+                    ),
+                    isThreeLine: true,
+                    trailing: const Icon(Icons.chevron_right),
+                    onTap: () => context.go('/lesson/${lesson.id}'),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+
+---
+lib/features/learning/presentation/views/lesson_view.dart
+---
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:senasgo/core/services/hive_service.dart';
+import 'package:senasgo/shared/widgets/professor_avatar.dart';
+
+/// Fase "Aprender" del ciclo: el avatar (profesor) demuestra la seña
+/// y se muestran los 5 parámetros formativos antes de practicar.
+class LessonView extends StatelessWidget {
+  const LessonView({required this.lessonId, super.key});
+
+  final String lessonId;
+
+  @override
+  Widget build(BuildContext context) {
+    final lesson = HiveService.lessonsBox.get(lessonId);
+    final signs = HiveService.signsOf(lessonId);
+
+    if (lesson == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Lección')),
+        body: const Center(child: Text('Lección no encontrada')),
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(title: Text(lesson.title)),
+      body: ListView(
+        padding: const EdgeInsets.all(20),
+        children: [
+          Text(
+            lesson.description,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 20),
+
+          // Avatar profesor - demostración (fallback 2D automático)
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primaryContainer,
+                borderRadius: BorderRadius.circular(24),
+              ),
+              child: ProfessorAvatar(
+                size: 180,
+                animate: true,
+                signId: signs.isEmpty ? null : signs.first.id,
+              ),
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Center(
+            child: Text(
+              'Mirá la demostración del profesor',
+              style: TextStyle(color: Colors.grey),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          const Text(
+            '5 parámetros formativos de la seña',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          const _ParamRow(
+            icon: Icons.back_hand,
+            text: 'Configuración manual: forma de la mano y dedos',
+          ),
+          const _ParamRow(
+            icon: Icons.rotate_right,
+            text: 'Orientación de la palma: hacia dónde mira',
+          ),
+          const _ParamRow(
+            icon: Icons.my_location,
+            text: 'Lugar de articulación: dónde se ejecuta',
+          ),
+          const _ParamRow(
+            icon: Icons.animation,
+            text: 'Movimiento: trayectoria y ritmo',
+          ),
+          const _ParamRow(
+            icon: Icons.face,
+            text: 'Expresión facial: acompañamiento del rostro',
+          ),
+          const SizedBox(height: 24),
+
+          const Text(
+            'Señas de esta lección',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 8),
+          ...signs.map(
+            (sign) => Card(
+              child: ListTile(
+                leading: const Icon(Icons.sign_language),
+                title: Text(sign.name),
+                subtitle: Text(sign.description),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          FilledButton.icon(
+            onPressed: () => context.go('/practice?lesson=$lessonId'),
+            icon: const Icon(Icons.camera_alt),
+            label: const Text('PRACTICAR'),
+            style: FilledButton.styleFrom(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              textStyle: const TextStyle(fontSize: 16),
+            ),
+          ),
+          const SizedBox(height: 12),
+          OutlinedButton(
+            onPressed: () => context.go('/library'),
+            child: const Text('Volver a la biblioteca'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ParamRow extends StatelessWidget {
+  const _ParamRow({required this.icon, required this.text});
+
+  final IconData icon;
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: Theme.of(context).colorScheme.primary),
+          const SizedBox(width: 10),
+          Expanded(child: Text(text)),
+        ],
+      ),
+    );
+  }
+}
+
+
+---
+lib/features/practice/presentation/controllers/practice_controller.dart
+---
+import 'dart:async';
+
+import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
+import 'package:logger/logger.dart';
+import 'package:senasgo/core/constants/app_constants.dart';
+import 'package:senasgo/core/services/camera_service.dart';
+import 'package:senasgo/core/services/hive_service.dart';
+import 'package:senasgo/core/services/inference_service.dart';
+import 'package:senasgo/shared/models/sign_model.dart';
+import 'package:senasgo/shared/models/user_model.dart';
+
+/// Los 11 estados del módulo de práctica (según documentación v3_04):
+/// preparación -> encuadre -> evaluación -> feedback -> siguiente/resumen,
+/// más estados de contingencia (permisos, iluminación, sin mano, error).
+enum PracticePhase {
+  preparing, // 1. Prepararse: fase obligatoria de encuadre
+  detecting, // 2. Captura: buscando la mano
+  evaluating, // 3. Evaluación de la postura
+  feedback, // 4. Recibir feedback (correcto/incorrecto)
+  completed, // 5. Seña correcta (+10 XP)
+  lessonFinished, // Resumen de lección (XP + insignia)
+  error, // Contingencia: permiso/cámara/sensor
+}
+
+class PracticeState {
+  const PracticeState({
+    required this.phase,
+    required this.handDetected,
+    required this.lightingOk,
+    required this.currentSignId,
+    required this.signName,
+    required this.attempts,
+    required this.correctCount,
+    required this.totalSigns,
+    required this.feedbackMessage,
+    required this.isPositiveFeedback,
+    required this.showGuide,
+    required this.showSummary,
+    required this.user,
+  });
+
+  final PracticePhase phase;
+  final bool handDetected;
+  final bool lightingOk;
+  final String currentSignId;
+  final String signName;
+  final int attempts;
+  final int correctCount;
+  final int totalSigns;
+  final String feedbackMessage;
+  final bool isPositiveFeedback;
+  final bool showGuide;
+  final bool showSummary;
+  final UserModel? user;
+
+  PracticeState copyWith({
+    PracticePhase? phase,
+    bool? handDetected,
+    bool? lightingOk,
+    String? currentSignId,
+    String? signName,
+    int? attempts,
+    int? correctCount,
+    int? totalSigns,
+    String? feedbackMessage,
+    bool? isPositiveFeedback,
+    bool? showGuide,
+    bool? showSummary,
+    UserModel? user,
+  }) {
+    return PracticeState(
+      phase: phase ?? this.phase,
+      handDetected: handDetected ?? this.handDetected,
+      lightingOk: lightingOk ?? this.lightingOk,
+      currentSignId: currentSignId ?? this.currentSignId,
+      signName: signName ?? this.signName,
+      attempts: attempts ?? this.attempts,
+      correctCount: correctCount ?? this.correctCount,
+      totalSigns: totalSigns ?? this.totalSigns,
+      feedbackMessage: feedbackMessage ?? this.feedbackMessage,
+      isPositiveFeedback: isPositiveFeedback ?? this.isPositiveFeedback,
+      showGuide: showGuide ?? this.showGuide,
+      showSummary: showSummary ?? this.showSummary,
+      user: user ?? this.user,
+    );
+  }
+}
+
+class PracticeController extends ChangeNotifier {
+  PracticeController({
+    required this.cameraService,
+    required this.inferenceService,
+  });
+
+  final CameraService cameraService;
+  final InferenceService inferenceService;
+  final Logger _logger = Logger();
+
+  List<SignModel> _signs = const [];
+  int _signIndex = 0;
+  bool _isProcessing = false;
+  Timer? _feedbackTimer;
+
+  PracticeState _state = PracticeState(
+    phase: PracticePhase.preparing,
+    handDetected: false,
+    lightingOk: true,
+    currentSignId: '',
+    signName: '',
+    attempts: 0,
+    correctCount: 0,
+    totalSigns: 0,
+    feedbackMessage: 'Coloca tu mano dentro del área indicada.',
+    isPositiveFeedback: false,
+    showGuide: true,
+    showSummary: false,
+    user: HiveService.currentUser,
+  );
+
+  PracticeState get state => _state;
+
+  /// Carga la lección elegida y arranca el ciclo Aprender->...->Corregir.
+  Future<void> startLesson(String? lessonId) async {
+    if (lessonId != null) {
+      _signs = HiveService.signsOf(lessonId);
+    }
+    if (_signs.isEmpty) {
+      // Práctica libre con todo el vocabulario
+      _signs = HiveService.vocabularyBox.values.toList();
+    }
+    _signIndex = 0;
+
+    final first = _signs.isEmpty ? null : _signs.first;
+    _state = _state.copyWith(
+      currentSignId: first?.id ?? '',
+      signName: first?.name ?? 'Seña',
+      attempts: 0,
+      correctCount: 0,
+      totalSigns: _signs.length,
+      user: HiveService.currentUser,
+    );
+    notifyListeners();
+
+    await initialize();
+  }
+
+  Future<void> initialize() async {
+    final hasPermission = await inferenceService.checkCameraPermission();
+    if (!hasPermission) {
+      _state = _state.copyWith(
+        phase: PracticePhase.error,
+        feedbackMessage:
+            'Permisos de cámara denegados. Podés continuar navegando la teoría y la biblioteca.',
+      );
+      notifyListeners();
+      return;
+    }
+
+    await cameraService.initialize();
+    if (cameraService.hasError) {
+      _state = _state.copyWith(
+        phase: PracticePhase.error,
+        feedbackMessage:
+            '${cameraService.errorMessage}. Podés continuar navegando la teoría y la biblioteca.',
+      );
+      notifyListeners();
+      return;
+    }
+
+    await inferenceService.loadModel();
+    if (!inferenceService.isLoaded) {
+      _logger.w('Modelo TFLite no disponible: modo conceptual activo.');
+    }
+
+    _startPreparation();
+  }
+
+  void _startPreparation() {
+    _state = _state.copyWith(
+      phase: PracticePhase.preparing,
+      handDetected: false,
+      lightingOk: true,
+      isPositiveFeedback: false,
+      feedbackMessage:
+          'Coloca tu mano dentro del área indicada y espera el encuadre.',
+      showGuide: true,
+    );
+    notifyListeners();
+
+    // Pequeña pausa formal de "Preparación" antes de abrir la captura
+    Future.delayed(const Duration(milliseconds: 800), () {
+      if (_state.phase == PracticePhase.preparing) _startDetection();
+    });
+  }
+
+  void _startDetection() {
+    cameraService.startImageStream(_onFrame);
+    _state = _state.copyWith(
+      phase: PracticePhase.detecting,
+      feedbackMessage: 'Buscando tu mano... Centra tu mano dentro del área indicada',
+    );
+    notifyListeners();
+  }
+
+  Future<void> _onFrame(CameraImage image) async {
+    if (_isProcessing ||
+        _state.phase == PracticePhase.evaluating ||
+        _state.phase == PracticePhase.feedback ||
+        _state.phase == PracticePhase.lessonFinished) {
+      return;
+    }
+
+    // 1. Verificación de entorno (contraluz / ambiente oscuro)
+    final lightingOk = await inferenceService.checkEnvironment(
+      controller: cameraService.controller!,
+      image: image,
+    );
+    if (!lightingOk) {
+      _state = _state.copyWith(
+        lightingOk: false,
+        phase: PracticePhase.preparing,
+        feedbackMessage:
+            '✕ Necesita mejorar: la iluminación no es suficiente (contraluz u ambiente oscuro).',
+      );
+      notifyListeners();
+      return;
+    }
+
+    // 2. Detección de la mano en el encuadre
+    final handDetected = _simulateHandDetection();
+    if (!handDetected) {
+      _state = _state.copyWith(
+        handDetected: false,
+        phase: PracticePhase.detecting,
+        feedbackMessage:
+            'No pudimos detectar correctamente la mano. Centra tu mano dentro del área indicada',
+      );
+      notifyListeners();
+      return;
+    }
+
+    // 3. Evaluación de la postura
+    _state = _state.copyWith(
+      handDetected: true,
+      phase: PracticePhase.evaluating,
+      feedbackMessage: 'Evaluando postura...',
+    );
+    notifyListeners();
+
+    await _evaluateCurrentSign(image);
+  }
+
+  bool _simulateHandDetection() {
+    // Reconocimiento conceptual (Fase 1). En Fase 2 aquí vive MediaPipe Hands.
+    return _signs.isNotEmpty;
+  }
+
+  Future<void> _evaluateCurrentSign(CameraImage image) async {
+    if (_isProcessing) return;
+    _isProcessing = true;
+
+    final user = HiveService.currentUser;
+    final result = await inferenceService.processFrame(
+      image: image,
+      targetLabel: _state.currentSignId,
+      userLevel: user.level,
+    );
+
+    _isProcessing = false;
+
+    if (result == null) {
+      _state = _state.copyWith(
+        phase: PracticePhase.detecting,
+        feedbackMessage: 'Reintentando detección...',
+      );
+      notifyListeners();
+      return;
+    }
+
+    final attempts = _state.attempts + 1;
+
+    if (result.isCorrect) {
+      // Otorga +10 XP locales y guarda en Hive
+      final updatedUser = await HiveService.addXp(AppConstants.xpPerCorrectSign);
+      final newXCount = _state.correctCount + 1;
+
+      _state = _state.copyWith(
+        phase: PracticePhase.feedback,
+        attempts: attempts,
+        correctCount: newXCount,
+        feedbackMessage: '¡Muy bien! +${AppConstants.xpPerCorrectSign} XP',
+        isPositiveFeedback: true,
+        user: updatedUser,
+      );
+      notifyListeners();
+
+      _feedbackTimer?.cancel();
+      _feedbackTimer = Timer(const Duration(milliseconds: 1600), () {
+        if (newXCount >= _state.totalSigns) {
+          _finishLesson();
+        } else {
+          _nextSign();
+        }
+      });
+    } else {
+      _state = _state.copyWith(
+        phase: PracticePhase.feedback,
+        attempts: attempts,
+        feedbackMessage: result.feedback,
+        isPositiveFeedback: false,
+      );
+      notifyListeners();
+
+      _feedbackTimer?.cancel();
+      _feedbackTimer = Timer(const Duration(milliseconds: 1800), () {
+        if (_state.phase == PracticePhase.feedback) {
+          _state = _state.copyWith(
+            phase: PracticePhase.detecting,
+            feedbackMessage: 'Intentá de nuevo. Revisá la guía y corregí la postura.',
+          );
+          notifyListeners();
+        }
+      });
+    }
+  }
+
+  void _nextSign() {
+    _signIndex = (_signIndex + 1).clamp(0, _signs.length - 1);
+    final next = _signs[_signIndex];
+    cameraService.stopImageStream();
+    _state = _state.copyWith(
+      currentSignId: next.id,
+      signName: next.name,
+      phase: PracticePhase.preparing,
+      handDetected: false,
+      feedbackMessage: 'Siguiente seña: ${next.name}. Preparate para el encuadre.',
+      isPositiveFeedback: false,
+    );
+    notifyListeners();
+    _startPreparation();
+  }
+
+  Future<void> _finishLesson() async {
+    cameraService.stopImageStream();
+
+    String? lessonId;
+    if (_signs.isNotEmpty) {
+      final matches = HiveService.lessons
+          .where((l) => l.signIds.contains(_signs.first.id));
+      if (matches.isNotEmpty) lessonId = matches.first.id;
+    }
+    if (lessonId != null) {
+      await HiveService.markLessonCompleted(lessonId);
+    }
+
+    _state = _state.copyWith(
+      phase: PracticePhase.lessonFinished,
+      showSummary: true,
+      feedbackMessage: '¡Lección completada!',
+      user: HiveService.currentUser,
+    );
+    notifyListeners();
+  }
+
+  // ─── Acciones de la UI ───
+  void retry() {
+    _feedbackTimer?.cancel();
+    _state = _state.copyWith(
+      phase: PracticePhase.preparing,
+      feedbackMessage: 'Coloca tu mano dentro del área indicada.',
+    );
+    notifyListeners();
+    _startPreparation();
+  }
+
+  void showGuideToggle() {
+    _state = _state.copyWith(showGuide: !_state.showGuide);
+    notifyListeners();
+  }
+
+  void closeSummary() {
+    _state = _state.copyWith(showSummary: false, phase: PracticePhase.completed);
+    notifyListeners();
+  }
+
+  Future<void> stop() async {
+    _feedbackTimer?.cancel();
+    cameraService.stopImageStream();
+  }
+
+  @override
+  void dispose() {
+    _feedbackTimer?.cancel();
+    cameraService.stopImageStream();
+    super.dispose();
+  }
+}
+
+
+---
+lib/features/practice/presentation/views/practice_view.dart
+---
+import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
+import 'package:senasgo/features/practice/presentation/controllers/practice_controller.dart';
+import 'package:senasgo/features/practice/presentation/widgets/camera_overlay.dart';
+import 'package:senasgo/features/practice/presentation/widgets/feedback_panel.dart';
+import 'package:senasgo/features/practice/presentation/widgets/guide_panel.dart';
+import 'package:senasgo/shared/widgets/professor_avatar.dart';
+
+/// Pantalla de Práctica: Preparación -> Practicar -> Feedback -> Corregir.
+class PracticeView extends StatefulWidget {
+  const PracticeView({super.key, this.lessonId});
+
+  final String? lessonId;
+
+  @override
+  State<PracticeView> createState() => _PracticeViewState();
+}
+
+class _PracticeViewState extends State<PracticeView> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<PracticeController>().startLesson(widget.lessonId);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PopScope(
+      canPop: true,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) context.read<PracticeController>().stop();
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: const Text('Practicar'),
+          backgroundColor: Colors.black87,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        body: Consumer<PracticeController>(
+          builder: (context, controller, child) {
+            final state = controller.state;
+            final cameraCtrl = controller.cameraService.controller;
+
+            if (state.phase == PracticePhase.error) {
+              return _errorFallback(context, state.feedbackMessage);
+            }
+
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                if (cameraCtrl != null && cameraCtrl.value.isInitialized)
+                  CameraPreview(cameraCtrl)
+                else
+                    const ColoredBox(
+                      color: Colors.black,
+                      child: Center(
+                        child: CircularProgressIndicator(color: Colors.white),
+                      ),
+                    ),
+                CameraOverlay(state: state),
+                if (state.showGuide && !state.showSummary)
+                  Positioned(top: 16, left: 16, right: 16, child: GuidePanel(state: state)),
+                if (state.phase == PracticePhase.preparing)
+                  Positioned(
+                    top: MediaQuery.of(context).size.height * 0.28,
+                    left: 0,
+                    right: 0,
+                    child: const Center(
+                      child: ProfessorAvatar(size: 120, animate: true),
+                    ),
+                  ),
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: FeedbackPanel(
+                    state: state,
+                    onRetry: controller.retry,
+                    onToggleGuide: controller.showGuideToggle,
+                    onCloseSummary: controller.closeSummary,
+                  ),
+                ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  /// Contingencia amigable: permiso denegado o sensor ocupado.
+  /// Permite seguir navegando teoría/biblioteca sin que la app se cierre.
+  Widget _errorFallback(BuildContext context, String message) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.no_photography, color: Colors.orange, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 15),
+            ),
+            const SizedBox(height: 24),
+            FilledButton.icon(
+              onPressed: () => context.go('/library'),
+              icon: const Icon(Icons.menu_book),
+              label: const Text('Ir a teoría y biblioteca'),
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton(
+              onPressed: () => context.go('/'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: Colors.white,
+                side: const BorderSide(color: Colors.white54),
+              ),
+              child: const Text('Volver al inicio'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+---
+lib/features/practice/presentation/widgets/camera_overlay.dart
+---
+import 'package:flutter/material.dart';
+import 'package:senasgo/features/practice/presentation/controllers/practice_controller.dart';
+
+class CameraOverlay extends StatelessWidget {
+  const CameraOverlay({required this.state, super.key});
+
+  final PracticeState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: [
+        // Marco de encuadre (fase de Preparación)
+        Center(
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.75,
+            height: MediaQuery.of(context).size.width * 0.75,
+            decoration: BoxDecoration(
+              border: Border.all(color: _getBorderColor(), width: 4),
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        // Indicador de estado (cualitativo, sin porcentajes)
+        Positioned(
+          top: 80,
+          left: 16,
+          right: 16,
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: Colors.black54,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                _getStatusText(),
+                style: const TextStyle(color: Colors.white, fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Color _getBorderColor() {
+    if (state.phase == PracticePhase.error) return Colors.red;
+    if (state.phase == PracticePhase.lessonFinished ||
+        state.isPositiveFeedback) {
+      return Colors.green;
+    }
+    if (state.phase == PracticePhase.evaluating && state.handDetected) {
+      return Colors.blue;
+    }
+    if (!state.lightingOk) return Colors.orange;
+    return Colors.white;
+  }
+
+  String _getStatusText() {
+    if (!state.lightingOk) return 'Iluminación insuficiente o contraluz';
+    switch (state.phase) {
+      case PracticePhase.preparing:
+        return 'PREPARACIÓN: Coloca tu mano dentro del área';
+      case PracticePhase.detecting:
+        return 'Buscando mano...';
+      case PracticePhase.evaluating:
+        return 'Evaluando postura...';
+      case PracticePhase.feedback:
+        return state.isPositiveFeedback
+            ? '¡Postura correcta!'
+            : 'Revisá la guía y corregí';
+      case PracticePhase.lessonFinished:
+        return '¡Lección completada!';
+      case PracticePhase.completed:
+        return 'Listo';
+      case PracticePhase.error:
+        return 'Sin cámara';
+    }
+  }
+}
+
+
+---
+lib/features/practice/presentation/widgets/feedback_panel.dart
+---
+import 'package:flutter/material.dart';
+import 'package:senasgo/core/constants/app_constants.dart';
+import 'package:senasgo/features/practice/presentation/controllers/practice_controller.dart';
+
+/// Panel inferior con la retroalimentación cualitativa (sin % ambiguos),
+/// la barra de progreso de sesión y las acciones del usuario.
+class FeedbackPanel extends StatelessWidget {
+  const FeedbackPanel({
+    required this.state,
+    required this.onRetry,
+    required this.onToggleGuide,
+    this.onCloseSummary,
+    super.key,
+  });
+
+  final PracticeState state;
+  final VoidCallback onRetry;
+  final VoidCallback onToggleGuide;
+  final VoidCallback? onCloseSummary;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+      decoration: const BoxDecoration(
+        color: Colors.black87,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: state.showSummary ? _summary(context) : _practice(context),
+    );
+  }
+
+  Widget _practice(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Barra de progreso de la sesión (ej: 3 / 5 señas)
+        if (state.totalSigns > 0) ...[
+          Row(
+            children: [
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: LinearProgressIndicator(
+                    value: state.totalSigns == 0
+                        ? 0
+                        : state.correctCount / state.totalSigns,
+                    minHeight: 8,
+                    backgroundColor: Colors.white24,
+                    valueColor:
+                        const AlwaysStoppedAnimation<Color>(Colors.green),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Text(
+                '${state.correctCount} / ${state.totalSigns}',
+                style: const TextStyle(color: Colors.white70, fontSize: 13),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+        ],
+        Text(
+          state.feedbackMessage,
+          style: TextStyle(
+            color: state.isPositiveFeedback ? Colors.green : Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        if (state.user != null) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.star, color: Colors.amber, size: 20),
+              const SizedBox(width: 4),
+              Text(
+                'Nivel ${state.user!.level} · ${state.user!.xp} XP',
+                style: const TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+            ],
+          ),
+        ],
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: OutlinedButton.icon(
+                onPressed: onToggleGuide,
+                icon: const Icon(Icons.visibility),
+                label: Text(state.showGuide ? 'Ocultar guía' : 'Ver guía'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  side: const BorderSide(color: Colors.white),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: state.isPositiveFeedback
+                  ? const SizedBox(height: 44)
+                  : ElevatedButton.icon(
+                      onPressed: onRetry,
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Intentar de nuevo'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.orange,
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Intentos: ${state.attempts} · +${AppConstants.xpPerCorrectSign} XP por acierto correcto',
+          style: const TextStyle(color: Colors.white54, fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  /// Resumen de cierre de lección: XP obtenidos + insignia.
+  Widget _summary(BuildContext context) {
+    final gained = state.correctCount * AppConstants.xpPerCorrectSign;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        const Icon(Icons.emoji_events, color: Colors.amber, size: 56),
+        const SizedBox(height: 8),
+        const Text(
+          '¡Muy bien! Lección completada',
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          'Ganaste $gained XP en esta sesión',
+          style: const TextStyle(color: Colors.green, fontSize: 16),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          decoration: BoxDecoration(
+            color: Colors.amber.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(20),
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.military_tech, color: Colors.amber, size: 18),
+              SizedBox(width: 6),
+              Text(
+                'Insignia: Primera Práctica',
+                style: TextStyle(color: Colors.amber, fontSize: 13),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton.icon(
+            onPressed: onCloseSummary,
+            icon: const Icon(Icons.check),
+            label: const Text('Finalizar'),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.green,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 14),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+
+---
+lib/features/practice/presentation/widgets/guide_panel.dart
+---
+import 'package:flutter/material.dart';
+import 'package:senasgo/features/practice/presentation/controllers/practice_controller.dart';
+
+/// Guía pedagógica con los 5 parámetros formativos de la seña.
+class GuidePanel extends StatelessWidget {
+  const GuidePanel({required this.state, super.key});
+
+  final PracticeState state;
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      elevation: 8,
+      color: Colors.black87,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Icon(Icons.menu_book, color: Colors.white, size: 18),
+                const SizedBox(width: 8),
+                Text(
+                  state.signName.isEmpty
+                      ? 'Guía de la seña'
+                      : 'Guía: ${state.signName}',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            const _Param(text: 'Configuración manual: forma de la mano'),
+            const _Param(text: 'Orientación de la palma'),
+            const _Param(text: 'Lugar de articulación'),
+            const _Param(text: 'Movimiento'),
+            const _Param(text: 'Expresión facial'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Param extends StatelessWidget {
+  const _Param({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_outline,
+              size: 14, color: Colors.white54),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: const TextStyle(color: Colors.white70, fontSize: 12.5),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+
+---
+lib/features/store/presentation/views/store_view.dart
+---
+import 'package:flutter/material.dart';
+import 'package:senasgo/core/services/hive_service.dart';
+import 'package:senasgo/shared/models/store_item_model.dart';
+
+/// Tienda local: el usuario gasta sus XP en ropa/colores/accesorios
+/// del avatar profesor. Todo persistido en Hive (sin internet).
+class StoreView extends StatefulWidget {
+  const StoreView({super.key});
+
+  @override
+  State<StoreView> createState() => _StoreViewState();
+}
+
+class _StoreViewState extends State<StoreView> {
+  List<StoreItemModel> _items = [];
+  int _xp = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _reload();
+  }
+
+  void _reload() {
+    setState(() {
+      _items = HiveService.storeItems;
+      _xp = HiveService.currentUser.xp;
+    });
+  }
+
+  Future<void> _buy(StoreItemModel item) async {
+    final result = await HiveService.buyItem(item.id);
+    if (!mounted) return;
+    if (result != null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('¡${item.name} desbloqueado! (-${item.priceXp} XP)')),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('No tenés XP suficientes (faltan ${item.priceXp - _xp} XP)'),
+        ),
+      );
+    }
+    _reload();
+  }
+
+  Future<void> _toggle(StoreItemModel item) async {
+    await HiveService.toggleEquip(item.id);
+    _reload();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Tienda'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16),
+            child: Center(
+              child: Row(
+                children: [
+                  const Icon(Icons.star, color: Colors.amber, size: 20),
+                  const SizedBox(width: 4),
+                  Text('$_xp XP'),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: _items.isEmpty
+          ? const Center(child: Text('La tienda está vacía.'))
+          : GridView.builder(
+              padding: const EdgeInsets.all(16),
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 12,
+                crossAxisSpacing: 12,
+                childAspectRatio: 0.78,
+              ),
+              itemCount: _items.length,
+              itemBuilder: (context, index) {
+                final item = _items[index];
+                final canBuy = !item.isUnlocked && _xp >= item.priceXp;
+
+                return Card(
+                  elevation: 2,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                    side: item.isEquipped
+                        ? BorderSide(
+                            color: Theme.of(context).colorScheme.primary,
+                            width: 2,
+                          )
+                        : BorderSide.none,
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Center(
+                              child: Icon(Icons.checkroom, size: 40),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          item.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
+                        Text(
+                          '${item.type.name} · ${item.rarity}',
+                          style: const TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        if (item.isUnlocked)
+                          FilledButton.tonal(
+                            onPressed: () => _toggle(item),
+                            child: Text(
+                              item.isEquipped ? 'Equipado' : 'Equipar',
+                            ),
+                          )
+                        else
+                          FilledButton(
+                            onPressed: canBuy ? () => _buy(item) : null,
+                            style: FilledButton.styleFrom(
+                              backgroundColor: canBuy
+                                  ? null
+                                  : Colors.grey.shade400,
+                            ),
+                            child: Text('${item.priceXp} XP'),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+}
+
+
+---
+lib/shared/models/lesson_model.dart
+---
+import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+
+part 'lesson_model.g.dart';
+
+@HiveType(typeId: 1)
+class LessonModel extends Equatable {
+  const LessonModel({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.signIds,
+    required this.isCompleted,
+    required this.difficulty,
+    required this.order,
+  });
+
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String title;
+  @HiveField(2)
+  final String description;
+  @HiveField(3)
+  final List<String> signIds;
+  @HiveField(4)
+  final bool isCompleted;
+  @HiveField(5)
+  final int difficulty;
+  @HiveField(6)
+  final int order;
+
+  LessonModel copyWith({
+    String? id,
+    String? title,
+    String? description,
+    List<String>? signIds,
+    bool? isCompleted,
+    int? difficulty,
+    int? order,
+  }) {
+    return LessonModel(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      signIds: signIds ?? this.signIds,
+      isCompleted: isCompleted ?? this.isCompleted,
+      difficulty: difficulty ?? this.difficulty,
+      order: order ?? this.order,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        title,
+        description,
+        signIds,
+        isCompleted,
+        difficulty,
+        order,
+      ];
+}
+
+---
+lib/shared/models/lesson_model.g.dart
+---
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'lesson_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class LessonModelAdapter extends TypeAdapter<LessonModel> {
+  @override
+  final int typeId = 1;
+
+  @override
+  LessonModel read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return LessonModel(
+      id: fields[0] as String,
+      title: fields[1] as String,
+      description: fields[2] as String,
+      signIds: (fields[3] as List).cast<String>(),
+      isCompleted: fields[4] as bool,
+      difficulty: fields[5] as int,
+      order: fields[6] as int,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, LessonModel obj) {
+    writer
+      ..writeByte(7)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.title)
+      ..writeByte(2)
+      ..write(obj.description)
+      ..writeByte(3)
+      ..write(obj.signIds)
+      ..writeByte(4)
+      ..write(obj.isCompleted)
+      ..writeByte(5)
+      ..write(obj.difficulty)
+      ..writeByte(6)
+      ..write(obj.order);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LessonModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+
+---
+lib/shared/models/progress_model.dart
+---
+import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+
+part 'progress_model.g.dart';
+
+@HiveType(typeId: 4)
+class ProgressModel extends Equatable {
+  const ProgressModel({
+    required this.userId,
+    required this.completedSignIds,
+    required this.streakDays,
+    required this.lastPracticeDate,
+    required this.totalPracticeTimeSeconds,
+    required this.correctAttempts,
+    required this.totalAttempts,
+  });
+
+  @HiveField(0)
+  final String userId;
+  @HiveField(1)
+  final List<String> completedSignIds;
+  @HiveField(2)
+  final int streakDays;
+  @HiveField(3)
+  final DateTime? lastPracticeDate;
+  @HiveField(4)
+  final int totalPracticeTimeSeconds;
+  @HiveField(5)
+  final int correctAttempts;
+  @HiveField(6)
+  final int totalAttempts;
+
+  double get accuracy => totalAttempts == 0 ? 0 : correctAttempts / totalAttempts;
+
+  ProgressModel copyWith({
+    String? userId,
+    List<String>? completedSignIds,
+    int? streakDays,
+    DateTime? lastPracticeDate,
+    int? totalPracticeTimeSeconds,
+    int? correctAttempts,
+    int? totalAttempts,
+  }) {
+    return ProgressModel(
+      userId: userId ?? this.userId,
+      completedSignIds: completedSignIds ?? this.completedSignIds,
+      streakDays: streakDays ?? this.streakDays,
+      lastPracticeDate: lastPracticeDate ?? this.lastPracticeDate,
+      totalPracticeTimeSeconds: totalPracticeTimeSeconds ?? this.totalPracticeTimeSeconds,
+      correctAttempts: correctAttempts ?? this.correctAttempts,
+      totalAttempts: totalAttempts ?? this.totalAttempts,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        userId,
+        completedSignIds,
+        streakDays,
+        lastPracticeDate,
+        totalPracticeTimeSeconds,
+        correctAttempts,
+        totalAttempts,
+      ];
+}
+
+---
+lib/shared/models/progress_model.g.dart
+---
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'progress_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class ProgressModelAdapter extends TypeAdapter<ProgressModel> {
+  @override
+  final int typeId = 4;
+
+  @override
+  ProgressModel read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return ProgressModel(
+      userId: fields[0] as String,
+      completedSignIds: (fields[1] as List).cast<String>(),
+      streakDays: fields[2] as int,
+      lastPracticeDate: fields[3] as DateTime?,
+      totalPracticeTimeSeconds: fields[4] as int,
+      correctAttempts: fields[5] as int,
+      totalAttempts: fields[6] as int,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, ProgressModel obj) {
+    writer
+      ..writeByte(7)
+      ..writeByte(0)
+      ..write(obj.userId)
+      ..writeByte(1)
+      ..write(obj.completedSignIds)
+      ..writeByte(2)
+      ..write(obj.streakDays)
+      ..writeByte(3)
+      ..write(obj.lastPracticeDate)
+      ..writeByte(4)
+      ..write(obj.totalPracticeTimeSeconds)
+      ..writeByte(5)
+      ..write(obj.correctAttempts)
+      ..writeByte(6)
+      ..write(obj.totalAttempts);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProgressModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+
+---
+lib/shared/models/sign_model.dart
+---
+import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+
+part 'sign_model.g.dart';
+
+@HiveType(typeId: 2)
+enum SignCategory {
+  @HiveField(0)
+  greetings,
+  @HiveField(1)
+  numbers,
+  @HiveField(2)
+  basics,
+  @HiveField(3)
+  family,
+  @HiveField(4)
+  emotions,
+}
+
+@HiveType(typeId: 3)
+class SignModel extends Equatable {
+  const SignModel({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.description,
+    required this.assetImagePath,
+    required this.assetAnimationPath,
+    required this.riveAssetPath,
+    required this.keypointsLabel,
+    required this.isActive,
+    required this.tags,
+  });
+
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String name;
+  @HiveField(2)
+  final SignCategory category;
+  @HiveField(3)
+  final String description;
+  @HiveField(4)
+  final String assetImagePath;
+  @HiveField(5)
+  final String? assetAnimationPath;
+  @HiveField(6)
+  final String? riveAssetPath;
+  @HiveField(7)
+  final String? keypointsLabel;
+  @HiveField(8)
+  final bool isActive;
+  @HiveField(9)
+  final List<String> tags;
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        category,
+        description,
+        assetImagePath,
+        assetAnimationPath,
+        riveAssetPath,
+        keypointsLabel,
+        isActive,
+        tags,
+      ];
+}
+
+---
+lib/shared/models/sign_model.g.dart
+---
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'sign_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class SignModelAdapter extends TypeAdapter<SignModel> {
+  @override
+  final int typeId = 3;
+
+  @override
+  SignModel read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return SignModel(
+      id: fields[0] as String,
+      name: fields[1] as String,
+      category: fields[2] as SignCategory,
+      description: fields[3] as String,
+      assetImagePath: fields[4] as String,
+      assetAnimationPath: fields[5] as String?,
+      riveAssetPath: fields[6] as String?,
+      keypointsLabel: fields[7] as String?,
+      isActive: fields[8] as bool,
+      tags: (fields[9] as List).cast<String>(),
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, SignModel obj) {
+    writer
+      ..writeByte(10)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.category)
+      ..writeByte(3)
+      ..write(obj.description)
+      ..writeByte(4)
+      ..write(obj.assetImagePath)
+      ..writeByte(5)
+      ..write(obj.assetAnimationPath)
+      ..writeByte(6)
+      ..write(obj.riveAssetPath)
+      ..writeByte(7)
+      ..write(obj.keypointsLabel)
+      ..writeByte(8)
+      ..write(obj.isActive)
+      ..writeByte(9)
+      ..write(obj.tags);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SignModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class SignCategoryAdapter extends TypeAdapter<SignCategory> {
+  @override
+  final int typeId = 2;
+
+  @override
+  SignCategory read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return SignCategory.greetings;
+      case 1:
+        return SignCategory.numbers;
+      case 2:
+        return SignCategory.basics;
+      case 3:
+        return SignCategory.family;
+      case 4:
+        return SignCategory.emotions;
+      default:
+        return SignCategory.greetings;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, SignCategory obj) {
+    switch (obj) {
+      case SignCategory.greetings:
+        writer.writeByte(0);
+        break;
+      case SignCategory.numbers:
+        writer.writeByte(1);
+        break;
+      case SignCategory.basics:
+        writer.writeByte(2);
+        break;
+      case SignCategory.family:
+        writer.writeByte(3);
+        break;
+      case SignCategory.emotions:
+        writer.writeByte(4);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SignCategoryAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+
+---
+lib/shared/models/store_item_model.dart
+---
+import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+
+part 'store_item_model.g.dart';
+
+@HiveType(typeId: 5)
+enum StoreItemType {
+  @HiveField(0)
+  hat,
+  @HiveField(1)
+  shirt,
+  @HiveField(2)
+  pants,
+  @HiveField(3)
+  shoes,
+  @HiveField(4)
+  accessory,
+  @HiveField(5)
+  color,
+  @HiveField(6)
+  hair,
+}
+
+@HiveType(typeId: 6)
+class StoreItemModel extends Equatable {
+  const StoreItemModel({
+    required this.id,
+    required this.name,
+    required this.description,
+    required this.type,
+    required this.priceXp,
+    required this.assetPath,
+    required this.isUnlocked,
+    required this.isEquipped,
+    required this.rarity,
+  });
+
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String name;
+  @HiveField(2)
+  final String description;
+  @HiveField(3)
+  final StoreItemType type;
+  @HiveField(4)
+  final int priceXp;
+  @HiveField(5)
+  final String assetPath;
+  @HiveField(6)
+  final bool isUnlocked;
+  @HiveField(7)
+  final bool isEquipped;
+  @HiveField(8)
+  final String rarity;
+
+  StoreItemModel copyWith({
+    String? id,
+    String? name,
+    String? description,
+    StoreItemType? type,
+    int? priceXp,
+    String? assetPath,
+    bool? isUnlocked,
+    bool? isEquipped,
+    String? rarity,
+  }) {
+    return StoreItemModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      type: type ?? this.type,
+      priceXp: priceXp ?? this.priceXp,
+      assetPath: assetPath ?? this.assetPath,
+      isUnlocked: isUnlocked ?? this.isUnlocked,
+      isEquipped: isEquipped ?? this.isEquipped,
+      rarity: rarity ?? this.rarity,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        name,
+        description,
+        type,
+        priceXp,
+        assetPath,
+        isUnlocked,
+        isEquipped,
+        rarity,
+      ];
+}
+
+---
+lib/shared/models/store_item_model.g.dart
+---
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'store_item_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class StoreItemModelAdapter extends TypeAdapter<StoreItemModel> {
+  @override
+  final int typeId = 6;
+
+  @override
+  StoreItemModel read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return StoreItemModel(
+      id: fields[0] as String,
+      name: fields[1] as String,
+      description: fields[2] as String,
+      type: fields[3] as StoreItemType,
+      priceXp: fields[4] as int,
+      assetPath: fields[5] as String,
+      isUnlocked: fields[6] as bool,
+      isEquipped: fields[7] as bool,
+      rarity: fields[8] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, StoreItemModel obj) {
+    writer
+      ..writeByte(9)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.name)
+      ..writeByte(2)
+      ..write(obj.description)
+      ..writeByte(3)
+      ..write(obj.type)
+      ..writeByte(4)
+      ..write(obj.priceXp)
+      ..writeByte(5)
+      ..write(obj.assetPath)
+      ..writeByte(6)
+      ..write(obj.isUnlocked)
+      ..writeByte(7)
+      ..write(obj.isEquipped)
+      ..writeByte(8)
+      ..write(obj.rarity);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StoreItemModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class StoreItemTypeAdapter extends TypeAdapter<StoreItemType> {
+  @override
+  final int typeId = 5;
+
+  @override
+  StoreItemType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return StoreItemType.hat;
+      case 1:
+        return StoreItemType.shirt;
+      case 2:
+        return StoreItemType.pants;
+      case 3:
+        return StoreItemType.shoes;
+      case 4:
+        return StoreItemType.accessory;
+      case 5:
+        return StoreItemType.color;
+      case 6:
+        return StoreItemType.hair;
+      default:
+        return StoreItemType.hat;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, StoreItemType obj) {
+    switch (obj) {
+      case StoreItemType.hat:
+        writer.writeByte(0);
+        break;
+      case StoreItemType.shirt:
+        writer.writeByte(1);
+        break;
+      case StoreItemType.pants:
+        writer.writeByte(2);
+        break;
+      case StoreItemType.shoes:
+        writer.writeByte(3);
+        break;
+      case StoreItemType.accessory:
+        writer.writeByte(4);
+        break;
+      case StoreItemType.color:
+        writer.writeByte(5);
+        break;
+      case StoreItemType.hair:
+        writer.writeByte(6);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is StoreItemTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+
+---
+lib/shared/models/user_model.dart
+---
+import 'package:equatable/equatable.dart';
+import 'package:hive/hive.dart';
+import 'package:uuid/uuid.dart';
+
+part 'user_model.g.dart';
+
+@HiveType(typeId: 0)
+class UserModel extends Equatable {
+  const UserModel({
+    required this.id,
+    required this.username,
+    required this.level,
+    required this.xp,
+    required this.completedLessons,
+    required this.unlockedItems,
+    required this.currentLessonId,
+    required this.createdAt,
+    required this.lastLogin,
+  });
+
+  factory UserModel.initial() {
+    final now = DateTime.now();
+    return UserModel(
+      id: const Uuid().v4(),
+      username: 'Usuario',
+      level: 1, // Principiante - más tolerante
+      xp: 0,
+      completedLessons: const [],
+      unlockedItems: const [],
+      currentLessonId: null,
+      createdAt: now,
+      lastLogin: now,
+    );
+  }
+
+  @HiveField(0)
+  final String id;
+  @HiveField(1)
+  final String username;
+  @HiveField(2)
+  final int level;
+  @HiveField(3)
+  final int xp;
+  @HiveField(4)
+  final List<String> completedLessons;
+  @HiveField(5)
+  final List<String> unlockedItems;
+  @HiveField(6)
+  final String? currentLessonId;
+  @HiveField(7)
+  final DateTime createdAt;
+  @HiveField(8)
+  final DateTime lastLogin;
+
+  UserModel copyWith({
+    String? id,
+    String? username,
+    int? level,
+    int? xp,
+    List<String>? completedLessons,
+    List<String>? unlockedItems,
+    String? currentLessonId,
+    DateTime? createdAt,
+    DateTime? lastLogin,
+  }) {
+    return UserModel(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      level: level ?? this.level,
+      xp: xp ?? this.xp,
+      completedLessons: completedLessons ?? this.completedLessons,
+      unlockedItems: unlockedItems ?? this.unlockedItems,
+      currentLessonId: currentLessonId ?? this.currentLessonId,
+      createdAt: createdAt ?? this.createdAt,
+      lastLogin: lastLogin ?? this.lastLogin,
+    );
+  }
+
+  @override
+  List<Object?> get props => [
+        id,
+        username,
+        level,
+        xp,
+        completedLessons,
+        unlockedItems,
+        currentLessonId,
+        createdAt,
+        lastLogin,
+      ];
+}
+
+---
+lib/shared/models/user_model.g.dart
+---
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'user_model.dart';
+
+// **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class UserModelAdapter extends TypeAdapter<UserModel> {
+  @override
+  final int typeId = 0;
+
+  @override
+  UserModel read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return UserModel(
+      id: fields[0] as String,
+      username: fields[1] as String,
+      level: fields[2] as int,
+      xp: fields[3] as int,
+      completedLessons: (fields[4] as List).cast<String>(),
+      unlockedItems: (fields[5] as List).cast<String>(),
+      currentLessonId: fields[6] as String?,
+      createdAt: fields[7] as DateTime,
+      lastLogin: fields[8] as DateTime,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, UserModel obj) {
+    writer
+      ..writeByte(9)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.username)
+      ..writeByte(2)
+      ..write(obj.level)
+      ..writeByte(3)
+      ..write(obj.xp)
+      ..writeByte(4)
+      ..write(obj.completedLessons)
+      ..writeByte(5)
+      ..write(obj.unlockedItems)
+      ..writeByte(6)
+      ..write(obj.currentLessonId)
+      ..writeByte(7)
+      ..write(obj.createdAt)
+      ..writeByte(8)
+      ..write(obj.lastLogin);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserModelAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+
+---
+lib/shared/widgets/professor_avatar.dart
+---
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:senasgo/core/services/device_performance.dart';
+
+/// Avatar interactivo (Profesor) que demuestra las señas.
+///
+/// - Modo principal: Rive (assets/rive/professor.riv) cuando el dispositivo
+///   tiene memoria suficiente.
+/// - Fallback Visual: si el dispositivo tiene poca RAM (o el asset no existe),
+///   transiciona automáticamente a una animación 2D ligera para evitar
+///   bloqueos o degradación del rendimiento.
+class ProfessorAvatar extends StatefulWidget {
+  const ProfessorAvatar({
+    super.key,
+    this.size = 160,
+    this.animate = true,
+    this.signId,
+  });
+
+  final double size;
+
+  /// Activa la demostración de la seña.
+  final bool animate;
+
+  /// Seña a demostrar (usada por el state machine de Rive / por la pose 2D).
+  final String? signId;
+
+  @override
+  State<ProfessorAvatar> createState() => _ProfessorAvatarState();
+}
+
+class _ProfessorAvatarState extends State<ProfessorAvatar>
+    with SingleTickerProviderStateMixin {
+  bool? _riveAvailable; // null = cargando
+  late final AnimationController _controller;
+  late final Animation<double> _armAngle;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1400),
+    );
+    _armAngle = Tween<double>(begin: -0.35, end: 0.55).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+    if (widget.animate) _controller.repeat(reverse: true);
+    _probeRive();
+  }
+
+  Future<void> _probeRive() async {
+    if (DevicePerformance.isLowMemory) {
+      // Fallback inmediato en dispositivos con poca RAM
+      if (mounted) setState(() => _riveAvailable = false);
+      return;
+    }
+    try {
+      final asset = widget.signId == null
+          ? 'assets/rive/professor.riv'
+          : 'assets/rive/${widget.signId}.riv';
+      await rootBundle.load(asset);
+      if (mounted) setState(() => _riveAvailable = true);
+    } catch (_) {
+      // Asset inexistente -> fallback 2D
+      if (mounted) setState(() => _riveAvailable = false);
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant ProfessorAvatar oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.animate && !_controller.isAnimating) {
+      _controller.repeat(reverse: true);
+    } else if (!widget.animate) {
+      _controller.stop();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_riveAvailable == null) {
+      return SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: const Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    // Transición suave entre modos (evita "flash")
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 350),
+      child: _riveAvailable == true
+          ? const Center(key: ValueKey('rive'))
+          : _TwoDProfessor(
+              key: const ValueKey('2d'),
+              size: widget.size,
+              animation: _armAngle,
+            ),
+    );
+  }
+}
+
+/// Fallback 2D: profesor animado dibujado con Flutter (sin assets pesados).
+/// Rendimiento mínimo en cualquier dispositivo.
+class _TwoDProfessor extends StatelessWidget {
+  const _TwoDProfessor({
+    super.key,
+    required this.size,
+    required this.animation,
+  });
+
+  final double size;
+  final Animation<double> animation;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = Theme.of(context).colorScheme.primary;
+    return AnimatedBuilder(
+      animation: animation,
+      builder: (context, _) {
+        return SizedBox(
+          width: size,
+          height: size,
+          child: CustomPaint(
+            painter: _ProfessorPainter(
+              armAngle: animation.value,
+              accent: accent,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ProfessorPainter extends CustomPainter {
+  _ProfessorPainter({required this.armAngle, required this.accent});
+
+  final double armAngle;
+  final Color accent;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final w = size.width;
+    final h = size.height;
+    final center = Offset(w * 0.5, h * 0.5);
+
+    final bodyPaint = Paint()..color = accent;
+    final skinPaint = Paint()..color = const Color(0xFFFFCBA4);
+    final darkPaint = Paint()..color = const Color(0xFF333355);
+    final stroke = Paint()
+      ..color = const Color(0xFF222244)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2;
+
+    // Cuerpo
+    canvas.drawRRect(
+      RRect.fromRectAndRadius(
+        Rect.fromCenter(center: Offset(center.dx, h * 0.72), width: w * 0.44, height: h * 0.34),
+        const Radius.circular(18),
+      ),
+      bodyPaint,
+    );
+
+    // Cabeza
+    canvas.drawCircle(Offset(center.dx, h * 0.34), w * 0.17, skinPaint);
+    canvas.drawCircle(Offset(center.dx, h * 0.34), w * 0.17, stroke);
+
+    // Pelo
+    canvas.drawArc(
+      Rect.fromCircle(center: Offset(center.dx, h * 0.34), radius: w * 0.17),
+      3.1416,
+      3.1416,
+      true,
+      darkPaint,
+    );
+
+    // Brazo fijo (izquierdo)
+    final shoulderL = Offset(center.dx - w * 0.2, h * 0.62);
+    canvas.drawLine(
+      shoulderL,
+      Offset(shoulderL.dx - w * 0.1, shoulderL.dy + h * 0.16),
+      Paint()
+        ..color = accent
+        ..strokeWidth = 10
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Brazo demostrador (derecho) - rota con la animación
+    final shoulderR = Offset(center.dx + w * 0.2, h * 0.62);
+    final angle = armAngle;
+    final len = h * 0.26;
+    final hand = Offset(
+      shoulderR.dx + len * (0.45 * angle + 0.9),
+      shoulderR.dy - len * (0.8 - angle),
+    );
+    canvas.drawLine(
+      shoulderR,
+      hand,
+      Paint()
+        ..color = accent
+        ..strokeWidth = 10
+        ..strokeCap = StrokeCap.round,
+    );
+
+    // Mano (configuración manual simulada)
+    canvas.drawCircle(hand, w * 0.055, skinPaint);
+    canvas.drawCircle(hand, w * 0.055, stroke);
+
+    // Dedos extendidos (seña)
+    for (var i = -1; i <= 1; i++) {
+      canvas.drawLine(
+        hand + Offset(i * 6.0, -4),
+        hand + Offset(i * 9.0, -16 - i.abs() * 3),
+        Paint()
+          ..color = const Color(0xFF222244)
+          ..strokeWidth = 3
+          ..strokeCap = StrokeCap.round,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ProfessorPainter oldDelegate) =>
+      oldDelegate.armAngle != armAngle || oldDelegate.accent != accent;
+}
+
+
+---
+pubspec.yaml
+---
+name: senasgo
+description: Aplicación móvil para el aprendizaje inicial de la Lengua de Señas Paraguaya (LSPy) con gamificación y Edge AI.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Navegación y estado
+  flutter_riverpod: ^2.5.1
+  provider: ^6.1.2
+  go_router: ^14.3.0
+  equatable: ^2.0.5
+  json_annotation: ^4.9.0
+
+  # UI / Animaciones
+  flutter_svg: ^2.0.10+1
+  lottie: ^3.1.2
+  rive: ^0.13.20  # Avatar animado (fallback 2D)
+  google_fonts: ^6.2.1
+  flutter_screenutil: ^5.9.3
+  shimmer: ^3.0.0
+
+  # Cámara y Visión Computacional (Edge AI)
+  camera: ^0.11.0+2
+  image: ^4.2.0
+  tflite_flutter: ^0.11.0
+  # MediaPipe Hands se integra vía TFLite/Interpreter o paquete alternativo; se deja espacio para modelo .tflite
+  # mediapipe_flutter: opcional; no incluido por estabilidad
+
+  # Permisos
+  permission_handler: ^11.3.1
+
+  # Persistencia local
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  sqflite: ^2.3.3+1
+  path_provider: ^2.1.4
+  shared_preferences: ^2.3.2
+
+  # Utilidades
+  collection: ^1.18.0
+  intl: ^0.19.0
+  uuid: ^4.5.1
+  logger: ^2.4.0
+
+  # Sensors / UX
+  wakelock_plus: ^1.2.8
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.12
+  hive_generator: ^2.0.1
+  flutter_lints: ^6.0.0
+  analyzer: ^6.4.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/models/
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+    - assets/lottie/
+    - assets/rive/
+    - assets/data/
+
+---

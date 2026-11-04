@@ -1,0 +1,21 @@
+[
+  {
+    "id": "saludo_hola",
+    "name": "Hola",
+    "category": "greetings",
+    "description": "Saludo básico en LSPy",
+    "assetImagePath": "assets/images/saludo_hola.png",
+    "riveAssetPath": null,
+    "keypointsLabel": "saludo_hola",
+    "tags": ["saludo", "hola"]
+  },
+  {
+    "id": "numero_uno",
+    "name": "Uno",
+    "category": "numbers",
+    "description": "Número 1",
+    "assetImagePath": "assets/images/numero_uno.png",
+    "keypointsLabel": "numero_uno",
+    "tags": ["numero", "1"]
+  }
+]

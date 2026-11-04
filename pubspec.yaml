@@ -1,0 +1,80 @@
+name: senasgo
+description: Aplicación móvil para el aprendizaje inicial de la Lengua de Señas Paraguaya (LSPy) con gamificación y Edge AI.
+publish_to: "none"
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+  flutter: ">=3.24.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  # Navegación y estado (MVVM: ChangeNotifier + Provider)
+  provider: ^6.1.2
+  go_router: ^14.3.0
+  equatable: ^2.0.5
+
+  # UI / Avatar del profesor
+  rive: ^0.13.20 # Avatar animado; fallback 2D automático con poca RAM
+  flutter_screenutil: ^5.9.3
+
+  # Cámara y Visión Computacional (Edge AI, 100% offline)
+  camera: ^0.11.0+2
+  # Ejecuta el modelo de landmarks de MediaPipe Hands (.tflite) y el
+  # clasificador de señas. Sin modelos en assets/models/ la app usa el
+  # modo conceptual descrito en la documentación v3_04.
+  # 0.12.1 usa LiteRT (com.google.ai.edge.litert) con namespaces únicos;
+  # 0.11.0 traía tensorflow-lite 2.11.0 cuyo namespace duplicado
+  # (org.tensorflow.lite en 3 AARs) rompe el manifest merger de AGP 9.
+  tflite_flutter: ^0.12.1
+
+  # Permisos
+  permission_handler: ^11.3.1
+
+  # Persistencia local (sin internet)
+  hive: ^2.2.3
+  hive_flutter: ^1.1.0
+  path_provider: ^2.1.4
+
+  # Utilidades
+  uuid: ^4.5.1
+  logger: ^2.4.0
+  wakelock_plus: ^1.2.8 # Pantalla encendida solo durante la práctica
+  model_viewer_plus: ^1.10.0
+  url_launcher: ^6.3.3
+  package_info_plus: ^10.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  build_runner: ^2.4.12
+  hive_generator: ^2.0.1
+  flutter_lints: ^6.0.0
+  analyzer: ^6.4.1
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/models/
+    - assets/images/
+    - assets/icons/
+    - assets/animations/
+    - assets/rive/
+    - assets/data/
+    - assets/fonts/OFL-Nunito.txt
+
+  # Nunito (SIL OFL 1.1) incluida en la app: la app es 100% offline, así
+  # que no se usa google_fonts (descargaría la fuente desde internet).
+  fonts:
+    - family: Nunito
+      fonts:
+        - asset: assets/fonts/Nunito-600.ttf
+          weight: 600
+        - asset: assets/fonts/Nunito-700.ttf
+          weight: 700
+        - asset: assets/fonts/Nunito-800.ttf
+          weight: 800
+        - asset: assets/fonts/Nunito-900.ttf
+          weight: 900

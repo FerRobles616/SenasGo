@@ -1,0 +1,17 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  errors:
+    avoid_print: ignore
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+
+linter:
+  rules:
+    public_member_api_docs: false
+    sort_pub_dependencies: false
+    lines_longer_than_80_chars: false
+    always_declare_return_types: true

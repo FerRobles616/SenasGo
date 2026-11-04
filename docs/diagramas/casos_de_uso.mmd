@@ -1,0 +1,48 @@
+flowchart LR
+    EST(("Estudiante<br/>oyente"))
+    CAM(("Cámara del<br/>dispositivo"))
+
+    subgraph SYS["Sistema SeñasGo (app móvil, sin conexión)"]
+        direction TB
+        CU01(["CU-01 Ver camino de aprendizaje"])
+        CU02(["CU-02 Seleccionar seña"])
+        CU03(["CU-03 Ver demostración del avatar"])
+        CU04(["CU-04 Controlar reproducción<br/>0.5x · repetir · girar"])
+        CU05(["CU-05 Practicar seña"])
+        CU06(["CU-06 Preparar encuadre e iluminación"])
+        CU07(["CU-07 Capturar y detectar la mano"])
+        CU08(["CU-08 Evaluar los 5 parámetros"])
+        CU09(["CU-09 Recibir retroalimentación"])
+        CU10(["CU-10 Reintentar captura"])
+        CU11(["CU-11 Ganar +10 XP"])
+        CU12(["CU-12 Perder una vida"])
+        CU13(["CU-13 Cerrar lección e insignia"])
+        CU14(["CU-14 Continuar sin cámara"])
+        CU15(["CU-15 Consultar biblioteca de señas"])
+        CU16(["CU-16 Escribir comentario o reporte"])
+        CU17(["CU-17 Consultar ayuda y reportes guardados"])
+        CU18(["CU-18 Ver racha, vidas y XP"])
+    end
+
+    EST --- CU01
+    EST --- CU02
+    EST --- CU03
+    EST --- CU05
+    EST --- CU15
+    EST --- CU16
+    EST --- CU17
+    EST --- CU18
+    CAM --- CU06
+    CAM --- CU07
+
+    CU04 -. "«extend»" .-> CU03
+    CU05 -. "«include»" .-> CU06
+    CU05 -. "«include»" .-> CU07
+    CU05 -. "«include»" .-> CU08
+    CU05 -. "«include»" .-> CU09
+    CU10 -. "«extend»<br/>mano no detectada o mala luz" .-> CU05
+    CU14 -. "«extend»<br/>permiso denegado o cámara ocupada" .-> CU05
+    CU11 -. "«extend»<br/>ejecución correcta" .-> CU09
+    CU12 -. "«extend»<br/>ejecución incorrecta" .-> CU09
+    CU13 -. "«extend»<br/>última seña de la lección" .-> CU09
+    CU17 -. "«extend»" .-> CU16
