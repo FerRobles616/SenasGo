@@ -31,11 +31,16 @@ La navegación principal tiene cinco pestañas: **Aprender**, **Biblioteca**,
   inicio en Android o instalarlo como PWA. No se simula un widget nativo.
 - **Práctica**: cámara a 10–15 FPS, chequeo de luz, encuadre y evaluación
   formativa de los 5 parámetros (sin porcentajes).
-- **Profesor 3D guiado**: `assets/models/teacher.glb` con 34 clips, ropa azul
-  y pasos **Forma → Lugar → Movimiento**. La cámara no es libre: cada paso
-  elige un encuadre de **cabeza a torso** con énfasis en las manos, y el clip
-  termina sosteniendo la pose. Si el equipo no puede con el visor, cae al
-  póster texturizado y al avatar 2D procedural.
+- **Profesor 3D guiado**: `assets/models/teacher.glb` con clips por seña y
+  pasos **Forma → Lugar → Movimiento**. La cámara no es libre: cada paso elige
+  un encuadre de **cabeza a torso** con énfasis en las manos, y el clip termina
+  sosteniendo la pose. El panel de pasos es compacto: una instrucción, un
+  indicador de progreso, repetir como ícono y una sola acción principal. Si el
+  equipo no puede con el visor, cae al póster texturizado y al avatar 2D.
+- **Panel de pasos simple**: muestra “Paso 2 de 2 · Lugar”, una frase corta y
+  botones **Anterior / Siguiente**; al final el botón principal pasa a **Ver
+  seña completa**. La navegación por pestañas grandes se reemplazó por puntos
+  de progreso.
 - **Ayuda y comentarios**: preguntas frecuentes, reportes guardados en Hive,
   copiar al portapapeles y abrir el correo. Nada se envía solo.
 - **Sin tienda**: no hay compras ni moneda. Los XP son solo de avance y no se

@@ -93,14 +93,12 @@ class _GuidedTeacherState extends State<GuidedTeacher> {
             steps: _steps,
             index: _index,
             full: _full,
-            onStep: _selectStep,
             onPrevious: _index > 0 ? () => _selectStep(_index - 1) : null,
             onNext: _index < _steps.length - 1
                 ? () => _selectStep(_index + 1)
                 : null,
             onReplay: _replay,
             onToggleFull: _toggleFull,
-            onExpand: widget.onExpand,
           ),
         ],
       ],
@@ -113,30 +111,26 @@ class _StepPanel extends StatelessWidget {
     required this.steps,
     required this.index,
     required this.full,
-    required this.onStep,
     required this.onPrevious,
     required this.onNext,
     required this.onReplay,
     required this.onToggleFull,
-    required this.onExpand,
   });
 
   final List<TeacherStep> steps;
   final int index;
   final bool full;
-  final ValueChanged<int> onStep;
   final VoidCallback? onPrevious;
   final VoidCallback? onNext;
   final VoidCallback onReplay;
   final VoidCallback onToggleFull;
-  final VoidCallback? onExpand;
 
   static final ButtonStyle _navStyle = ButtonStyle(
-    minimumSize: WidgetStateProperty.all(const Size(0, 40)),
+    minimumSize: WidgetStateProperty.all(const Size(0, 42)),
     padding: WidgetStateProperty.all(
-        const EdgeInsets.symmetric(horizontal: 5, vertical: 7)),
+        const EdgeInsets.symmetric(horizontal: 10, vertical: 8)),
     textStyle: WidgetStateProperty.all(
-        const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w800)),
+        const TextStyle(fontSize: 13, fontWeight: FontWeight.w800)),
     shape: WidgetStateProperty.all(
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(13)),
     ),
@@ -150,8 +144,16 @@ class _StepPanel extends StatelessWidget {
             ? steps.length - 1
             : index;
     final step = steps[safe];
+    final isLast = safe >= steps.length - 1;
+    final title = full
+        ? 'Seña completa'
+        : 'Paso ${safe + 1} de ${steps.length} · ${step.title}';
+    final instruction = full
+        ? 'Mirá la seña completa y después volvé a los pasos.'
+        : step.instruction;
+
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(22),
@@ -169,81 +171,51 @@ class _StepPanel extends StatelessWidget {
         children: [
           Row(
             children: [
-              Icon(Icons.school_rounded, color: AppColors.primary, size: 18),
-              const SizedBox(width: 8),
               Expanded(
                 child: Text(
-                  'Paso a paso',
+                  title,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 14.5,
+                    fontSize: 13.5,
                     color: AppColors.ink,
                   ),
                 ),
               ),
-              Text(
-                full ? 'Completa' : '${index + 1} de ${steps.length}',
-                style: TextStyle(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 11,
-                ),
+              IconButton(
+                tooltip: full ? 'Repetir seña completa' : 'Repetir paso',
+                onPressed: onReplay,
+                icon: const Icon(Icons.replay_rounded, size: 20),
+                color: AppColors.primary,
+                visualDensity: VisualDensity.compact,
+                constraints: const BoxConstraints(minWidth: 48, minHeight: 44),
               ),
-              if (onExpand != null) ...[
-                const SizedBox(width: 2),
-                IconButton(
-                  tooltip: 'Ver en pantalla completa',
-                  onPressed: onExpand,
-                  icon: const Icon(Icons.fullscreen_rounded, size: 20),
-                  color: AppColors.primary,
-                  visualDensity: VisualDensity.compact,
-                ),
-              ],
             ],
           ),
-          const SizedBox(height: 7),
-          Row(
-            children: [
-              for (var i = 0; i < steps.length; i++) ...[
-                if (i > 0) const SizedBox(width: 7),
-                Expanded(
-                  child: _StepChip(
-                    step: steps[i],
-                    selected: !full && i == index,
-                    onTap: () => onStep(i),
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 8),
+          if (!full) _StepDots(index: safe, total: steps.length),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 180),
             child: Container(
-              key: ValueKey(full ? 'full' : 'step-$index'),
-              padding: const EdgeInsets.all(9),
+              key: ValueKey(full ? 'full' : 'step-$safe'),
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
                 color: AppColors.primarySoft,
-                borderRadius: BorderRadius.circular(15),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Icon(full ? Icons.play_circle_outline_rounded : step.icon,
-                      color: AppColors.primary, size: 21),
-                  const SizedBox(width: 9),
+                      color: AppColors.primary, size: 18),
+                  const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      full
-                          ? 'Mirá la seña completa y después volvé a los pasos '
-                              'para repasar lo que no te haya quedado claro.'
-                          : step.instruction,
+                      instruction,
                       style: TextStyle(
                         color: AppColors.ink,
-                        fontSize: 13,
-                        height: 1.35,
+                        fontSize: 12.5,
+                        height: 1.3,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -253,104 +225,100 @@ class _StepPanel extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onPrevious,
-                  style: _navStyle,
-                  child: const Text('Anterior',
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+          if (full)
+            FilledButton.tonalIcon(
+              onPressed: onToggleFull,
+              icon: const Icon(Icons.format_list_numbered_rounded, size: 18),
+              label: const Text('Volver a los pasos'),
+              style: _navStyle,
+            )
+          else ...[
+            Row(
+              children: [
+                if (onPrevious != null) ...[
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: onPrevious,
+                      style: _navStyle,
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.arrow_back_rounded, size: 16),
+                          SizedBox(width: 4),
+                          Text('Anterior'),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Expanded(
+                  child: isLast
+                      ? FilledButton.icon(
+                          onPressed: onToggleFull,
+                          icon: const Icon(Icons.play_circle_outline_rounded,
+                              size: 18),
+                          label: const Text('Ver seña completa'),
+                          style: _navStyle,
+                        )
+                      : FilledButton.icon(
+                          onPressed: onNext,
+                          icon:
+                              const Icon(Icons.arrow_forward_rounded, size: 18),
+                          label: const Text('Siguiente'),
+                          style: _navStyle,
+                        ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: FilledButton.tonalIcon(
-                  onPressed: onReplay,
-                  icon: const Icon(Icons.replay_rounded, size: 18),
-                  label: const Text('Repetir'),
-                  style: _navStyle,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: onNext,
-                  style: _navStyle,
-                  child: const Text('Siguiente',
-                      maxLines: 1, overflow: TextOverflow.ellipsis),
+              ],
+            ),
+            if (!isLast) ...[
+              const SizedBox(height: 2),
+              Center(
+                child: TextButton.icon(
+                  onPressed: onToggleFull,
+                  style: TextButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    visualDensity: VisualDensity.compact,
+                    textStyle: const TextStyle(
+                        fontSize: 12.5, fontWeight: FontWeight.w700),
+                  ),
+                  icon: const Icon(Icons.play_circle_outline_rounded, size: 17),
+                  label: const Text('Ver la seña completa'),
                 ),
               ),
             ],
-          ),
-          const SizedBox(height: 2),
-          TextButton.icon(
-            onPressed: onToggleFull,
-            icon: Icon(
-              full
-                  ? Icons.format_list_numbered_rounded
-                  : Icons.play_circle_outline_rounded,
-              size: 19,
-            ),
-            label: Text(full ? 'Volver a los pasos' : 'Ver la seña completa'),
-          ),
+          ],
         ],
       ),
     );
   }
 }
 
-class _StepChip extends StatelessWidget {
-  const _StepChip({
-    required this.step,
-    required this.selected,
-    required this.onTap,
-  });
+class _StepDots extends StatelessWidget {
+  const _StepDots({required this.index, required this.total});
 
-  final TeacherStep step;
-  final bool selected;
-  final VoidCallback onTap;
+  final int index;
+  final int total;
 
   @override
   Widget build(BuildContext context) {
-    final foreground = selected ? Colors.white : AppColors.ink;
-    return Material(
-      color: selected ? AppColors.primary : AppColors.surface,
-      borderRadius: BorderRadius.circular(13),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(13),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 6),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(13),
-            border: Border.all(
-              color: selected ? AppColors.primary : AppColors.border,
+    return Semantics(
+      label: 'Paso ${index + 1} de $total',
+      excludeSemantics: true,
+      child: Row(
+        children: [
+          for (var i = 0; i < total; i++)
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              margin: const EdgeInsets.only(right: 5, bottom: 6),
+              width: i == index ? 20 : 7,
+              height: 7,
+              decoration: BoxDecoration(
+                color: i <= index ? AppColors.primary : AppColors.border,
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                step.icon,
-                size: 16,
-                color: selected ? Colors.white : AppColors.primary,
-              ),
-              const SizedBox(height: 3),
-              Text(
-                step.title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  color: foreground,
-                  fontWeight: FontWeight.w800,
-                  fontSize: 10.5,
-                ),
-              ),
-            ],
-          ),
-        ),
+        ],
       ),
     );
   }
