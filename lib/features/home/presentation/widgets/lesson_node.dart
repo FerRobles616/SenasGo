@@ -3,8 +3,8 @@ import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/home/domain/learning_path.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
 
-/// Nodo circular del camino. La seña actual rebota y muestra "EMPEZAR";
-/// las bloqueadas van en gris con candado (no solo el color indica el estado).
+/// Nodo circular del camino. La seña actual rebota y queda resaltada; el
+/// botón EMPEZAR vive en la tarjeta de la unidad para no duplicar acciones.
 class LessonNode extends StatefulWidget {
   const LessonNode(
       {required this.node,
@@ -15,8 +15,8 @@ class LessonNode extends StatefulWidget {
 
   static const double size = 78;
 
-  /// Alto reservado: la seña actual suma el globo "EMPEZAR" y el halo.
-  static double slotHeightFor({required bool current}) => current ? 184 : 130;
+  /// Alto reservado para el nodo y su etiqueta; la seña actual suma el halo.
+  static double slotHeightFor({required bool current}) => current ? 142 : 130;
 
   final PathNode node;
   final UnitPalette palette;
@@ -105,11 +105,6 @@ class _LessonNodeState extends State<LessonNode>
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              if (_isCurrent)
-                Transform.translate(
-                  offset: Offset(0, dy),
-                  child: _StartBubble(color: widget.palette.face),
-                ),
               const SizedBox(height: 6),
               _anchor(Transform.translate(
                 offset: Offset(0, dy),
@@ -146,7 +141,7 @@ class _LessonNodeState extends State<LessonNode>
     );
   }
 
-  /// El enganche rodea al botón por fuera del rebote: el globo queda pegado
+  /// El enganche rodea al botón por fuera del rebote: el popover queda pegado
   /// al nodo pero no salta con la animación del nodo actual.
   Widget _anchor(Widget child) => widget.link == null
       ? child
@@ -171,63 +166,4 @@ class _Halo extends StatelessWidget {
       child: child,
     );
   }
-}
-
-/// Globo "EMPEZAR" sobre la seña actual.
-class _StartBubble extends StatelessWidget {
-  const _StartBubble({required this.color});
-
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border, width: 2),
-            boxShadow: [
-              BoxShadow(
-                color: color.withValues(alpha: 0.16),
-                blurRadius: 12,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Text('EMPEZAR',
-              style: TextStyle(
-                  color: color,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 14,
-                  letterSpacing: 0.5)),
-        ),
-        CustomPaint(size: const Size(14, 7), painter: _TailPainter()),
-      ],
-    );
-  }
-}
-
-class _TailPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final path = Path()
-      ..moveTo(0, 0)
-      ..lineTo(size.width / 2, size.height)
-      ..lineTo(size.width, 0);
-    canvas.drawPath(path, Paint()..color = AppColors.surface);
-    canvas.drawPath(
-      path,
-      Paint()
-        ..color = AppColors.border
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

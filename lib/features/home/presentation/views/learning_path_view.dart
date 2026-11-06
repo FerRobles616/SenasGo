@@ -178,6 +178,16 @@ class _LearningPathViewState extends State<LearningPathView> {
   @override
   Widget build(BuildContext context) {
     final path = _path;
+    final current = path.current;
+    PathUnit? currentUnit;
+    if (current != null) {
+      for (final unit in path.units) {
+        if (unit.nodes.contains(current)) {
+          currentUnit = unit;
+          break;
+        }
+      }
+    }
     return Scaffold(
       backgroundColor: AppColors.background,
       body: CustomScrollView(
@@ -193,6 +203,12 @@ class _LearningPathViewState extends State<LearningPathView> {
                   child: UnitHeader(
                     unit: unit,
                     onGuide: () => _open('/lesson-guide/${unit.lesson.id}'),
+                    currentSign:
+                        currentUnit?.index == unit.index ? current : null,
+                    onStart: currentUnit?.index == unit.index && current != null
+                        ? () => _open(
+                            '/practice?lesson=${current.lessonId}&sign=${current.sign.id}')
+                        : null,
                   ),
                 ),
               ),
@@ -202,7 +218,6 @@ class _LearningPathViewState extends State<LearningPathView> {
                 child: _UnitPath(
                   unit: unit,
                   currentKey: _currentKey,
-                  mascotMessages: _mascotMessages(path, unit),
                   onNodeTap: (n, ctx) => _onNodeTap(n, unit, ctx),
                   linkFor: _linkFor,
                   onMilestone: () => _open('/lesson-guide/${unit.lesson.id}'),
@@ -238,25 +253,6 @@ class _LearningPathViewState extends State<LearningPathView> {
       ),
     );
   }
-
-  /// Mensajes de la mascota según el estado del jugador.
-  List<String>? _mascotMessages(LearningPath path, PathUnit unit) {
-    final current = path.current;
-    if (current == null || !unit.nodes.contains(current)) return null;
-    final s = path.stats;
-    final pending = unit.nodes.length - unit.completedCount;
-    return [
-      if (s.hearts == 0)
-        'Te quedaste sin vidas. Repasá la guía mientras se recargan.'
-      else if (path.units.every((u) => u.completedCount == 0))
-        '¡Hola! Tocá EMPEZAR para aprender tu primera seña.'
-      else if (s.streak > 0 && !s.practicedToday)
-        '¡No pierdas tu racha! Practicá una seña hoy.'
-      else
-        'Vas muy bien. ${pending == 1 ? 'Te falta 1 seña' : 'Te faltan $pending señas'}.',
-      'Consejo: buscá buena luz y mantené la mano dentro del recuadro.',
-    ];
-  }
 }
 
 /// Ancho máximo en tablets: el camino queda centrado y legible.
@@ -282,7 +278,6 @@ class _UnitPath extends StatelessWidget {
     required this.linkFor,
     required this.currentKey,
     required this.onMilestone,
-    this.mascotMessages,
   });
 
   final PathUnit unit;
@@ -290,10 +285,6 @@ class _UnitPath extends StatelessWidget {
   final LayerLink Function(PathNode node) linkFor;
   final GlobalKey currentKey;
   final VoidCallback onMilestone;
-  final List<String>? mascotMessages;
-
-  // Deja espacio para que el globo crezca cuando el ancho es reducido.
-  static const double _mascotRowHeight = 124;
 
   /// Desplazamiento horizontal del zigzag (fracción de la amplitud).
   static const List<double> _wave = [
@@ -322,19 +313,6 @@ class _UnitPath extends StatelessWidget {
         for (var i = 0; i < unit.nodes.length; i++) {
           final node = unit.nodes[i];
           final isCurrent = node.status == NodeStatus.current;
-          if (isCurrent && mascotMessages != null) {
-            children.add(Positioned(
-              left: 16,
-              right: 16,
-              top: y,
-              height: _mascotRowHeight,
-              child: Align(
-                alignment: Alignment.bottomLeft,
-                child: MascotTooltip(messages: mascotMessages!),
-              ),
-            ));
-            y += _mascotRowHeight;
-          }
           final cx =
               width / 2 + amplitude * _wave[node.indexInPath % _wave.length];
           centers.add(Offset(

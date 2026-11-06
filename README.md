@@ -9,9 +9,10 @@ en el teléfono: no hay backend, cuentas, Firebase ni envío automático de dato
 La navegación principal tiene cinco pestañas: **Aprender**, **Biblioteca**,
 **Retos**, **Progreso** y **Ayuda**.
 
-- **Aprender**: camino corto de lecciones, racha, vidas, XP y nivel. La
-  pantalla prioriza una sola acción —empezar la seña actual— y evita tarjetas
-  secundarias que compitan con el camino.
+- **Aprender**: tarjeta **“Tu próxima seña”** con nombre, progreso, guía y un
+  único botón **EMPEZAR**; debajo queda el camino de nodos. La racha, las vidas
+  y el XP viven en una barra compacta, sin tarjetas secundarias que compitan
+  con la práctica.
 - **Biblioteca**: selector **Lecciones / Señas**, búsqueda contextual y filtros
   por saludos, números y palabras básicas. Cada seña abre su guía o práctica.
 - **Retos**: metas diarias y semanales calculadas en el teléfono. Solo se
