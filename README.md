@@ -9,19 +9,22 @@ en el teléfono: no hay backend, cuentas, Firebase ni envío automático de dato
 La navegación principal tiene cinco pestañas: **Aprender**, **Biblioteca**,
 **Retos**, **Progreso** y **Ayuda**.
 
-- **Aprender**: camino corto de lecciones, racha, vidas, XP y nivel. La seña
-  actual queda a la vista y el encabezado de la unidad se mantiene visible en
-  pantallas pequeñas.
-- **Biblioteca**: búsqueda y filtros por saludos, números y palabras básicas,
-  con guías de lección y acceso a cada seña.
-- **Retos**: metas diarias y semanales calculadas en el teléfono, con
-  recompensas de XP reclamables una sola vez.
+- **Aprender**: camino corto de lecciones, racha, vidas, XP y nivel. La
+  pantalla prioriza una sola acción —empezar la seña actual— y evita tarjetas
+  secundarias que compitan con el camino.
+- **Biblioteca**: selector **Lecciones / Señas**, búsqueda contextual y filtros
+  por saludos, números y palabras básicas. Cada seña abre su guía o práctica.
+- **Retos**: metas diarias y semanales calculadas en el teléfono. Solo se
+  muestran los retos activos; las recompensas reclamadas quedan plegadas y
+  únicamente aparece un botón cuando hay algo para reclamar.
 - **Progreso**: nivel, XP, precisión, actividad semanal y avance por lección.
 - **Racha**: calendario de constancia, mejor racha y protectores locales.
 - **Perfil**: meta diaria editable, calendario, liga de práctica y comunidad
   offline. No hay amigos, rankings ni cuentas inventadas: la liga compara tu
   XP semanal contra metas personales y la comunidad solo comparte tu progreso
   cuando vos lo decidís.
+- **Apariencia**: modo **Oscuro**, **Claro** o **Según el sistema**, con
+  persistencia local y adaptación de fondos, tarjetas, textos y navegación.
 - **Onboarding**: tres pasos (bienvenida, meta diaria y compromiso) y una
   recompensa única de bienvenida de **+10 XP**.
 - **Acceso rápido**: tutorial honesto para anclar SeñasGo a la pantalla de
@@ -154,7 +157,7 @@ flutter test
 
 La suite cubre evaluación geométrica, tolerancias por nivel, progreso,
 rachas/vidas, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
-clips del profesor. Al momento de esta versión pasan **51 pruebas**.
+clips del profesor. Al momento de esta versión pasan **53 pruebas**.
 
 ## Notas de diseño
 
@@ -162,6 +165,8 @@ clips del profesor. Al momento de esta versión pasan **51 pruebas**.
 - La app es portrait-only; el recuadro guía asume esa orientación.
 - La interfaz usa una paleta azul/teal propia, con la estructura de camino,
   tarjetas redondeadas y gamificación de Duolingo, sin copiar su verde.
+- La simplificación prioriza una acción principal por pantalla, menos texto
+  duplicado y opciones avanzadas plegadas.
 - Los reportes de soporte se guardan como mapas dinámicos en `support_box`,
   sin adapters nuevos ni migraciones.
 - `AppConstants.supportEmail` es un buzón de ejemplo: cambialo por uno real

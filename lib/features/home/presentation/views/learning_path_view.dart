@@ -185,14 +185,6 @@ class _LearningPathViewState extends State<LearningPathView> {
         scrollCacheExtent: const ScrollCacheExtent.pixels(4000),
         slivers: [
           TopStatsBar(stats: path.stats),
-          const SliverToBoxAdapter(
-            child: _Centered(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(16, 14, 16, 0),
-                child: _DailyQuestStrip(),
-              ),
-            ),
-          ),
           for (final unit in path.units) ...[
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 20, 16, 4),
@@ -257,13 +249,12 @@ class _LearningPathViewState extends State<LearningPathView> {
       if (s.hearts == 0)
         'Te quedaste sin vidas. Repasá la guía mientras se recargan.'
       else if (path.units.every((u) => u.completedCount == 0))
-        '¡Hola! Soy el Jaguareté. Tocá EMPEZAR y aprendamos tu primera seña.'
+        '¡Hola! Tocá EMPEZAR para aprender tu primera seña.'
       else if (s.streak > 0 && !s.practicedToday)
-        '¡No pierdas tu racha de ${s.streak} ${s.streak == 1 ? 'día' : 'días'}! Practicá una seña hoy.'
+        '¡No pierdas tu racha! Practicá una seña hoy.'
       else
-        '¡Vas muy bien! ${pending == 1 ? 'Te falta 1 seña' : 'Te faltan $pending señas'} en ${unit.lesson.title}.',
+        'Vas muy bien. ${pending == 1 ? 'Te falta 1 seña' : 'Te faltan $pending señas'}.',
       'Consejo: buscá buena luz y mantené la mano dentro del recuadro.',
-      'Cada seña correcta suma +${AppConstants.xpPerCorrectSign} XP y te acerca al siguiente nivel.',
     ];
   }
 }
@@ -281,70 +272,6 @@ class _Centered extends StatelessWidget {
           child: child,
         ),
       );
-}
-
-/// Pequeña tarjeta de reto diario que conecta el camino con la pestaña Retos.
-class _DailyQuestStrip extends StatelessWidget {
-  const _DailyQuestStrip();
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
-        onTap: () => context.push('/challenges'),
-        borderRadius: BorderRadius.circular(18),
-        child: Ink(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-          decoration: BoxDecoration(
-            color: AppColors.surface,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: AppColors.warningSoft,
-                  borderRadius: BorderRadius.circular(11),
-                ),
-                child: Icon(Icons.emoji_events_rounded,
-                    color: AppColors.warningInk, size: 19),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Retos de hoy',
-                      style: TextStyle(
-                        color: AppColors.ink,
-                        fontWeight: FontWeight.w900,
-                        fontSize: 13.5,
-                      ),
-                    ),
-                    Text(
-                      'Ganá XP extra practicando LSPy',
-                      style: TextStyle(
-                        color: AppColors.muted,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11.5,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.chevron_right_rounded, color: AppColors.primary),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
 }
 
 /// Nodos de una unidad en zigzag, unidos por el camino y cerrados por un cofre.
@@ -366,7 +293,7 @@ class _UnitPath extends StatelessWidget {
   final List<String>? mascotMessages;
 
   // Deja espacio para que el globo crezca cuando el ancho es reducido.
-  static const double _mascotRowHeight = 136;
+  static const double _mascotRowHeight = 124;
 
   /// Desplazamiento horizontal del zigzag (fracción de la amplitud).
   static const List<double> _wave = [

@@ -43,7 +43,7 @@ void main() {
     });
 
     test('Con progreso: lo aprendido queda completado y avanza la actual', () {
-      final path = _pathWith({'saludo_hola', 'saludo_chau'});
+      final path = _pathWith({'saludo_hola', 'saludo_chau', 'saludo_saludos'});
       expect(
           path.units.first.nodes.every((n) => n.status == NodeStatus.completed),
           isTrue);
@@ -136,7 +136,7 @@ void main() {
     await tester.tap(chau);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.textContaining('PRACTICAR'), findsOneWidget);
-    expect(find.text('VER DEMOSTRACIÓN'), findsOneWidget);
+    expect(find.text('Demostración'), findsOneWidget);
+    expect(find.text('Repaso'), findsOneWidget);
   });
 }

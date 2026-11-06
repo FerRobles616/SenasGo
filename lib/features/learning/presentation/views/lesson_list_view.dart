@@ -9,6 +9,8 @@ import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
 
 /// Biblioteca: lecciones y señas del vocabulario acotado, con búsqueda y
 /// filtros. Cada seña se puede abrir directamente en la demostración 3D.
+enum _LibrarySection { lessons, signs }
+
 class LessonListView extends StatefulWidget {
   const LessonListView({super.key});
 
@@ -22,6 +24,7 @@ class _LessonListViewState extends State<LessonListView> {
   late List<SignModel> _signs = HiveService.signsOfAll;
   SignCategory? _category;
   String _query = '';
+  _LibrarySection _section = _LibrarySection.lessons;
 
   @override
   void dispose() {
@@ -97,17 +100,22 @@ class _LessonListViewState extends State<LessonListView> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 6, 20, 28),
         children: [
-          Text(
-            'Lecciones cortas y señas sueltas para repasar cuando quieras.',
-            style: TextStyle(color: AppColors.muted, fontSize: 14),
+          _LibrarySwitch(
+            section: _section,
+            onChanged: (section) => setState(() {
+              _section = section;
+              if (section == _LibrarySection.lessons) _category = null;
+            }),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           TextField(
             controller: _search,
             onChanged: (v) => setState(() => _query = v),
             textInputAction: TextInputAction.search,
             decoration: InputDecoration(
-              hintText: 'Buscar una seña o lección…',
+              hintText: _section == _LibrarySection.lessons
+                  ? 'Buscar una lección…'
+                  : 'Buscar una seña…',
               prefixIcon: const Icon(Icons.search_rounded),
               suffixIcon: _query.isEmpty
                   ? null
@@ -131,101 +139,107 @@ class _LessonListViewState extends State<LessonListView> {
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          // En pantallas angostas los filtros pasan a una segunda fila en vez
-          // de quedar cortados en un carrusel horizontal.
-          Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              _FilterChip(
-                label: 'Todas',
-                icon: Icons.apps_rounded,
-                selected: _category == null,
-                onTap: () => setState(() => _category = null),
-              ),
-              _FilterChip(
-                label: 'Saludos',
-                icon: Icons.waving_hand_rounded,
-                selected: _category == SignCategory.greetings,
-                onTap: () => setState(() => _category = SignCategory.greetings),
-              ),
-              _FilterChip(
-                label: 'Números',
-                icon: Icons.pin_rounded,
-                selected: _category == SignCategory.numbers,
-                onTap: () => setState(() => _category = SignCategory.numbers),
-              ),
-              _FilterChip(
-                label: 'Básicos',
-                icon: Icons.chat_bubble_outline_rounded,
-                selected: _category == SignCategory.basics,
-                onTap: () => setState(() => _category = SignCategory.basics),
-              ),
-            ],
-          ),
-          if (_query.isEmpty && _category == null) ...[
-            const SizedBox(height: 24),
-            const _SectionHeader(
-              title: 'Lecciones',
-              subtitle: 'Un recorrido corto, de saludos a frases cotidianas.',
+          if (_section == _LibrarySection.signs) ...[
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 6,
+              runSpacing: 6,
+              children: [
+                _FilterChip(
+                  label: 'Todas',
+                  icon: Icons.apps_rounded,
+                  selected: _category == null,
+                  onTap: () => setState(() => _category = null),
+                ),
+                _FilterChip(
+                  label: 'Saludos',
+                  icon: Icons.waving_hand_rounded,
+                  selected: _category == SignCategory.greetings,
+                  onTap: () =>
+                      setState(() => _category = SignCategory.greetings),
+                ),
+                _FilterChip(
+                  label: 'Números',
+                  icon: Icons.pin_rounded,
+                  selected: _category == SignCategory.numbers,
+                  onTap: () => setState(() => _category = SignCategory.numbers),
+                ),
+                _FilterChip(
+                  label: 'Básicos',
+                  icon: Icons.chat_bubble_outline_rounded,
+                  selected: _category == SignCategory.basics,
+                  onTap: () => setState(() => _category = SignCategory.basics),
+                ),
+              ],
             ),
-            const SizedBox(height: 10),
-            for (var i = 0; i < lessons.length; i++) ...[
-              _LessonCard(
-                lesson: lessons[i],
-                palette: UnitPalette.of(i),
-                learned: learned,
-                onTap: () async {
-                  await context.push('/lesson/${lessons[i].id}');
-                  if (mounted) _reload();
-                },
-              ),
-              const SizedBox(height: 10),
-            ],
           ],
           const SizedBox(height: 22),
-          _SectionHeader(
-            title: _query.isEmpty && _category == null
-                ? 'Todas las señas'
-                : 'Resultados',
-            subtitle: signs.isEmpty
-                ? 'No encontramos señas con ese filtro.'
-                : '${signs.length} seña${signs.length == 1 ? '' : 's'} disponible${signs.length == 1 ? '' : 's'}.',
-          ),
-          const SizedBox(height: 10),
-          if (signs.isEmpty)
-            _EmptySearch(
-              onClear: () {
-                _search.clear();
-                setState(() {
-                  _query = '';
-                  _category = null;
-                });
-              },
-            )
-          else
-            for (final sign in signs) ...[
-              _SignCard(
-                sign: sign,
-                learned: learned.contains(sign.id),
-                onTap: () => _openSign(sign),
-              ),
-              const SizedBox(height: 8),
-            ],
-          if (_query.isNotEmpty || _category != null) ...[
-            const SizedBox(height: 6),
-            TextButton.icon(
-              onPressed: () {
-                _search.clear();
-                setState(() {
-                  _query = '';
-                  _category = null;
-                });
-              },
-              icon: const Icon(Icons.restart_alt_rounded),
-              label: const Text('Ver todo el vocabulario'),
+          if (_section == _LibrarySection.lessons) ...[
+            const _SectionHeader(title: 'Lecciones'),
+            const SizedBox(height: 10),
+            if (lessons.isEmpty)
+              _EmptySearch(
+                onClear: () {
+                  _search.clear();
+                  setState(() => _query = '');
+                },
+              )
+            else
+              for (var i = 0; i < lessons.length; i++) ...[
+                _LessonCard(
+                  lesson: lessons[i],
+                  palette: UnitPalette.of(i),
+                  learned: learned,
+                  onTap: () async {
+                    await context.push('/lesson/${lessons[i].id}');
+                    if (mounted) _reload();
+                  },
+                ),
+                const SizedBox(height: 10),
+              ],
+          ] else ...[
+            _SectionHeader(
+              title: _query.isEmpty && _category == null
+                  ? 'Todas las señas'
+                  : 'Resultados',
+              subtitle: signs.isEmpty
+                  ? 'No encontramos señas con ese filtro.'
+                  : '${signs.length} seña${signs.length == 1 ? '' : 's'} disponible${signs.length == 1 ? '' : 's'}.',
             ),
+            const SizedBox(height: 10),
+            if (signs.isEmpty)
+              _EmptySearch(
+                onClear: () {
+                  _search.clear();
+                  setState(() {
+                    _query = '';
+                    _category = null;
+                  });
+                },
+              )
+            else
+              for (final sign in signs) ...[
+                _SignCard(
+                  sign: sign,
+                  learned: learned.contains(sign.id),
+                  onTap: () => _openSign(sign),
+                ),
+                const SizedBox(height: 8),
+              ],
+            if (_query.isNotEmpty || _category != null) ...[
+              const SizedBox(height: 6),
+              TextButton.icon(
+                onPressed: () {
+                  _search.clear();
+                  setState(() {
+                    _query = '';
+                    _category = null;
+                  });
+                },
+                icon: const Icon(Icons.restart_alt_rounded),
+                label: const Text('Ver todas las señas'),
+              ),
+            ],
           ],
         ],
       ),
@@ -273,10 +287,10 @@ class _FilterChip extends StatelessWidget {
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title, required this.subtitle});
+  const _SectionHeader({required this.title, this.subtitle});
 
   final String title;
-  final String subtitle;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -288,9 +302,107 @@ class _SectionHeader extends StatelessWidget {
                 fontSize: 20,
                 fontWeight: FontWeight.w900,
                 color: AppColors.ink)),
-        const SizedBox(height: 2),
-        Text(subtitle, style: TextStyle(color: AppColors.muted, fontSize: 13)),
+        if (subtitle != null) ...[
+          const SizedBox(height: 2),
+          Text(subtitle!,
+              style: TextStyle(color: AppColors.muted, fontSize: 13)),
+        ],
       ],
+    );
+  }
+}
+
+/// Cambia entre el recorrido de lecciones y el vocabulario suelto sin
+/// apilar dos listas largas en la misma pantalla.
+class _LibrarySwitch extends StatelessWidget {
+  const _LibrarySwitch({required this.section, required this.onChanged});
+
+  final _LibrarySection section;
+  final ValueChanged<_LibrarySection> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceAlt,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _LibrarySwitchOption(
+              icon: Icons.school_rounded,
+              label: 'Lecciones',
+              selected: section == _LibrarySection.lessons,
+              onTap: () => onChanged(_LibrarySection.lessons),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Expanded(
+            child: _LibrarySwitchOption(
+              icon: Icons.sign_language_rounded,
+              label: 'Señas',
+              selected: section == _LibrarySection.signs,
+              onTap: () => onChanged(_LibrarySection.signs),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _LibrarySwitchOption extends StatelessWidget {
+  const _LibrarySwitchOption({
+    required this.icon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(12);
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: label,
+      excludeSemantics: true,
+      child: Material(
+        color: selected ? AppColors.surface : Colors.transparent,
+        borderRadius: radius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(icon,
+                    size: 18,
+                    color: selected ? AppColors.primary : AppColors.muted),
+                const SizedBox(width: 7),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: selected ? AppColors.primary : AppColors.muted,
+                    fontWeight: FontWeight.w900,
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

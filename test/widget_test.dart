@@ -1,14 +1,17 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/hive_service.dart';
+import 'package:senasgo/core/theme/theme_controller.dart';
 import 'package:senasgo/core/vision/frame_processor.dart';
 import 'package:senasgo/core/vision/hand_landmarks.dart';
 import 'package:senasgo/core/vision/sign_evaluator.dart';
 import 'package:senasgo/core/vision/tolerance_profile.dart';
+import 'package:senasgo/features/learning/presentation/views/lesson_list_view.dart';
 import 'package:senasgo/features/practice/domain/sign_evaluation.dart';
 import 'package:senasgo/features/practice/domain/sign_reference.dart';
 import 'package:senasgo/main.dart';
@@ -42,9 +45,34 @@ void main() {
 
     // Barra de navegación, primera unidad y la seña actual destacada.
     expect(find.text('Aprender'), findsOneWidget);
-    expect(find.text('Saludos'), findsOneWidget);
+    expect(find.text('Saludos'), findsWidgets);
     expect(find.text('EMPEZAR'), findsOneWidget);
     expect(find.text('LSPy'), findsOneWidget);
+  });
+
+  testWidgets('La biblioteca separa lecciones del vocabulario',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: LessonListView()));
+    await tester.pump();
+
+    expect(find.text('Lecciones'), findsWidgets);
+    expect(find.text('Todas las señas'), findsNothing);
+
+    await tester.tap(find.text('Señas'));
+    await tester.pump();
+
+    expect(find.text('Todas las señas'), findsOneWidget);
+  });
+
+  test('La apariencia elegida se guarda localmente', () async {
+    ThemeController.init();
+    expect(ThemeController.instance.preference, AppearancePreference.dark);
+
+    await ThemeController.instance.setPreference(AppearancePreference.light);
+    ThemeController.init();
+    expect(ThemeController.instance.preference, AppearancePreference.light);
+
+    await ThemeController.instance.setPreference(AppearancePreference.dark);
   });
 
   test('El usuario inicial tiene estado válido', () {

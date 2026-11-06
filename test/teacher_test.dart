@@ -46,7 +46,7 @@ void main() {
   });
 
   test('El catálogo de pasos cubre todos los clips del GLB', () {
-    expect(TeacherLessonCatalog.stepClipIds.length, 24);
+    expect(TeacherLessonCatalog.stepClipIds.length, 26);
     expect(TeacherLessonCatalog.stepClipIds, contains('saludo_hola_forma'));
     expect(
         TeacherLessonCatalog.stepClipIds, contains('basico_por_favor_movimiento'));

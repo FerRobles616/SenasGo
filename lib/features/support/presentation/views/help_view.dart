@@ -299,30 +299,33 @@ class _EmptyTickets extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(18),
+      padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
       ),
-      child: Column(
+      child: Row(
         children: [
-          Icon(Icons.inbox_outlined, size: 38, color: AppColors.muted),
-          const SizedBox(height: 8),
-          Text('No hay reportes guardados',
-              style:
-                  TextStyle(fontWeight: FontWeight.w800, color: AppColors.ink)),
-          const SizedBox(height: 3),
-          Text(
-            'Si algo no funciona o querés proponer una mejora, escribinos.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: AppColors.muted, fontSize: 13),
+          Icon(Icons.inbox_outlined, size: 26, color: AppColors.muted),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('No hay reportes guardados',
+                    style: TextStyle(
+                        fontWeight: FontWeight.w800, color: AppColors.ink)),
+                Text(
+                  'Escribinos si algo falla o querés proponer una mejora.',
+                  style: TextStyle(color: AppColors.muted, fontSize: 12),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 12),
-          TextButton.icon(
+          TextButton(
             onPressed: () => onReport(SupportCategory.idea),
-            icon: const Icon(Icons.lightbulb_outline_rounded),
-            label: const Text('Sugerir una mejora'),
+            child: const Text('Sugerir'),
           ),
         ],
       ),

@@ -19,13 +19,17 @@ class ThemeController extends ChangeNotifier {
 
   static const _key = 'appearance';
 
-  /// Única instancia; se crea en `main()` después de abrir Hive.
-  static late final ThemeController instance;
+  static ThemeController? _instance;
+
+  /// Única instancia. Si `init()` todavía no corrió (por ejemplo en un test de
+  /// widget), se usa una preferencia segura por defecto en vez de fallar.
+  static ThemeController get instance =>
+      _instance ??= ThemeController._(AppearancePreference.dark);
 
   /// La app arranca en oscuro hasta que la persona elija otra cosa.
   static void init() {
     final saved = HiveService.prefsBox.get(_key) as String?;
-    instance = ThemeController._(
+    _instance = ThemeController._(
         AppearancePreference.values.asNameMap()[saved] ??
             AppearancePreference.dark);
   }

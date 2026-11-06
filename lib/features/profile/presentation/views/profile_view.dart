@@ -231,20 +231,11 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            'Nivel ${_user.level} · ${_levelName(_user.level)}',
+                            'Nivel ${_user.level}',
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.86),
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
-                            ),
-                          ),
-                          const SizedBox(height: 3),
-                          Text(
-                            'Miembro desde ${_dateLabel(_user.createdAt)}',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.68),
-                              fontWeight: FontWeight.w600,
-                              fontSize: 11.5,
                             ),
                           ),
                         ],
@@ -327,10 +318,7 @@ class _ProfileViewState extends State<ProfileView> {
             ],
           ),
           const SizedBox(height: 20),
-          const AppSectionTitle(
-            'Mi compromiso',
-            subtitle: 'Pequeños pasos, todos los días.',
-          ),
+          const AppSectionTitle('Mi compromiso'),
           const SizedBox(height: 10),
           AppCard(
             padding: const EdgeInsets.all(16),
@@ -355,7 +343,7 @@ class _ProfileViewState extends State<ProfileView> {
                         ),
                       ),
                       Text(
-                        '$_goal minutos',
+                        '$_goal min',
                         style: TextStyle(
                           color: AppColors.ink,
                           fontWeight: FontWeight.w900,
@@ -417,102 +405,31 @@ class _ProfileViewState extends State<ProfileView> {
             ),
           ),
           const SizedBox(height: 20),
-          const AppSectionTitle(
-            'Apariencia',
-            subtitle: 'Elegí cómo se ve SeñasGo.',
-          ),
+          const AppSectionTitle('Apariencia'),
           const SizedBox(height: 10),
           const _AppearancePicker(),
           const SizedBox(height: 20),
-          const AppSectionTitle(
-            'Comunidad offline',
-            subtitle: 'Sin cuentas, sin rankings falsos.',
-          ),
+          const AppSectionTitle('Comunidad'),
           const SizedBox(height: 10),
           AppCard(
-            onTap: () => context.push('/league'),
-            padding: const EdgeInsets.all(16),
-            child: Row(
+            padding: EdgeInsets.zero,
+            child: Column(
               children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Color(0xFF1E3A8A), AppColors.primary],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(17),
-                  ),
-                  child: Icon(Icons.emoji_events_rounded,
-                      color: AppColors.gold, size: 27),
+                _ProfileLinkRow(
+                  icon: Icons.emoji_events_rounded,
+                  color: AppColors.gold,
+                  title: 'Liga de práctica',
+                  subtitle: '$weeklyXp XP esta semana',
+                  onTap: () => context.push('/league'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Liga de práctica',
-                        style: TextStyle(
-                          color: AppColors.ink,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 14.5,
-                        ),
-                      ),
-                      Text(
-                        '$weeklyXp XP esta semana · tu liga local',
-                        style: TextStyle(
-                          color: AppColors.muted,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: AppColors.muted),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          AppCard(
-            onTap: () => context.push('/community'),
-            padding: const EdgeInsets.all(16),
-            child: Row(
-              children: [
-                AppIconBadge(
+                const Divider(height: 1, indent: 66),
+                _ProfileLinkRow(
                   icon: Icons.people_alt_rounded,
                   color: AppColors.indigo,
-                  size: 52,
-                  radius: 17,
+                  title: 'Novedades',
+                  subtitle: 'Tu actividad, solo en este teléfono',
+                  onTap: () => context.push('/community'),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Novedades y amigos',
-                        style: TextStyle(
-                          color: AppColors.ink,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 14.5,
-                        ),
-                      ),
-                      Text(
-                        '${HiveService.recentAttempts.length} actividades guardadas',
-                        style: TextStyle(
-                          color: AppColors.muted,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Icon(Icons.chevron_right_rounded, color: AppColors.muted),
               ],
             ),
           ),
@@ -523,22 +440,6 @@ class _ProfileViewState extends State<ProfileView> {
             padding: EdgeInsets.zero,
             child: Column(
               children: [
-                ListTile(
-                  leading: const Icon(Icons.person_outline_rounded),
-                  title: const Text('Editar nombre'),
-                  subtitle: Text(_user.username),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: _editName,
-                ),
-                const Divider(height: 1, indent: 56),
-                ListTile(
-                  leading: const Icon(Icons.timer_outlined),
-                  title: const Text('Meta diaria'),
-                  subtitle: Text('$_goal minutos por día'),
-                  trailing: const Icon(Icons.chevron_right_rounded),
-                  onTap: _editGoal,
-                ),
-                const Divider(height: 1, indent: 56),
                 ListTile(
                   leading: const Icon(Icons.support_agent_rounded),
                   title: const Text('Ayuda y comentarios'),
@@ -581,18 +482,67 @@ class _ProfileViewState extends State<ProfileView> {
       ),
     );
   }
+}
 
-  static String _levelName(int level) => const [
-        'Principiante',
-        'Explorador',
-        'Comunicador',
-        'Avanzado',
-        'Experto',
-      ][(level - 1).clamp(0, 4)];
+class _ProfileLinkRow extends StatelessWidget {
+  const _ProfileLinkRow({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
 
-  static String _dateLabel(DateTime date) =>
-      '${date.day.toString().padLeft(2, '0')}/'
-      '${date.month.toString().padLeft(2, '0')}/${date.year}';
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      type: MaterialType.transparency,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
+          child: Row(
+            children: [
+              AppIconBadge(icon: icon, color: color, size: 42, radius: 13),
+              const SizedBox(width: 11),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: TextStyle(
+                        color: AppColors.ink,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 14,
+                      ),
+                    ),
+                    Text(
+                      subtitle,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: AppColors.muted,
+                        fontWeight: FontWeight.w600,
+                        fontSize: 11.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: AppColors.muted),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Oscuro · Claro · Según el sistema. El cambio se ve al instante.

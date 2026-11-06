@@ -19,6 +19,7 @@ class ChallengesView extends StatefulWidget {
 
 class _ChallengesViewState extends State<ChallengesView> {
   bool _claiming = false;
+  bool _showClaimed = false;
 
   List<_Challenge> _buildChallenges() {
     final claimed = HiveService.claimedChallenges;
@@ -98,8 +99,10 @@ class _ChallengesViewState extends State<ChallengesView> {
   @override
   Widget build(BuildContext context) {
     final challenges = _buildChallenges();
+    final active = challenges.where((c) => !c.claimed).toList();
+    final claimedChallenges = challenges.where((c) => c.claimed).toList();
     final completed = challenges.where((c) => c.canClaim).length;
-    final claimed = challenges.where((c) => c.claimed).length;
+    final claimed = claimedChallenges.length;
 
     return Scaffold(
       appBar: AppBar(
@@ -165,69 +168,75 @@ class _ChallengesViewState extends State<ChallengesView> {
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          AppCard(
-            color: AppColors.primarySoft,
-            borderColor: AppColors.primarySoft,
-            padding: const EdgeInsets.all(14),
-            child: Row(
-              children: [
-                Icon(Icons.auto_awesome_rounded,
-                    color: AppColors.primary, size: 21),
-                const SizedBox(width: 9),
-                Expanded(
-                  child: Text(
-                    completed == 0
-                        ? 'Completá un reto para reclamar XP extra. Todo se calcula sin conexión.'
-                        : 'Tenés $completed ${completed == 1 ? 'recompensa lista' : 'recompensas listas'} para reclamar.',
-                    style: TextStyle(
-                      color: AppColors.primaryDeep,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12.5,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
           const SizedBox(height: 18),
-          const AppSectionTitle(
+          AppSectionTitle(
             'Tus retos',
-            subtitle: 'Se renuevan con tu actividad diaria y semanal.',
+            subtitle: completed > 0
+                ? 'Tenés $completed ${completed == 1 ? 'recompensa lista' : 'recompensas listas'} para reclamar.'
+                : 'Se renuevan con tu actividad.',
           ),
           const SizedBox(height: 10),
-          for (final challenge in challenges) ...[
-            _ChallengeCard(
-              challenge: challenge,
-              claiming: _claiming,
-              onClaim: () => _claim(challenge),
-            ),
-            const SizedBox(height: 10),
+          if (active.isEmpty)
+            AppCard(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Ya reclamaste todos los retos disponibles. Volvé cuando '
+                'avances en tu práctica.',
+                style: TextStyle(
+                  color: AppColors.muted,
+                  fontSize: 13,
+                  height: 1.4,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            )
+          else
+            for (final challenge in active) ...[
+              _ChallengeCard(
+                challenge: challenge,
+                claiming: _claiming,
+                onClaim: () => _claim(challenge),
+              ),
+              const SizedBox(height: 10),
+            ],
+          if (claimedChallenges.isNotEmpty) ...[
+            const SizedBox(height: 2),
+            if (!_showClaimed)
+              TextButton.icon(
+                onPressed: () => setState(() => _showClaimed = true),
+                icon: const Icon(Icons.expand_more_rounded),
+                label: Text('Ver completados ($claimed)'),
+              )
+            else ...[
+              const SizedBox(height: 6),
+              AppSectionTitle(
+                'Completados',
+                subtitle: 'Ya no necesitan acción.',
+              ),
+              const SizedBox(height: 8),
+              for (final challenge in claimedChallenges) ...[
+                _ChallengeCard(
+                  challenge: challenge,
+                  claiming: _claiming,
+                  onClaim: () {},
+                ),
+                const SizedBox(height: 10),
+              ],
+              TextButton.icon(
+                onPressed: () => setState(() => _showClaimed = false),
+                icon: const Icon(Icons.expand_less_rounded),
+                label: const Text('Ocultar completados'),
+              ),
+            ],
           ],
           const SizedBox(height: 12),
-          AppCard(
-            padding: const EdgeInsets.all(15),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Icon(Icons.info_outline_rounded,
-                    color: AppColors.muted, size: 20),
-                const SizedBox(width: 9),
-                Expanded(
-                  child: Text(
-                    'Los retos y la liga son locales: no hay cuentas, servidores '
-                    'ni competencia con otras personas. Tu progreso no sale de '
-                    'este teléfono.',
-                    style: TextStyle(
-                      color: AppColors.muted.withValues(alpha: 0.95),
-                      fontSize: 12.5,
-                      height: 1.4,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ],
+          Text(
+            'Los retos son locales y no compiten con otras personas.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: AppColors.muted,
+              fontSize: 11.5,
+              height: 1.35,
             ),
           ),
         ],
@@ -360,43 +369,45 @@ class _ChallengeCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 11),
-          SizedBox(
-            width: double.infinity,
-            child: challenge.claimed
-                ? OutlinedButton.icon(
-                    onPressed: null,
-                    icon: const Icon(Icons.check_circle_rounded, size: 18),
-                    label: const Text('RECLAMADO'),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.success,
-                      side: BorderSide(color: AppColors.successSoft),
-                      backgroundColor: AppColors.successSoft,
-                      minimumSize: const Size.fromHeight(42),
-                    ),
-                  )
-                : FilledButton.icon(
-                    onPressed: done && !claiming ? onClaim : null,
-                    icon: Icon(
-                      done ? Icons.redeem_rounded : Icons.lock_clock_rounded,
-                      size: 18,
-                    ),
-                    label: Text(done ? 'RECLAMAR RECOMPENSA' : 'EN PROGRESO'),
-                    style: FilledButton.styleFrom(
-                      minimumSize: const Size.fromHeight(42),
-                      backgroundColor:
-                          done ? challenge.color : AppColors.surfaceAlt,
-                      foregroundColor: done ? Colors.white : AppColors.muted,
-                      disabledBackgroundColor: AppColors.surfaceAlt,
-                      disabledForegroundColor: AppColors.muted,
-                      textStyle: const TextStyle(
-                        fontSize: 12.5,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 0.3,
-                      ),
-                    ),
+          if (challenge.canClaim) ...[
+            const SizedBox(height: 11),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: claiming ? null : onClaim,
+                icon: const Icon(Icons.redeem_rounded, size: 18),
+                label: Text('RECLAMAR +${challenge.reward} XP'),
+                style: FilledButton.styleFrom(
+                  minimumSize: const Size.fromHeight(42),
+                  backgroundColor: challenge.color,
+                  foregroundColor: Colors.white,
+                  textStyle: const TextStyle(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.3,
                   ),
-          ),
+                ),
+              ),
+            ),
+          ] else if (challenge.claimed) ...[
+            const SizedBox(height: 9),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.check_circle_rounded,
+                    color: AppColors.success, size: 16),
+                const SizedBox(width: 5),
+                Text(
+                  'Recompensa reclamada',
+                  style: TextStyle(
+                    color: AppColors.success,
+                    fontWeight: FontWeight.w800,
+                    fontSize: 11.5,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ],
       ),
     );

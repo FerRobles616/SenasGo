@@ -245,13 +245,13 @@ class _LevelCard extends StatelessWidget {
               valueColor: const AlwaysStoppedAnimation(Color(0xFFFFE6A6)),
             ),
           ),
-          const SizedBox(height: 8),
-          Text(
-            nextXp == null
-                ? 'Seguí repasando para no perder lo aprendido.'
-                : 'Cada seña correcta suma +${AppConstants.xpPerCorrectSign} XP.',
-            style: const TextStyle(color: Colors.white70, fontSize: 12.5),
-          ),
+          if (nextXp == null) ...[
+            const SizedBox(height: 8),
+            const Text(
+              'Seguí repasando para no perder lo aprendido.',
+              style: TextStyle(color: Colors.white70, fontSize: 12.5),
+            ),
+          ],
         ],
       ),
     );
