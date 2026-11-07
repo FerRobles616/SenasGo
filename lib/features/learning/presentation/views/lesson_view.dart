@@ -221,7 +221,7 @@ class _SignChip extends StatelessWidget {
       label: Text(sign.name),
       selectedColor: AppColors.primary,
       backgroundColor: AppColors.surface,
-      side: BorderSide(color: AppColors.border),
+      side: BorderSide(color: AppColors.outlineStrong),
       labelStyle: TextStyle(
         color: selected ? AppColors.onPrimary : AppColors.ink,
         fontWeight: FontWeight.w800,

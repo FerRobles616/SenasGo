@@ -19,7 +19,7 @@ class AvatarPlaybackControls extends StatelessWidget {
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppColors.border),
+          border: Border.all(color: AppColors.outlineStrong),
           boxShadow: [
             BoxShadow(
               color: AppColors.primary.withValues(alpha: 0.08),

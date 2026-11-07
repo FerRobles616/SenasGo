@@ -179,11 +179,11 @@ class _SupportFormViewState extends State<SupportFormView> {
             fillColor: AppColors.surface,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.outlineStrong),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.outlineStrong),
             ),
           ),
           onChanged: (_) {
@@ -203,11 +203,11 @@ class _SupportFormViewState extends State<SupportFormView> {
             prefixIcon: const Icon(Icons.alternate_email_rounded),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.outlineStrong),
             ),
             enabledBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: AppColors.border),
+              borderSide: BorderSide(color: AppColors.outlineStrong),
             ),
           ),
         ),
@@ -412,7 +412,7 @@ class _CategoryChip extends StatelessWidget {
           size: 18, color: selected ? AppColors.onPrimary : AppColors.primary),
       selectedColor: AppColors.primary,
       backgroundColor: AppColors.surface,
-      side: BorderSide(color: AppColors.border),
+      side: BorderSide(color: AppColors.outlineStrong),
       labelStyle: TextStyle(
         color: selected ? AppColors.onPrimary : AppColors.ink,
         fontWeight: FontWeight.w800,

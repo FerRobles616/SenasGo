@@ -131,11 +131,11 @@ class _LessonListViewState extends State<LessonListView> {
               fillColor: AppColors.surface,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: AppColors.outlineStrong),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(18),
-                borderSide: BorderSide(color: AppColors.border),
+                borderSide: BorderSide(color: AppColors.outlineStrong),
               ),
             ),
           ),
@@ -271,7 +271,7 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selectedColor: AppColors.primary,
       backgroundColor: AppColors.surface,
-      side: BorderSide(color: AppColors.border),
+      side: BorderSide(color: AppColors.outlineStrong),
       visualDensity: VisualDensity.compact,
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),

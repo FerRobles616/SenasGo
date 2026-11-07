@@ -429,7 +429,7 @@ window.teacherView = (orbit, target, fov) => {
                   textStyle: WidgetStateProperty.all(const TextStyle(
                       fontSize: 12, fontWeight: FontWeight.w800)),
                   side: WidgetStateProperty.all(
-                      BorderSide(color: AppColors.border)),
+                      BorderSide(color: AppColors.outlineStrong)),
                   backgroundColor: WidgetStateProperty.resolveWith((states) =>
                       states.contains(WidgetState.selected)
                           ? AppColors.primarySoft

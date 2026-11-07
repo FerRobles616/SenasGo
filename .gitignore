@@ -49,3 +49,6 @@ app.*.map.json
 
 # Videos de referencia locales
 /Screenrecorder-*.mp4
+
+# Modelos VRM de trabajo (no versionar muestras con licencia)
+*.vrm

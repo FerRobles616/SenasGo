@@ -27,6 +27,7 @@ class AppPalette {
     required this.surface,
     required this.surfaceAlt,
     required this.border,
+    required this.outlineStrong,
     required this.ink,
     required this.muted,
     required this.navy,
@@ -71,6 +72,9 @@ class AppPalette {
   final Color surface;
   final Color surfaceAlt;
   final Color border;
+
+  /// Borde de controles interactivos. Debe distinguirse del fondo.
+  final Color outlineStrong;
   final Color ink;
   final Color muted;
   final Color navy;
@@ -117,6 +121,7 @@ class AppPalette {
     surface: Color(0xFFFFFFFF),
     surfaceAlt: Color(0xFFE8F4EC),
     border: Color(0xFFCFE3D7),
+    outlineStrong: Color(0xFF5F957F),
     ink: Color(0xFF10231C),
     muted: Color(0xFF5C786C),
     navy: Color(0xFF071A16),
@@ -158,6 +163,7 @@ class AppPalette {
     surface: Color(0xFF0C2A22),
     surfaceAlt: Color(0xFF12382D),
     border: Color(0xFF1E5A48),
+    outlineStrong: Color(0xFF4F8B74),
     ink: Color(0xFFF1FFF9),
     muted: Color(0xFF9FC4B6),
     navy: Color(0xFF020806),
@@ -211,6 +217,7 @@ class AppColors {
   static Color get surface => _palette.surface;
   static Color get surfaceAlt => _palette.surfaceAlt;
   static Color get border => _palette.border;
+  static Color get outlineStrong => _palette.outlineStrong;
   static Color get ink => _palette.ink;
   static Color get muted => _palette.muted;
   static Color get navy => _palette.navy;
@@ -369,7 +376,7 @@ class AppTheme {
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(50),
           foregroundColor: p.primary,
-          side: BorderSide(color: p.border, width: 1.6),
+          side: BorderSide(color: p.outlineStrong, width: 1.8),
           shape: rounded16,
           textStyle: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800),
         ),
@@ -389,11 +396,11 @@ class AppTheme {
             const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: p.border),
+          borderSide: BorderSide(color: p.outlineStrong),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
-          borderSide: BorderSide(color: p.border),
+          borderSide: BorderSide(color: p.outlineStrong),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(18),
@@ -432,7 +439,7 @@ class AppTheme {
         backgroundColor: p.surface,
         selectedColor: p.primary,
         disabledColor: p.locked,
-        side: BorderSide(color: p.border),
+        side: BorderSide(color: p.outlineStrong),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         labelStyle:
             TextStyle(color: p.ink, fontWeight: FontWeight.w800, fontSize: 13),

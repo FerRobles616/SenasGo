@@ -118,7 +118,9 @@ blender --background --python tool/render_teacher_poster.py
 ```
 
 Las demostraciones siguen siendo ilustrativas hasta que una persona experta
-en LSPy las valide.
+en LSPy las valide. Los archivos VRM de muestra no se versionan; el pipeline
+espera un avatar propio o uno con licencia que permita modificarlo y
+distribuirlo.
 
 ## Modelo de IA (Edge AI)
 
@@ -169,14 +171,15 @@ flutter test
 
 La suite cubre evaluación geométrica, tolerancias por nivel, progreso,
 rachas, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
-clips del profesor. Al momento de esta versión pasan **50 pruebas**.
+clips del profesor. Al momento de esta versión pasan **56 pruebas**.
 
 ## Notas de diseño
 
 - Documento de referencia: `SeñasGo-Documentacion(v3_05).docx`.
 - La app es portrait-only; el recuadro guía asume esa orientación.
 - La interfaz usa la paleta **Selva eléctrica** (verde, turquesa y ámbar),
-  con camino continuo, tarjetas redondeadas y gamificación propia.
+  con camino continuo, tarjetas redondeadas y gamificación propia. Los bordes
+  interactivos usan un token de alto contraste para no perderse en modo claro.
 - La simplificación prioriza una acción principal por pantalla, menos texto
   duplicado y opciones avanzadas plegadas.
 - Los reportes de soporte se guardan como mapas dinámicos en `support_box`,

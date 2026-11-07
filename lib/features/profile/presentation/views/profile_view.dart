@@ -120,7 +120,7 @@ class _ProfileViewState extends State<ProfileView> {
                       side: BorderSide(
                         color: minutes == _goal
                             ? AppColors.primary
-                            : AppColors.border,
+                            : AppColors.outlineStrong,
                         width: minutes == _goal ? 2 : 1,
                       ),
                     ),
@@ -612,7 +612,7 @@ class _AppearanceOption extends StatelessWidget {
             decoration: BoxDecoration(
               borderRadius: radius,
               border: Border.all(
-                color: selected ? AppColors.primary : AppColors.border,
+                color: selected ? AppColors.primary : AppColors.outlineStrong,
                 width: selected ? 2 : 1.4,
               ),
             ),

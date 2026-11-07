@@ -573,8 +573,7 @@ class _NodePopover extends StatelessWidget {
                   PushableButton(
                     onPressed: onPractice,
                     color: Colors.white,
-                    shadowColor:
-                        Color.lerp(Colors.white, palette.shade, 0.45)!,
+                    shadowColor: Color.lerp(Colors.white, palette.shade, 0.45)!,
                     child: Text(
                       label,
                       style: TextStyle(
