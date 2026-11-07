@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 class AppPalette {
   const AppPalette({
     required this.brightness,
+    required this.onPrimary,
     required this.primary,
     required this.primaryDark,
     required this.primaryDeep,
@@ -49,6 +50,9 @@ class AppPalette {
   });
 
   final Brightness brightness;
+
+  /// Texto/icono legible sobre [primary].
+  final Color onPrimary;
 
   // Identidad principal
   final Color primary;
@@ -98,80 +102,82 @@ class AppPalette {
 
   static const light = AppPalette(
     brightness: Brightness.light,
-    primary: Color(0xFF2563EB),
-    primaryDark: Color(0xFF1D4ED8),
-    primaryDeep: Color(0xFF1E3A8A),
-    primarySoft: Color(0xFFE8F1FF),
-    sky: Color(0xFF38BDF8),
-    skySoft: Color(0xFFE0F2FE),
-    teal: Color(0xFF14B8A6),
+    onPrimary: Colors.white,
+    primary: Color(0xFF0F766E),
+    primaryDark: Color(0xFF115E59),
+    primaryDeep: Color(0xFF134E4A),
+    primarySoft: Color(0xFFD9F5EE),
+    sky: Color(0xFF0891B2),
+    skySoft: Color(0xFFCFFAFE),
+    teal: Color(0xFF0D9488),
     tealSoft: Color(0xFFCCFBF1),
-    indigo: Color(0xFF6366F1),
-    indigoSoft: Color(0xFFE0E7FF),
-    background: Color(0xFFF4F8FF),
+    indigo: Color(0xFF14B8A6),
+    indigoSoft: Color(0xFFD1FAE5),
+    background: Color(0xFFF4FAF5),
     surface: Color(0xFFFFFFFF),
-    surfaceAlt: Color(0xFFEDF4FF),
-    border: Color(0xFFDCE8FA),
-    ink: Color(0xFF10233F),
-    muted: Color(0xFF64748B),
-    navy: Color(0xFF0B1B33),
-    cameraCard: Color(0xFF0F2547),
+    surfaceAlt: Color(0xFFE8F4EC),
+    border: Color(0xFFCFE3D7),
+    ink: Color(0xFF10231C),
+    muted: Color(0xFF5C786C),
+    navy: Color(0xFF071A16),
+    cameraCard: Color(0xFF0B241E),
     success: Color(0xFF10B981),
     successSoft: Color(0xFFD1FAE5),
     successInk: Color(0xFF047857),
-    error: Color(0xFFEF4444),
-    errorSoft: Color(0xFFFEE2E2),
-    errorInk: Color(0xFFB91C1C),
-    warning: Color(0xFFF59E0B),
+    error: Color(0xFFE11D48),
+    errorSoft: Color(0xFFFFE4E6),
+    errorInk: Color(0xFF9F1239),
+    warning: Color(0xFFD97706),
     warningSoft: Color(0xFFFEF3C7),
     warningInk: Color(0xFF92400E),
     streak: Color(0xFFF97316),
-    heart: Color(0xFFF43F5E),
-    gem: Color(0xFF0EA5E9),
+    heart: Color(0xFFE11D48),
+    gem: Color(0xFF0D9488),
     gold: Color(0xFFFBBF24),
-    locked: Color(0xFFE2E8F0),
-    lockedShade: Color(0xFFCBD5E1),
-    lockedInk: Color(0xFF94A3B8),
+    locked: Color(0xFFDDEBE2),
+    lockedShade: Color(0xFFC5DCCF),
+    lockedInk: Color(0xFF7C9587),
   );
 
   /// Noche azul profunda: el azul de SeñasGo sube de brillo para mantener el
   /// contraste y los fondos "Soft" pasan a ser tintes oscuros.
   static const dark = AppPalette(
     brightness: Brightness.dark,
-    primary: Color(0xFF4C8DFF),
-    primaryDark: Color(0xFF2F6BDB),
-    primaryDeep: Color(0xFFC9DCFF),
-    primarySoft: Color(0xFF1A2F55),
-    sky: Color(0xFF38BDF8),
-    skySoft: Color(0xFF0F3047),
+    onPrimary: Color(0xFF04120F),
+    primary: Color(0xFF2DD4BF),
+    primaryDark: Color(0xFF14B8A6),
+    primaryDeep: Color(0xFF5EEAD4),
+    primarySoft: Color(0xFF12382D),
+    sky: Color(0xFF22D3EE),
+    skySoft: Color(0xFF083344),
     teal: Color(0xFF2DD4BF),
-    tealSoft: Color(0xFF0E3B3A),
-    indigo: Color(0xFF818CF8),
-    indigoSoft: Color(0xFF262A57),
-    background: Color(0xFF0D1626),
-    surface: Color(0xFF15223A),
-    surfaceAlt: Color(0xFF1B2B47),
-    border: Color(0xFF283B5E),
-    ink: Color(0xFFE8EFFC),
-    muted: Color(0xFF94A5C2),
-    navy: Color(0xFF040A15),
-    cameraCard: Color(0xFF0A1424),
+    tealSoft: Color(0xFF0F3B35),
+    indigo: Color(0xFF5EEAD4),
+    indigoSoft: Color(0xFF0E3B36),
+    background: Color(0xFF04120F),
+    surface: Color(0xFF0C2A22),
+    surfaceAlt: Color(0xFF12382D),
+    border: Color(0xFF1E5A48),
+    ink: Color(0xFFF1FFF9),
+    muted: Color(0xFF9FC4B6),
+    navy: Color(0xFF020806),
+    cameraCard: Color(0xFF071A16),
     success: Color(0xFF34D399),
     successSoft: Color(0xFF0F3A2D),
     successInk: Color(0xFF6EE7B7),
-    error: Color(0xFFF87171),
+    error: Color(0xFFFB7185),
     errorSoft: Color(0xFF471A20),
-    errorInk: Color(0xFFFCA5A5),
+    errorInk: Color(0xFFFDA4AF),
     warning: Color(0xFFFBBF24),
     warningSoft: Color(0xFF3A2C0C),
     warningInk: Color(0xFFFCD34D),
     streak: Color(0xFFFB923C),
     heart: Color(0xFFFB7185),
-    gem: Color(0xFF38BDF8),
+    gem: Color(0xFF2DD4BF),
     gold: Color(0xFFFBBF24),
-    locked: Color(0xFF24344F),
-    lockedShade: Color(0xFF1A273E),
-    lockedInk: Color(0xFF6B7D9C),
+    locked: Color(0xFF1A3A30),
+    lockedShade: Color(0xFF122C24),
+    lockedInk: Color(0xFF6F9182),
   );
 }
 
@@ -184,6 +190,7 @@ class AppColors {
 
   static AppPalette get palette => _palette;
   static bool get isDark => _palette.isDark;
+  static Color get onPrimary => _palette.onPrimary;
 
   static void use(AppPalette palette) => _palette = palette;
 
@@ -254,11 +261,11 @@ class UnitPalette {
   final Color shade;
 
   static const List<UnitPalette> all = [
-    UnitPalette(Color(0xFF2563EB), Color(0xFF1D4ED8)), // azul principal
-    UnitPalette(Color(0xFF0EA5E9), Color(0xFF0284C7)), // celeste
-    UnitPalette(Color(0xFF14B8A6), Color(0xFF0F766E)), // turquesa
-    UnitPalette(Color(0xFF6366F1), Color(0xFF4338CA)), // índigo
-    UnitPalette(Color(0xFFF59E0B), Color(0xFFB45309)), // ámbar
+    UnitPalette(Color(0xFF0F766E), Color(0xFF115E59)), // selva
+    UnitPalette(Color(0xFF0D9488), Color(0xFF0B7A70)), // turquesa
+    UnitPalette(Color(0xFFB45309), Color(0xFF92400E)), // jaguar
+    UnitPalette(Color(0xFFBE123C), Color(0xFF9F1239)), // coral
+    UnitPalette(Color(0xFF047857), Color(0xFF065F46)), // esmeralda
   ];
 
   static UnitPalette of(int unitIndex) => all[unitIndex % all.length];
@@ -276,7 +283,7 @@ class AppTheme {
       brightness: p.brightness,
     ).copyWith(
       primary: p.primary,
-      onPrimary: Colors.white,
+      onPrimary: p.onPrimary,
       primaryContainer: p.primarySoft,
       onPrimaryContainer: p.primaryDeep,
       secondary: p.sky,
@@ -303,7 +310,16 @@ class AppTheme {
       // Tipografía redondeada y gruesa, de lectura muy clara.
       fontFamily: 'Nunito',
       colorScheme: scheme,
-      scaffoldBackgroundColor: p.background,
+      scaffoldBackgroundColor: Colors.transparent,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: JunglePageTransitionsBuilder(),
+          TargetPlatform.iOS: JunglePageTransitionsBuilder(),
+          TargetPlatform.linux: JunglePageTransitionsBuilder(),
+          TargetPlatform.macOS: JunglePageTransitionsBuilder(),
+          TargetPlatform.windows: JunglePageTransitionsBuilder(),
+        },
+      ),
       splashFactory: InkSparkle.splashFactory,
       visualDensity: VisualDensity.standard,
       appBarTheme: AppBarTheme(
@@ -341,7 +357,7 @@ class AppTheme {
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(56),
           backgroundColor: p.primary,
-          foregroundColor: Colors.white,
+          foregroundColor: p.onPrimary,
           shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(18)),
           ),
@@ -420,8 +436,8 @@ class AppTheme {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
         labelStyle:
             TextStyle(color: p.ink, fontWeight: FontWeight.w800, fontSize: 13),
-        secondaryLabelStyle: const TextStyle(
-            color: Colors.white, fontWeight: FontWeight.w800, fontSize: 13),
+        secondaryLabelStyle: TextStyle(
+            color: p.onPrimary, fontWeight: FontWeight.w800, fontSize: 13),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
       ),
       snackBarTheme: SnackBarThemeData(
@@ -480,6 +496,68 @@ class AppTheme {
         iconColor: p.primary,
         textColor: p.ink,
       ),
+    );
+  }
+}
+
+/// Transición suave para las rutas de la app: el contenido aparece con un
+/// fade y un desplazamiento vertical muy corto, sin mover toda la pantalla.
+class JunglePageTransitionsBuilder extends PageTransitionsBuilder {
+  const JunglePageTransitionsBuilder();
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return child;
+    final curved = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeOutCubic,
+      reverseCurve: Curves.easeInCubic,
+    );
+    return FadeTransition(
+      opacity: curved,
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.025),
+          end: Offset.zero,
+        ).animate(curved),
+        child: child,
+      ),
+    );
+  }
+}
+
+/// Fondo orgánico compartido por las pantallas. El degradado es estático para
+/// no gastar batería; el movimiento se reserva para las interacciones.
+class JungleBackdrop extends StatelessWidget {
+  const JungleBackdrop({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = AppColors.isDark;
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    return AnimatedContainer(
+      duration:
+          reduceMotion ? Duration.zero : const Duration(milliseconds: 260),
+      curve: Curves.easeOutCubic,
+      decoration: BoxDecoration(
+        gradient: RadialGradient(
+          center: const Alignment(-0.85, -0.9),
+          radius: 1.35,
+          colors: dark
+              ? const [Color(0xFF0B3B2E), Color(0xFF04120F)]
+              : const [Color(0xFFE0F4E8), Color(0xFFF4FAF5)],
+          stops: const [0, 0.92],
+        ),
+      ),
+      child: child,
     );
   }
 }

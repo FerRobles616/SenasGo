@@ -9,8 +9,13 @@ en el teléfono: no hay backend, cuentas, Firebase ni envío automático de dato
 La navegación principal tiene cinco pestañas: **Aprender**, **Biblioteca**,
 **Retos**, **Progreso** y **Ayuda**.
 
+La identidad visual **“Selva eléctrica”** combina verde profundo, turquesa,
+ámbar jaguar y coral. Incluye fondos con gradientes suaves, tarjetas con
+profundidad y transiciones de pantalla con fade/desplazamiento. Las
+animaciones respetan la opción de reducir movimiento del sistema.
+
 - **Aprender**: tarjeta **“Tu próxima seña”** con nombre, progreso, guía y un
-  único botón **EMPEZAR**; debajo queda el camino de nodos. La racha, las vidas
+  único botón **EMPEZAR**; debajo queda el camino de nodos. La racha, la energía
   y el XP viven en una barra compacta, sin tarjetas secundarias que compitan
   con la práctica.
 - **Biblioteca**: selector **Lecciones / Señas**, búsqueda contextual y filtros
@@ -18,8 +23,9 @@ La navegación principal tiene cinco pestañas: **Aprender**, **Biblioteca**,
 - **Retos**: metas diarias y semanales calculadas en el teléfono. Solo se
   muestran los retos activos; las recompensas reclamadas quedan plegadas y
   únicamente aparece un botón cuando hay algo para reclamar.
-- **Progreso**: nivel, XP, precisión, actividad semanal y avance por lección.
-- **Racha**: calendario de constancia, mejor racha y protectores locales.
+- **Progreso**: nivel, XP, energía, precisión, actividad semanal y avance por lección.
+- **Racha**: calendario de constancia, mejor racha y protectores locales. La energía se recupera sola y no reemplaza el repaso.
+- **Energía**: es el único recurso de práctica. Se gasta con intentos incorrectos y se recupera con el tiempo; la guía sigue disponible sin energía.
 - **Perfil**: meta diaria editable, calendario, liga de práctica y comunidad
   offline. No hay amigos, rankings ni cuentas inventadas: la liga compara tu
   XP semanal contra metas personales y la comunidad solo comparte tu progreso
@@ -38,6 +44,7 @@ La navegación principal tiene cinco pestañas: **Aprender**, **Biblioteca**,
   sosteniendo la pose. El panel de pasos es compacto: una instrucción, un
   indicador de progreso, repetir como ícono y una sola acción principal. Si el
   equipo no puede con el visor, cae al póster texturizado y al avatar 2D.
+- **Sendero continuo**: el camino de nodos usa una cinta conectada y animada, con tramos completados y pendientes, en lugar de puntos aislados.
 - **Panel de pasos simple**: muestra “Paso 2 de 2 · Lugar”, una frase corta y
   botones **Anterior / Siguiente**; al final el botón principal pasa a **Ver
   seña completa**. La navegación por pestañas grandes se reemplazó por puntos
@@ -162,15 +169,15 @@ flutter test
 ```
 
 La suite cubre evaluación geométrica, tolerancias por nivel, progreso,
-rachas/vidas, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
+rachas/energía, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
 clips del profesor. Al momento de esta versión pasan **53 pruebas**.
 
 ## Notas de diseño
 
 - Documento de referencia: `SeñasGo-Documentacion(v3_05).docx`.
 - La app es portrait-only; el recuadro guía asume esa orientación.
-- La interfaz usa una paleta azul/teal propia, con la estructura de camino,
-  tarjetas redondeadas y gamificación de Duolingo, sin copiar su verde.
+- La interfaz usa la paleta **Selva eléctrica** (verde, turquesa y ámbar),
+  con camino continuo, tarjetas redondeadas y gamificación propia.
 - La simplificación prioriza una acción principal por pantalla, menos texto
   duplicado y opciones avanzadas plegadas.
 - Los reportes de soporte se guardan como mapas dinámicos en `support_box`,

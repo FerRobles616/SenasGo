@@ -14,8 +14,8 @@ import 'package:senasgo/shared/models/user_model.dart';
 const _stats = PlayerStats(
   streak: 3,
   practicedToday: true,
-  hearts: 4,
-  maxHearts: 5,
+  energy: 4,
+  maxEnergy: 5,
   xp: 30,
 );
 
@@ -57,7 +57,7 @@ void main() {
     });
   });
 
-  group('Racha y vidas (Hive)', () {
+  group('Racha y energía (Hive)', () {
     setUpAll(() async {
       Hive.init(Directory.systemTemp.createTempSync('senasgo_game').path);
       await HiveService.registerAdapters();
@@ -70,23 +70,23 @@ void main() {
     tearDownAll(() => Hive.deleteFromDisk());
 
     test('Un intento incorrecto resta una vida', () async {
-      expect(HiveService.hearts, AppConstants.maxHearts);
+      expect(HiveService.energy, AppConstants.maxEnergy);
       await HiveService.recordAttempt(signId: 'saludo_hola', correct: false);
-      expect(HiveService.hearts, AppConstants.maxHearts - 1);
-      expect(HiveService.nextHeartIn, isNotNull);
+      expect(HiveService.energy, AppConstants.maxEnergy - 1);
+      expect(HiveService.nextEnergyIn, isNotNull);
     });
 
-    test('Las vidas se recargan con el tiempo', () async {
-      await HiveService.gameBox.put('hearts', 1);
+    test('La energía se recarga con el tiempo', () async {
+      await HiveService.gameBox.put('energy', 1);
       await HiveService.gameBox.put(
-          'heartsAt', DateTime.now().subtract(AppConstants.heartRegen * 2.5));
-      expect(HiveService.hearts, 3);
+          'energyAt', DateTime.now().subtract(AppConstants.energyRegen * 2.5));
+      expect(HiveService.energy, 3);
     });
 
     test('Nunca baja de cero', () async {
-      await HiveService.gameBox.put('hearts', 0);
-      await HiveService.gameBox.put('heartsAt', DateTime.now());
-      expect(await HiveService.loseHeart(), 0);
+      await HiveService.gameBox.put('energy', 0);
+      await HiveService.gameBox.put('energyAt', DateTime.now());
+      expect(await HiveService.spendEnergy(), 0);
     });
 
     test('Una seña correcta inicia la racha y suma una sola vez por día',
@@ -122,7 +122,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('3'), findsOneWidget); // racha
-    expect(find.text('4'), findsOneWidget); // vidas
+    expect(find.text('4'), findsOneWidget); // energía
     expect(find.text('30'), findsOneWidget); // XP
     expect(find.text('EMPEZAR'), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('Jaguareté dice')), findsOneWidget);

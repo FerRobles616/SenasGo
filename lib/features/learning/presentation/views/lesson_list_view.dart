@@ -267,7 +267,7 @@ class _FilterChip extends StatelessWidget {
       selected: selected,
       onSelected: (_) => onTap(),
       avatar: Icon(icon,
-          size: 14, color: selected ? Colors.white : AppColors.primary),
+          size: 14, color: selected ? AppColors.onPrimary : AppColors.primary),
       label: Text(label),
       selectedColor: AppColors.primary,
       backgroundColor: AppColors.surface,
@@ -277,7 +277,7 @@ class _FilterChip extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
       labelPadding: const EdgeInsets.only(right: 2),
       labelStyle: TextStyle(
-        color: selected ? Colors.white : AppColors.ink,
+        color: selected ? AppColors.onPrimary : AppColors.ink,
         fontWeight: FontWeight.w800,
         fontSize: 11.5,
       ),

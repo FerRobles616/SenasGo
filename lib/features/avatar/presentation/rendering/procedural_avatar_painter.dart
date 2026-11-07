@@ -21,11 +21,11 @@ class AvatarPalette {
     this.metal = const Color(0xFFC3CCD6),
     this.gold = const Color(0xFFE4B63E),
     this.leather = const Color(0xFF7B4A2A),
-    this.accent = const Color(0xFF2563EB),
+    this.accent = const Color(0xFF0F766E),
   });
 
   /// Túnica azul de la marca (color por defecto).
-  static const Color tunicBlue = Color(0xFF2563EB);
+  static const Color tunicBlue = Color(0xFF0F766E);
 
   /// Túnica roja histórica, conservada por compatibilidad de assets.
   static const Color tunicRed = Color(0xFFC9372C);

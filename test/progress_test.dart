@@ -40,14 +40,14 @@ void main() {
   });
 
   test('Un intento incorrecto resta una vida y no suma XP', () async {
-    final before = HiveService.hearts;
+    final before = HiveService.energy;
     final user = await HiveService.recordAttempt(
       signId: 'saludo_hola',
       correct: false,
     );
 
     expect(user.xp, 0);
-    expect(HiveService.hearts, before - 1);
+    expect(HiveService.energy, before - 1);
     expect(HiveService.progress.totalAttempts, 1);
     expect(HiveService.progress.correctAttempts, 0);
   });

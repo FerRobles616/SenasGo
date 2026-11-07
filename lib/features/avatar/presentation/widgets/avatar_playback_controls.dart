@@ -87,7 +87,7 @@ class _Timeline extends StatelessWidget {
                     height: 8,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF38BDF8), AppColors.primary],
+                        colors: [Color(0xFF2DD4BF), AppColors.primary],
                       ),
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -157,7 +157,7 @@ class _PlayButton extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [Color(0xFF38BDF8), AppColors.primary],
+            colors: [Color(0xFF2DD4BF), AppColors.primary],
           ),
           borderRadius: BorderRadius.circular(playing ? 20 : 29),
           boxShadow: [

@@ -46,9 +46,9 @@ class _WelcomeRewardViewState extends State<WelcomeRewardView> {
         decoration: BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color(0xFF0B2A5B),
+              Color(0xFF04120F),
               AppColors.primary,
-              Color(0xFF38BDF8),
+              Color(0xFF2DD4BF),
             ],
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,

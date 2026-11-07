@@ -71,9 +71,9 @@ class CommunityView extends StatelessWidget {
         children: [
           AppHeroHeader(
             colors: const [
-              Color(0xFF4338CA),
-              Color(0xFF6366F1),
-              Color(0xFF38BDF8)
+              Color(0xFF0B3B2E),
+              Color(0xFF0F766E),
+              Color(0xFF115E59)
             ],
             child: Row(
               children: [

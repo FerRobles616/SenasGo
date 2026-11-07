@@ -87,7 +87,7 @@ class _ProgressViewState extends State<ProgressView> {
           const SizedBox(height: 16),
           _StatsGrid(
             streak: HiveService.streak,
-            hearts: HiveService.hearts,
+            energy: HiveService.energy,
             learned: learned,
             totalSigns: totalSigns,
             accuracy: accuracy,
@@ -123,7 +123,7 @@ class _ProgressViewState extends State<ProgressView> {
           PushableButton(
             onPressed: _practice,
             color: AppColors.primary,
-            shadowColor: const Color(0xFF1D4ED8),
+            shadowColor: const Color(0xFF115E59),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -172,7 +172,7 @@ class _LevelCard extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF2563EB), Color(0xFF38BDF8)],
+          colors: [Color(0xFF0B3B2E), Color(0xFF0F766E)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -261,14 +261,14 @@ class _LevelCard extends StatelessWidget {
 class _StatsGrid extends StatelessWidget {
   const _StatsGrid({
     required this.streak,
-    required this.hearts,
+    required this.energy,
     required this.learned,
     required this.totalSigns,
     required this.accuracy,
   });
 
   final int streak;
-  final int hearts;
+  final int energy;
   final int learned;
   final int totalSigns;
   final double accuracy;
@@ -291,10 +291,10 @@ class _StatsGrid extends StatelessWidget {
             ),
             _StatCard(
               width: width,
-              icon: Icons.favorite_rounded,
-              color: AppColors.heart,
-              value: '$hearts/${AppConstants.maxHearts}',
-              label: 'vidas',
+              icon: Icons.battery_charging_full_rounded,
+              color: AppColors.teal,
+              value: '$energy/${AppConstants.maxEnergy}',
+              label: 'energía',
             ),
             _StatCard(
               width: width,

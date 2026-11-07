@@ -342,7 +342,7 @@ class IncorrectFeedback extends StatelessWidget {
                 style: TextStyle(color: AppColors.error, fontSize: 13.5),
               ),
               const SizedBox(height: 6),
-              _HeartsLeft(hearts: HiveService.hearts),
+              _EnergyLeft(energy: HiveService.energy),
             ],
           ),
         ),
@@ -361,28 +361,28 @@ class IncorrectFeedback extends StatelessWidget {
   }
 }
 
-/// "−1 vida": recuerda que equivocarse está bien y cuántas quedan.
-class _HeartsLeft extends StatelessWidget {
-  const _HeartsLeft({required this.hearts});
+/// "−1 energía": recuerda que equivocarse está bien y cuánta queda.
+class _EnergyLeft extends StatelessWidget {
+  const _EnergyLeft({required this.energy});
 
-  final int hearts;
+  final int energy;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        for (var i = 0; i < AppConstants.maxHearts; i++)
+        for (var i = 0; i < AppConstants.maxEnergy; i++)
           Icon(
-            Icons.favorite_rounded,
+            Icons.battery_charging_full_rounded,
             size: 18,
-            color: i < hearts ? AppColors.heart : AppColors.locked,
+            color: i < energy ? AppColors.teal : AppColors.locked,
           ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
-            hearts == 0
-                ? 'Sin vidas: repasa la guía; se recargan solas.'
-                : '−1 vida · te ${hearts == 1 ? 'queda 1' : 'quedan $hearts'}',
+            energy == 0
+                ? 'Sin energía: repasa la guía; se recarga sola.'
+                : '−1 energía · te ${energy == 1 ? 'queda 1' : 'quedan $energy'}',
             style: TextStyle(
                 color: AppColors.muted,
                 fontSize: 13.5,

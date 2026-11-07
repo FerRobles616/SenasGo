@@ -59,9 +59,8 @@ class SupportTicket extends Equatable {
 
   factory SupportTicket.fromMap(Map<dynamic, dynamic> map) => SupportTicket(
         id: map['id'] as String? ?? '',
-        createdAt:
-            DateTime.tryParse(map['createdAt'] as String? ?? '') ??
-                DateTime.now(),
+        createdAt: DateTime.tryParse(map['createdAt'] as String? ?? '') ??
+            DateTime.now(),
         category: SupportCategory.fromName(map['category'] as String?),
         message: map['message'] as String? ?? '',
         email: map['email'] as String? ?? '',

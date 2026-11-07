@@ -4,7 +4,7 @@ import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/home/domain/learning_path.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 
-/// Barra superior fija con perfil, racha, vidas y XP.
+/// Barra superior fija con perfil, racha, energía y XP.
 ///
 /// Las estadísticas se explican al tocarlas y la racha lleva al calendario.
 /// El avatar abre el perfil; así la app tiene un lugar para la identidad de
@@ -16,7 +16,7 @@ class TopStatsBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final nextHeart = stats.nextHeartIn;
+    final nextEnergy = stats.nextEnergyIn;
     return SliverAppBar(
       pinned: true,
       automaticallyImplyLeading: false,
@@ -48,13 +48,14 @@ class TopStatsBar extends StatelessWidget {
             onTap: () => context.push('/streak'),
           ),
           _Stat(
-            icon: Icons.favorite_rounded,
-            color: stats.hearts > 0 ? AppColors.heart : AppColors.lockedInk,
-            value: '${stats.hearts}',
-            label: 'Vidas',
-            help: nextHeart == null
-                ? 'Tenés todas tus vidas. Perdés una con cada intento incorrecto.'
-                : 'Recuperás 1 vida en ${nextHeart.inMinutes + 1} min.',
+            icon: Icons.battery_charging_full_rounded,
+            color: stats.energy > 0 ? AppColors.teal : AppColors.lockedInk,
+            value: '${stats.energy}',
+            label: 'Energía',
+            help: nextEnergy == null
+                ? 'Tenés toda tu energía. Se gasta con cada intento incorrecto.'
+                : 'Recuperás 1 energía en ${nextEnergy.inMinutes + 1} min.',
+            onTap: () => context.push('/progress'),
           ),
           _Stat(
             icon: Icons.bolt_rounded,

@@ -53,7 +53,7 @@ class AppConstants {
   static const String hiveBoxSupport = 'support_box';
   static const String hiveBoxPrefs = 'prefs_box';
 
-  // Vidas: permiten equivocarse sin frustrar; se recuperan solas.
-  static const int maxHearts = 5;
-  static const Duration heartRegen = Duration(minutes: 20);
+  // Energía: permite equivocarse sin frustrar; se recupera sola.
+  static const int maxEnergy = 5;
+  static const Duration energyRegen = Duration(minutes: 20);
 }

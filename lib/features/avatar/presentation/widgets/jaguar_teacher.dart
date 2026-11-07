@@ -280,7 +280,7 @@ window.teacherView = (orbit, target, fov) => {
         gradient: const RadialGradient(
           center: Alignment(0, -0.18),
           radius: 1.08,
-          colors: [Color(0xFF1E3A8A), Color(0xFF0B1B33), Color(0xFF050B16)],
+          colors: [Color(0xFF0B3B2E), Color(0xFF071A16), Color(0xFF050B16)],
           stops: [0, 0.56, 1],
         ),
       ),

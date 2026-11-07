@@ -123,7 +123,7 @@ class _ChallengesViewState extends State<ChallengesView> {
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
         children: [
           AppHeroHeader(
-            colors: const [Color(0xFF1D4ED8), Color(0xFF38BDF8)],
+            colors: const [Color(0xFF0B3B2E), Color(0xFF0F766E)],
             child: Row(
               children: [
                 Container(

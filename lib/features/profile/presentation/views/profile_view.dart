@@ -183,9 +183,9 @@ class _ProfileViewState extends State<ProfileView> {
         children: [
           AppHeroHeader(
             colors: const [
-              Color(0xFF1E3A8A),
-              Color(0xFF2563EB),
-              Color(0xFF38BDF8)
+              Color(0xFF0B3B2E),
+              Color(0xFF0F766E),
+              Color(0xFF115E59)
             ],
             child: Column(
               children: [

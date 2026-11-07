@@ -148,7 +148,7 @@ class _LessonViewState extends State<LessonView> {
               onPressed: () => context
                   .push('/practice?lesson=${widget.lessonId}&sign=${shown.id}'),
               color: AppColors.primary,
-              shadowColor: const Color(0xFF1D4ED8),
+              shadowColor: const Color(0xFF115E59),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -213,7 +213,7 @@ class _SignChip extends StatelessWidget {
         learned ? Icons.check_rounded : Icons.sign_language_rounded,
         size: 17,
         color: selected
-            ? Colors.white
+            ? AppColors.onPrimary
             : learned
                 ? AppColors.success
                 : AppColors.primary,
@@ -223,7 +223,7 @@ class _SignChip extends StatelessWidget {
       backgroundColor: AppColors.surface,
       side: BorderSide(color: AppColors.border),
       labelStyle: TextStyle(
-        color: selected ? Colors.white : AppColors.ink,
+        color: selected ? AppColors.onPrimary : AppColors.ink,
         fontWeight: FontWeight.w800,
         fontSize: 13,
       ),

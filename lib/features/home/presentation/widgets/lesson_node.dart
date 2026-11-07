@@ -113,24 +113,22 @@ class _LessonNodeState extends State<LessonNode>
                     : button,
               )),
               const SizedBox(height: 6),
-              // Fondo del camino: la línea pasa por detrás del nombre.
-              DecoratedBox(
+              // Pequeña placa que separa el nombre del sendero sin cortarlo
+              // de forma brusca.
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
                 decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(10),
+                  color: AppColors.background.withValues(alpha: 0.92),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 1),
-                  child: Text(
-                    node.sign.name,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontSize: 15,
-                      color: locked ? AppColors.lockedInk : AppColors.ink,
-                    ),
+                child: Text(
+                  node.sign.name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w900,
+                    fontSize: 15,
+                    color: locked ? AppColors.lockedInk : AppColors.ink,
                   ),
                 ),
               ),

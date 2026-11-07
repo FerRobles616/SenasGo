@@ -4,7 +4,7 @@
 --
 --  Equivalente relacional de la persistencia local de la app (Hive):
 --  UserModel, LessonModel, SignModel, ProgressModel, intentos de práctica
---  y la caja de juego (racha / vidas). Los reportes de soporte se guardan
+--  y la caja de juego (racha / energia). Los reportes de soporte se guardan
 --  solo en Hive como mapas dinámicos. 100 % local y sin cuentas en la nube.
 -- =====================================================================
 
@@ -92,13 +92,13 @@ CREATE TABLE usuario (
     ultimo_ingreso     TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Racha y vidas (1 a 1 con el usuario).
+-- Racha y energia (1 a 1 con el usuario).
 CREATE TABLE estado_juego (
     usuario_id    TEXT PRIMARY KEY REFERENCES usuario(id) ON DELETE CASCADE,
     racha_dias    INTEGER NOT NULL DEFAULT 0 CHECK (racha_dias >= 0),
     fecha_racha   TEXT,                       -- último día con seña correcta
-    vidas         INTEGER NOT NULL DEFAULT 5 CHECK (vidas BETWEEN 0 AND 5),
-    vidas_desde   TEXT                        -- inicio de la recarga (1 cada 20 min)
+    energia         INTEGER NOT NULL DEFAULT 5 CHECK (energia BETWEEN 0 AND 5),
+    energia_desde   TEXT                        -- inicio de la recarga (1 cada 20 min)
 );
 
 -- ---------------------------------------------------------------------
@@ -199,14 +199,14 @@ BEGIN
     VALUES (NEW.usuario_id, 'primera_practica');
 END;
 
--- Intento incorrecto: resta una vida (nunca baja de cero).
+-- Intento incorrecto: resta una energía (nunca baja de cero).
 CREATE TRIGGER trg_intento_incorrecto
 AFTER INSERT ON intento
 WHEN NEW.correcto = 0
 BEGIN
     UPDATE estado_juego
-       SET vidas_desde = CASE WHEN vidas = 5 THEN NEW.fecha ELSE vidas_desde END,
-           vidas = MAX(vidas - 1, 0)
+       SET energia_desde = CASE WHEN energia = 5 THEN NEW.fecha ELSE energia_desde END,
+           energia = MAX(energia - 1, 0)
      WHERE usuario_id = NEW.usuario_id;
 END;
 
@@ -234,7 +234,7 @@ SELECT u.id                                   AS usuario_id,
        u.xp,
        u.nivel,
        g.racha_dias,
-       g.vidas,
+       g.energia,
        COUNT(i.id)                            AS intentos_totales,
        COALESCE(SUM(i.correcto), 0)           AS intentos_correctos,
        (SELECT COUNT(*) FROM sena_aprendida a WHERE a.usuario_id = u.id) AS senas_aprendidas

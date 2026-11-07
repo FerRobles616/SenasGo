@@ -220,7 +220,7 @@ class HiveService {
     );
     await _recordRecentAttempt(signId, correct);
     if (!correct) {
-      await loseHeart();
+      await spendEnergy();
       return currentUser;
     }
     await _touchStreak();
@@ -364,44 +364,49 @@ class HiveService {
     if (days > best) await gameBox.put('bestStreak', days);
   }
 
-  // ─────────────────────────── Vidas ───────────────────────────
+  // ─────────────────────────── Energía ───────────────────────────
 
-  /// Vidas actuales, recuperando 1 cada [AppConstants.heartRegen].
-  static int get hearts => _syncHearts().$1;
+  /// Energía actual, recuperando 1 cada [AppConstants.energyRegen].
+  static int get energy => _syncEnergy().$1;
 
-  /// Tiempo hasta la próxima vida (null si están completas).
-  static Duration? get nextHeartIn {
-    final (h, since) = _syncHearts();
-    if (h >= AppConstants.maxHearts) return null;
-    return AppConstants.heartRegen - DateTime.now().difference(since);
+  /// Tiempo hasta la próxima energía (null si está completa).
+  static Duration? get nextEnergyIn {
+    final (e, since) = _syncEnergy();
+    if (e >= AppConstants.maxEnergy) return null;
+    return AppConstants.energyRegen - DateTime.now().difference(since);
   }
 
-  static (int, DateTime) _syncHearts() {
-    const max = AppConstants.maxHearts;
+  static (int, DateTime) _syncEnergy() {
+    const max = AppConstants.maxEnergy;
     final now = DateTime.now();
-    var h = gameBox.get('hearts', defaultValue: max) as int;
-    var since = gameBox.get('heartsAt') as DateTime? ?? now;
-    if (h >= max) return (max, now);
+    // Los datos de versiones anteriores usaban "hearts". Se migran sin
+    // perder el progreso de quien ya tenía la app instalada.
+    final stored = gameBox.get('energy') as int?;
+    var e = stored ?? gameBox.get('hearts', defaultValue: max) as int;
+    var since = gameBox.get('energyAt') as DateTime? ??
+        gameBox.get('heartsAt') as DateTime? ??
+        now;
+    if (e >= max) return (max, now);
     final gained = now.difference(since).inMicroseconds ~/
-        AppConstants.heartRegen.inMicroseconds;
+        AppConstants.energyRegen.inMicroseconds;
     if (gained > 0) {
-      h = (h + gained).clamp(0, max);
-      since = h >= max ? now : since.add(AppConstants.heartRegen * gained);
-      gameBox.put('hearts', h);
-      gameBox.put('heartsAt', since);
+      e = (e + gained).clamp(0, max);
+      since = e >= max ? now : since.add(AppConstants.energyRegen * gained);
+      gameBox.put('energy', e);
+      gameBox.put('energyAt', since);
     }
-    return (h, since);
+    return (e, since);
   }
 
-  /// Resta una vida por un intento incorrecto. Devuelve las que quedan.
-  static Future<int> loseHeart() async {
-    final h = hearts;
-    if (h <= 0) return 0;
-    if (h >= AppConstants.maxHearts) {
-      await gameBox.put('heartsAt', DateTime.now());
+  /// Resta una energía por un intento incorrecto. Devuelve las que quedan.
+  static Future<int> spendEnergy() async {
+    final e = energy;
+    if (e <= 0) return 0;
+    if (e >= AppConstants.maxEnergy) {
+      await gameBox.put('energyAt', DateTime.now());
     }
-    await gameBox.put('hearts', h - 1);
-    return h - 1;
+    await gameBox.put('energy', e - 1);
+    return e - 1;
   }
 
   /// Señas aprendidas (al menos una práctica correcta).

@@ -32,7 +32,7 @@ class HomeShortcutView extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
         children: [
           AppHeroHeader(
-            colors: [Color(0xFF1E3A8A), AppColors.primary, Color(0xFF38BDF8)],
+            colors: [Color(0xFF0B3B2E), AppColors.primary, Color(0xFF115E59)],
             child: Row(
               children: [
                 const JaguareteMascot(size: 74, mood: MascotMood.thinking),
@@ -276,7 +276,7 @@ class _PhoneMock extends StatelessWidget {
       height: 280,
       padding: const EdgeInsets.fromLTRB(14, 18, 14, 14),
       decoration: BoxDecoration(
-        color: const Color(0xFF0B1B33),
+        color: const Color(0xFF071A16),
         borderRadius: BorderRadius.circular(30),
         border: Border.all(color: const Color(0xFF334155), width: 3),
         boxShadow: [
@@ -312,10 +312,10 @@ class _PhoneMock extends StatelessWidget {
                       Color(0xFF64748B),
                       Color(0xFF475569),
                       Color(0xFF334155),
-                      Color(0xFF0EA5E9),
+                      Color(0xFF0D9488),
                       Color(0xFF14B8A6),
                       AppColors.primary,
-                      Color(0xFF6366F1),
+                      Color(0xFF14B8A6),
                       Color(0xFFF59E0B),
                     ][i],
                   ),

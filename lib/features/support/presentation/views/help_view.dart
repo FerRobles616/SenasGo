@@ -111,7 +111,7 @@ class _Hero extends StatelessWidget {
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF2563EB), Color(0xFF38BDF8)],
+          colors: [Color(0xFF0B3B2E), Color(0xFF0F766E)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -204,8 +204,8 @@ const _faqs = [
         'forma general, no como referencia oficial del idioma.',
   ),
   _Faq(
-    '¿Para qué sirven las vidas y los XP?',
-    'Las vidas te invitan a descansar y repasar: se recuperan solas cada '
+    '¿Para qué sirven la energía y los XP?',
+    'La energía te invita a descansar y repasar: se recupera sola cada '
         '20 minutos. Los XP muestran tu avance y suben tu nivel; no se compran '
         'ni se gastan.',
   ),

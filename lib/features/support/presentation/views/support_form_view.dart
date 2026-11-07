@@ -109,7 +109,7 @@ class _SupportFormViewState extends State<SupportFormView> {
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
             gradient: const LinearGradient(
-              colors: [Color(0xFF2563EB), Color(0xFF38BDF8)],
+              colors: [Color(0xFF0B3B2E), Color(0xFF0F766E)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
@@ -250,7 +250,7 @@ class _SupportFormViewState extends State<SupportFormView> {
         PushableButton(
           onPressed: _saving ? null : _submit,
           color: AppColors.primary,
-          shadowColor: const Color(0xFF1D4ED8),
+          shadowColor: const Color(0xFF115E59),
           child: _saving
               ? const SizedBox(
                   width: 22,
@@ -340,7 +340,7 @@ class _SupportFormViewState extends State<SupportFormView> {
         PushableButton(
           onPressed: () => SupportActions.copy(context, ticket),
           color: AppColors.primary,
-          shadowColor: const Color(0xFF1D4ED8),
+          shadowColor: const Color(0xFF115E59),
           child: const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -409,12 +409,12 @@ class _CategoryChip extends StatelessWidget {
       onSelected: (_) => onTap(),
       label: Text(category.label),
       avatar: Icon(_iconFor(category),
-          size: 18, color: selected ? Colors.white : AppColors.primary),
+          size: 18, color: selected ? AppColors.onPrimary : AppColors.primary),
       selectedColor: AppColors.primary,
       backgroundColor: AppColors.surface,
       side: BorderSide(color: AppColors.border),
       labelStyle: TextStyle(
-        color: selected ? Colors.white : AppColors.ink,
+        color: selected ? AppColors.onPrimary : AppColors.ink,
         fontWeight: FontWeight.w800,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

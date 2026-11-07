@@ -12,7 +12,7 @@ import 'package:senasgo/shared/widgets/lesson_progress_bar.dart';
 
 /// Repaso rápido sin cámara: preguntas de opción múltiple sobre las señas de
 /// una lección. Alterna "¿qué seña es?" (descripción → nombre) y "¿cómo se
-/// hace?" (nombre → descripción). No quita vidas: sirve para afianzar lo
+/// hace?" (nombre → descripción). No consume energía: sirve para afianzar lo
 /// aprendido en cualquier lugar, aunque no se pueda usar la cámara.
 class QuizView extends StatefulWidget {
   const QuizView({required this.lessonId, super.key});
@@ -289,10 +289,10 @@ class _QuizViewState extends State<QuizView> {
                 ),
               ),
               const SizedBox(width: 12),
-              // Recordatorio honesto: equivocarse acá no cuesta vidas.
+              // Recordatorio honesto: equivocarse acá no consume energía.
               Tooltip(
-                message: 'El repaso no quita vidas',
-                child: Icon(Icons.favorite_border_rounded,
+                message: 'El repaso no consume energía',
+                child: Icon(Icons.battery_charging_full_rounded,
                     color: AppColors.muted, size: 24),
               ),
             ],

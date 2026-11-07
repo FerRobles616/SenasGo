@@ -48,20 +48,20 @@ class PlayerStats {
   const PlayerStats({
     required this.streak,
     required this.practicedToday,
-    required this.hearts,
-    required this.maxHearts,
+    required this.energy,
+    required this.maxEnergy,
     required this.xp,
-    this.nextHeartIn,
+    this.nextEnergyIn,
   });
 
   final int streak;
   final bool practicedToday;
-  final int hearts;
-  final int maxHearts;
+  final int energy;
+  final int maxEnergy;
 
   /// XP acumulada: define el nivel y el rigor de la evaluación.
   final int xp;
-  final Duration? nextHeartIn;
+  final Duration? nextEnergyIn;
 }
 
 /// Arma el camino: las unidades son las lecciones y cada nodo, una seña.
@@ -123,10 +123,10 @@ class LearningPath {
         stats: PlayerStats(
           streak: HiveService.streak,
           practicedToday: HiveService.practicedToday,
-          hearts: HiveService.hearts,
-          maxHearts: AppConstants.maxHearts,
+          energy: HiveService.energy,
+          maxEnergy: AppConstants.maxEnergy,
           xp: HiveService.currentUser.xp,
-          nextHeartIn: HiveService.nextHeartIn,
+          nextEnergyIn: HiveService.nextEnergyIn,
         ),
       );
 }

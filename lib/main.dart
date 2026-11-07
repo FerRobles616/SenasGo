@@ -114,7 +114,7 @@ class _MyAppState extends State<MyApp> {
               WidgetsBinding.instance.addPostFrameCallback(
                   (_) => WidgetsBinding.instance.reassembleApplication());
             }
-            return child!;
+            return JungleBackdrop(child: child!);
           },
         ),
       ),

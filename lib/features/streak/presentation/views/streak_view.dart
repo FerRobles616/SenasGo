@@ -68,7 +68,7 @@ class _StreakViewState extends State<StreakView> {
         padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
         children: [
           AppHeroHeader(
-            colors: const [Color(0xFFF97316), Color(0xFFFBBF24)],
+            colors: const [Color(0xFFC2410C), Color(0xFFD97706)],
             child: Row(
               children: [
                 Container(

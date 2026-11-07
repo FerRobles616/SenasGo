@@ -20,7 +20,7 @@ class LeagueView extends StatelessWidget {
         'Bronce', 0, Color(0xFFB45309), Icons.workspace_premium_rounded),
     _LeagueTier('Plata', 30, Color(0xFF64748B), Icons.military_tech_rounded),
     _LeagueTier('Oro', 70, Color(0xFFD97706), Icons.emoji_events_rounded),
-    _LeagueTier('Zafiro', 120, Color(0xFF2563EB), Icons.diamond_rounded),
+    _LeagueTier('Zafiro', 120, Color(0xFF0F766E), Icons.diamond_rounded),
     _LeagueTier('Diamante', 200, Color(0xFF0E7490), Icons.auto_awesome_rounded),
   ];
 
@@ -54,9 +54,9 @@ class LeagueView extends StatelessWidget {
         children: [
           AppHeroHeader(
             colors: const [
-              Color(0xFF0B1B33),
-              Color(0xFF1E3A8A),
-              Color(0xFF2563EB)
+              Color(0xFF071A16),
+              Color(0xFF0B3B2E),
+              Color(0xFF0F766E)
             ],
             child: Column(
               children: [

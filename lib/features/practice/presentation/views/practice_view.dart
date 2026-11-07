@@ -317,11 +317,11 @@ class _PracticeViewState extends State<PracticeView>
       case PracticeStage.incorrect:
         return Column(mainAxisSize: MainAxisSize.min, children: [
           FilledButton.icon(
-            onPressed: HiveService.hearts > 0 ? c.tryAgain : null,
+            onPressed: HiveService.energy > 0 ? c.tryAgain : null,
             icon: const Icon(Icons.refresh),
-            label: Text(HiveService.hearts > 0
+            label: Text(HiveService.energy > 0
                 ? 'INTENTAR DE NUEVO'
-                : 'SIN VIDAS POR AHORA'),
+                : 'SIN ENERGÍA POR AHORA'),
           ),
           const SizedBox(height: 10),
           _secondary(Icons.play_arrow_outlined, 'VER GUÍA', c.viewGuide),
@@ -458,7 +458,7 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hearts = HiveService.hearts;
+    final energy = HiveService.energy;
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 4, 4, 6),
       child: Column(
@@ -478,16 +478,16 @@ class _Header extends StatelessWidget {
               ),
               const SizedBox(width: 12),
               Semantics(
-                label: '$hearts vidas',
+                label: '$energy de energía',
                 excludeSemantics: true,
                 child: Row(
                   children: [
-                    Icon(Icons.favorite_rounded,
-                        color: AppColors.heart, size: 24),
+                    Icon(Icons.battery_charging_full_rounded,
+                        color: AppColors.teal, size: 24),
                     const SizedBox(width: 3),
-                    Text('$hearts',
+                    Text('$energy',
                         style: TextStyle(
-                            color: AppColors.heart,
+                            color: AppColors.teal,
                             fontWeight: FontWeight.w900,
                             fontSize: 17)),
                   ],
