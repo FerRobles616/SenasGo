@@ -134,7 +134,6 @@ class _LearningPathViewState extends State<LearningPathView> {
     final width = math.min(screenWidth - 32, 340.0);
     final idealLeft = nodeX - width / 2;
     final left = idealLeft.clamp(16.0, screenWidth - 16 - width);
-    final stats = _path.stats;
     _popover = OverlayEntry(
       builder: (_) => Stack(
         children: [
@@ -158,8 +157,6 @@ class _LearningPathViewState extends State<LearningPathView> {
               node: node,
               unit: unit,
               position: unit.nodes.indexOf(node) + 1,
-              energy: stats.energy,
-              nextEnergyIn: stats.nextEnergyIn,
               reduceMotion: reduceMotion,
               onPractice: () => _open(
                   '/practice?lesson=${node.lessonId}&sign=${node.sign.id}'),
@@ -484,8 +481,6 @@ class _NodePopover extends StatelessWidget {
     required this.node,
     required this.unit,
     required this.position,
-    required this.energy,
-    required this.nextEnergyIn,
     required this.reduceMotion,
     required this.onPractice,
     required this.onLearn,
@@ -500,8 +495,6 @@ class _NodePopover extends StatelessWidget {
   final PathNode node;
   final PathUnit unit;
   final int position;
-  final int energy;
-  final Duration? nextEnergyIn;
   final bool reduceMotion;
   final VoidCallback onPractice;
   final VoidCallback onLearn;
@@ -514,13 +507,10 @@ class _NodePopover extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = UnitPalette.of(unit.index);
     final done = node.status == NodeStatus.completed;
-    final noEnergy = energy == 0;
     final radius = BorderRadius.circular(22);
-    final label = noEnergy
-        ? 'SIN ENERGÍA'
-        : done
-            ? 'REPASAR · +${AppConstants.xpPerCorrectSign} XP'
-            : 'EMPEZAR · +${AppConstants.xpPerCorrectSign} XP';
+    final label = done
+        ? 'REPASAR · +${AppConstants.xpPerCorrectSign} XP'
+        : 'EMPEZAR · +${AppConstants.xpPerCorrectSign} XP';
 
     final card = SizedBox(
       width: width,
@@ -579,39 +569,16 @@ class _NodePopover extends StatelessWidget {
                       height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      const Icon(Icons.battery_charging_full_rounded,
-                          color: Colors.white, size: 16),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Text(
-                          noEnergy
-                              ? 'Sin energía · recuperás una en ${(nextEnergyIn?.inMinutes ?? 0) + 1} min'
-                              : '$energy de energía disponible',
-                          style: TextStyle(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                   const SizedBox(height: 12),
                   PushableButton(
-                    onPressed: noEnergy ? null : onPractice,
-                    color: noEnergy
-                        ? Colors.white.withValues(alpha: 0.3)
-                        : Colors.white,
-                    shadowColor: noEnergy
-                        ? Colors.transparent
-                        : Color.lerp(Colors.white, palette.shade, 0.45)!,
+                    onPressed: onPractice,
+                    color: Colors.white,
+                    shadowColor:
+                        Color.lerp(Colors.white, palette.shade, 0.45)!,
                     child: Text(
                       label,
                       style: TextStyle(
-                        color: noEnergy ? Colors.white : palette.shade,
+                        color: palette.shade,
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
                         letterSpacing: 0.4,

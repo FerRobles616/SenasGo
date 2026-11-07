@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/home/domain/learning_path.dart';
@@ -87,7 +86,6 @@ class _ProgressViewState extends State<ProgressView> {
           const SizedBox(height: 16),
           _StatsGrid(
             streak: HiveService.streak,
-            energy: HiveService.energy,
             learned: learned,
             totalSigns: totalSigns,
             accuracy: accuracy,
@@ -261,67 +259,56 @@ class _LevelCard extends StatelessWidget {
 class _StatsGrid extends StatelessWidget {
   const _StatsGrid({
     required this.streak,
-    required this.energy,
     required this.learned,
     required this.totalSigns,
     required this.accuracy,
   });
 
   final int streak;
-  final int energy;
   final int learned;
   final int totalSigns;
   final double accuracy;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, box) {
-        final width = (box.maxWidth - 10) / 2;
-        return Wrap(
-          spacing: 10,
-          runSpacing: 10,
-          children: [
-            _StatCard(
-              width: width,
-              icon: Icons.local_fire_department_rounded,
-              color: AppColors.streak,
-              value: '$streak',
-              label: streak == 1 ? 'día de racha' : 'días de racha',
-            ),
-            _StatCard(
-              width: width,
-              icon: Icons.battery_charging_full_rounded,
-              color: AppColors.teal,
-              value: '$energy/${AppConstants.maxEnergy}',
-              label: 'energía',
-            ),
-            _StatCard(
-              width: width,
-              icon: Icons.sign_language_rounded,
-              color: AppColors.primary,
-              value: '$learned',
-              label: 'aprendidas',
-              hint: 'de $totalSigns',
-            ),
-            _StatCard(
-              width: width,
-              icon: Icons.track_changes_rounded,
-              color: AppColors.success,
-              value: '${(accuracy * 100).round()}%',
-              label: 'precisión',
-              hint: '${HiveService.progress.correctAttempts} aciertos',
-            ),
-          ],
-        );
-      },
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _StatCard(
+            icon: Icons.local_fire_department_rounded,
+            color: AppColors.streak,
+            value: '$streak',
+            label: streak == 1 ? 'día de racha' : 'días de racha',
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _StatCard(
+            icon: Icons.sign_language_rounded,
+            color: AppColors.primary,
+            value: '$learned',
+            label: 'aprendidas',
+            hint: 'de $totalSigns',
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: _StatCard(
+            icon: Icons.track_changes_rounded,
+            color: AppColors.success,
+            value: '${(accuracy * 100).round()}%',
+            label: 'precisión',
+            hint: '${HiveService.progress.correctAttempts} aciertos',
+          ),
+        ),
+      ],
     );
   }
 }
 
 class _StatCard extends StatelessWidget {
   const _StatCard({
-    required this.width,
     required this.icon,
     required this.color,
     required this.value,
@@ -329,7 +316,6 @@ class _StatCard extends StatelessWidget {
     this.hint,
   });
 
-  final double width;
   final IconData icon;
   final Color color;
   final String value;
@@ -338,70 +324,54 @@ class _StatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // En 320 px las tarjetas de dos columnas quedan muy angostas: achicar
-    // icono y padding evita que "días de racha" y los aciertos se corten.
-    final compact = width < 150;
     return Container(
-      width: width,
-      padding: EdgeInsets.all(compact ? 10 : 14),
+      padding: const EdgeInsets.fromLTRB(11, 11, 9, 10),
       decoration: BoxDecoration(
         color: AppColors.surface,
         borderRadius: BorderRadius.circular(18),
         border: Border.all(color: AppColors.border),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: compact ? 34 : 40,
-            height: compact ? 34 : 40,
+            width: 32,
+            height: 32,
             decoration: BoxDecoration(
               color: color.withValues(alpha: 0.12),
-              borderRadius: BorderRadius.circular(13),
+              borderRadius: BorderRadius.circular(11),
             ),
-            child: Icon(icon, color: color, size: compact ? 18 : 21),
+            child: Icon(icon, color: color, size: 18),
           ),
-          SizedBox(width: compact ? 8 : 10),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.baseline,
-                  textBaseline: TextBaseline.alphabetic,
-                  children: [
-                    Text(value,
-                        style: TextStyle(
-                            fontSize: compact ? 18 : 20,
-                            fontWeight: FontWeight.w900,
-                            color: AppColors.ink)),
-                    if (hint != null && !compact) ...[
-                      const SizedBox(width: 4),
-                      Expanded(
-                        child: Text(hint!,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                                color: AppColors.muted, fontSize: 10.5)),
-                      ),
-                    ],
-                  ],
-                ),
-                Text(label,
-                    maxLines: compact ? 2 : 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        color: AppColors.muted,
-                        fontSize: compact ? 10.5 : 11.5,
-                        height: compact ? 1.1 : null,
-                        fontWeight: FontWeight.w600)),
-                if (hint != null && compact)
-                  Text(hint!,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(color: AppColors.muted, fontSize: 9.5)),
-              ],
+          const SizedBox(height: 7),
+          Text(
+            value,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+              color: AppColors.ink,
             ),
           ),
+          Text(
+            label,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              color: AppColors.muted,
+              fontSize: 10.5,
+              height: 1.1,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          if (hint != null)
+            Text(
+              hint!,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(color: AppColors.muted, fontSize: 9.5),
+            ),
         ],
       ),
     );

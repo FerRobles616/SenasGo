@@ -52,8 +52,4 @@ class AppConstants {
   static const String hiveBoxGame = 'game_box';
   static const String hiveBoxSupport = 'support_box';
   static const String hiveBoxPrefs = 'prefs_box';
-
-  // Energía: permite equivocarse sin frustrar; se recupera sola.
-  static const int maxEnergy = 5;
-  static const Duration energyRegen = Duration(minutes: 20);
 }

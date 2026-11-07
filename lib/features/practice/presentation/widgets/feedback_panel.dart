@@ -1,9 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
-import 'package:senasgo/core/services/hive_service.dart';
+import 'package:flutter/services.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/practice/domain/sign_evaluation.dart';
 import 'package:senasgo/features/practice/domain/sign_reference.dart';
@@ -341,8 +340,6 @@ class IncorrectFeedback extends StatelessWidget {
                 '${state.completedCount} / ${state.totalSigns}.',
                 style: TextStyle(color: AppColors.error, fontSize: 13.5),
               ),
-              const SizedBox(height: 6),
-              _EnergyLeft(energy: HiveService.energy),
             ],
           ),
         ),
@@ -355,39 +352,6 @@ class IncorrectFeedback extends StatelessWidget {
           label: '¿El resultado no coincide con tu seña? Avisanos',
           contextLabel:
               'Resultado incorrecto · ${state.currentSign?.name ?? ''}',
-        ),
-      ],
-    );
-  }
-}
-
-/// "−1 energía": recuerda que equivocarse está bien y cuánta queda.
-class _EnergyLeft extends StatelessWidget {
-  const _EnergyLeft({required this.energy});
-
-  final int energy;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (var i = 0; i < AppConstants.maxEnergy; i++)
-          Icon(
-            Icons.battery_charging_full_rounded,
-            size: 18,
-            color: i < energy ? AppColors.teal : AppColors.locked,
-          ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            energy == 0
-                ? 'Sin energía: repasa la guía; se recarga sola.'
-                : '−1 energía · te ${energy == 1 ? 'queda 1' : 'quedan $energy'}',
-            style: TextStyle(
-                color: AppColors.muted,
-                fontSize: 13.5,
-                fontWeight: FontWeight.w700),
-          ),
         ),
       ],
     );

@@ -15,17 +15,16 @@ profundidad y transiciones de pantalla con fade/desplazamiento. Las
 animaciones respetan la opción de reducir movimiento del sistema.
 
 - **Aprender**: tarjeta **“Tu próxima seña”** con nombre, progreso, guía y un
-  único botón **EMPEZAR**; debajo queda el camino de nodos. La racha, la energía
-  y el XP viven en una barra compacta, sin tarjetas secundarias que compitan
+  único botón **EMPEZAR**; debajo queda el camino de nodos. La racha y el XP
+  viven en una barra compacta, sin tarjetas secundarias que compitan
   con la práctica.
 - **Biblioteca**: selector **Lecciones / Señas**, búsqueda contextual y filtros
   por saludos, números y palabras básicas. Cada seña abre su guía o práctica.
 - **Retos**: metas diarias y semanales calculadas en el teléfono. Solo se
   muestran los retos activos; las recompensas reclamadas quedan plegadas y
   únicamente aparece un botón cuando hay algo para reclamar.
-- **Progreso**: nivel, XP, energía, precisión, actividad semanal y avance por lección.
-- **Racha**: calendario de constancia, mejor racha y protectores locales. La energía se recupera sola y no reemplaza el repaso.
-- **Energía**: es el único recurso de práctica. Se gasta con intentos incorrectos y se recupera con el tiempo; la guía sigue disponible sin energía.
+- **Progreso**: nivel, XP, precisión, actividad semanal y avance por lección.
+- **Racha**: calendario de constancia, mejor racha y protectores locales.
 - **Perfil**: meta diaria editable, calendario, liga de práctica y comunidad
   offline. No hay amigos, rankings ni cuentas inventadas: la liga compara tu
   XP semanal contra metas personales y la comunidad solo comparte tu progreso
@@ -169,8 +168,8 @@ flutter test
 ```
 
 La suite cubre evaluación geométrica, tolerancias por nivel, progreso,
-rachas/energía, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
-clips del profesor. Al momento de esta versión pasan **53 pruebas**.
+rachas, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
+clips del profesor. Al momento de esta versión pasan **50 pruebas**.
 
 ## Notas de diseño
 

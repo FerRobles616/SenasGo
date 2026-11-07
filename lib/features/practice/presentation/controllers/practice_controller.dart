@@ -206,9 +206,8 @@ class PracticeController extends ChangeNotifier {
     }
   }
 
-  /// 9 -> 4: [INTENTAR DE NUEVO]. Sin energía no se reintenta (sí la guía).
+  /// 9 -> 4: [INTENTAR DE NUEVO].
   Future<void> tryAgain() async {
-    if (HiveService.energy <= 0) return;
     await startCapture();
   }
 

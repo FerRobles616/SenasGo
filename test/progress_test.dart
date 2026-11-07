@@ -39,15 +39,13 @@ void main() {
     expect(HiveService.recentAttempts.first.correct, isTrue);
   });
 
-  test('Un intento incorrecto resta una vida y no suma XP', () async {
-    final before = HiveService.energy;
+  test('Un intento incorrecto no suma XP y conserva el progreso', () async {
     final user = await HiveService.recordAttempt(
       signId: 'saludo_hola',
       correct: false,
     );
 
     expect(user.xp, 0);
-    expect(HiveService.energy, before - 1);
     expect(HiveService.progress.totalAttempts, 1);
     expect(HiveService.progress.correctAttempts, 0);
   });

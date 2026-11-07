@@ -1,4 +1,3 @@
-import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/shared/models/lesson_model.dart';
 import 'package:senasgo/shared/models/sign_model.dart';
@@ -48,20 +47,14 @@ class PlayerStats {
   const PlayerStats({
     required this.streak,
     required this.practicedToday,
-    required this.energy,
-    required this.maxEnergy,
     required this.xp,
-    this.nextEnergyIn,
   });
 
   final int streak;
   final bool practicedToday;
-  final int energy;
-  final int maxEnergy;
 
   /// XP acumulada: define el nivel y el rigor de la evaluación.
   final int xp;
-  final Duration? nextEnergyIn;
 }
 
 /// Arma el camino: las unidades son las lecciones y cada nodo, una seña.
@@ -123,10 +116,7 @@ class LearningPath {
         stats: PlayerStats(
           streak: HiveService.streak,
           practicedToday: HiveService.practicedToday,
-          energy: HiveService.energy,
-          maxEnergy: AppConstants.maxEnergy,
           xp: HiveService.currentUser.xp,
-          nextEnergyIn: HiveService.nextEnergyIn,
         ),
       );
 }

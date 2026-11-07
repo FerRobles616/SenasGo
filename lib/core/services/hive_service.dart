@@ -219,10 +219,7 @@ class HiveService {
       ),
     );
     await _recordRecentAttempt(signId, correct);
-    if (!correct) {
-      await spendEnergy();
-      return currentUser;
-    }
+    if (!correct) return currentUser;
     await _touchStreak();
     return addXp(AppConstants.xpPerCorrectSign);
   }
@@ -362,51 +359,6 @@ class HiveService {
     await gameBox.put('streakDate', now);
     await gameBox.put('streakFreezes', freezes);
     if (days > best) await gameBox.put('bestStreak', days);
-  }
-
-  // ─────────────────────────── Energía ───────────────────────────
-
-  /// Energía actual, recuperando 1 cada [AppConstants.energyRegen].
-  static int get energy => _syncEnergy().$1;
-
-  /// Tiempo hasta la próxima energía (null si está completa).
-  static Duration? get nextEnergyIn {
-    final (e, since) = _syncEnergy();
-    if (e >= AppConstants.maxEnergy) return null;
-    return AppConstants.energyRegen - DateTime.now().difference(since);
-  }
-
-  static (int, DateTime) _syncEnergy() {
-    const max = AppConstants.maxEnergy;
-    final now = DateTime.now();
-    // Los datos de versiones anteriores usaban "hearts". Se migran sin
-    // perder el progreso de quien ya tenía la app instalada.
-    final stored = gameBox.get('energy') as int?;
-    var e = stored ?? gameBox.get('hearts', defaultValue: max) as int;
-    var since = gameBox.get('energyAt') as DateTime? ??
-        gameBox.get('heartsAt') as DateTime? ??
-        now;
-    if (e >= max) return (max, now);
-    final gained = now.difference(since).inMicroseconds ~/
-        AppConstants.energyRegen.inMicroseconds;
-    if (gained > 0) {
-      e = (e + gained).clamp(0, max);
-      since = e >= max ? now : since.add(AppConstants.energyRegen * gained);
-      gameBox.put('energy', e);
-      gameBox.put('energyAt', since);
-    }
-    return (e, since);
-  }
-
-  /// Resta una energía por un intento incorrecto. Devuelve las que quedan.
-  static Future<int> spendEnergy() async {
-    final e = energy;
-    if (e <= 0) return 0;
-    if (e >= AppConstants.maxEnergy) {
-      await gameBox.put('energyAt', DateTime.now());
-    }
-    await gameBox.put('energy', e - 1);
-    return e - 1;
   }
 
   /// Señas aprendidas (al menos una práctica correcta).

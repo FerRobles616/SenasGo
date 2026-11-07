@@ -3,7 +3,6 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/camera_service.dart';
-import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/services/inference_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/core/vision/frame_processor.dart';
@@ -317,11 +316,9 @@ class _PracticeViewState extends State<PracticeView>
       case PracticeStage.incorrect:
         return Column(mainAxisSize: MainAxisSize.min, children: [
           FilledButton.icon(
-            onPressed: HiveService.energy > 0 ? c.tryAgain : null,
+            onPressed: c.tryAgain,
             icon: const Icon(Icons.refresh),
-            label: Text(HiveService.energy > 0
-                ? 'INTENTAR DE NUEVO'
-                : 'SIN ENERGÍA POR AHORA'),
+            label: const Text('INTENTAR DE NUEVO'),
           ),
           const SizedBox(height: 10),
           _secondary(Icons.play_arrow_outlined, 'VER GUÍA', c.viewGuide),
@@ -458,7 +455,6 @@ class _Header extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final energy = HiveService.energy;
     return Padding(
       padding: const EdgeInsets.fromLTRB(4, 4, 4, 6),
       child: Column(
@@ -475,23 +471,6 @@ class _Header extends StatelessWidget {
               Expanded(
                 child: LessonProgressBar(
                     done: state.completedCount, total: state.totalSigns),
-              ),
-              const SizedBox(width: 12),
-              Semantics(
-                label: '$energy de energía',
-                excludeSemantics: true,
-                child: Row(
-                  children: [
-                    Icon(Icons.battery_charging_full_rounded,
-                        color: AppColors.teal, size: 24),
-                    const SizedBox(width: 3),
-                    Text('$energy',
-                        style: TextStyle(
-                            color: AppColors.teal,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 17)),
-                  ],
-                ),
               ),
               IconButton(
                 tooltip: 'Ayuda y comentarios',

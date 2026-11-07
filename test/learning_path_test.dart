@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
-import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/home/domain/learning_path.dart';
@@ -14,8 +13,6 @@ import 'package:senasgo/shared/models/user_model.dart';
 const _stats = PlayerStats(
   streak: 3,
   practicedToday: true,
-  energy: 4,
-  maxEnergy: 5,
   xp: 30,
 );
 
@@ -57,7 +54,7 @@ void main() {
     });
   });
 
-  group('Racha y energía (Hive)', () {
+  group('Racha (Hive)', () {
     setUpAll(() async {
       Hive.init(Directory.systemTemp.createTempSync('senasgo_game').path);
       await HiveService.registerAdapters();
@@ -68,26 +65,6 @@ void main() {
     });
 
     tearDownAll(() => Hive.deleteFromDisk());
-
-    test('Un intento incorrecto resta una vida', () async {
-      expect(HiveService.energy, AppConstants.maxEnergy);
-      await HiveService.recordAttempt(signId: 'saludo_hola', correct: false);
-      expect(HiveService.energy, AppConstants.maxEnergy - 1);
-      expect(HiveService.nextEnergyIn, isNotNull);
-    });
-
-    test('La energía se recarga con el tiempo', () async {
-      await HiveService.gameBox.put('energy', 1);
-      await HiveService.gameBox.put(
-          'energyAt', DateTime.now().subtract(AppConstants.energyRegen * 2.5));
-      expect(HiveService.energy, 3);
-    });
-
-    test('Nunca baja de cero', () async {
-      await HiveService.gameBox.put('energy', 0);
-      await HiveService.gameBox.put('energyAt', DateTime.now());
-      expect(await HiveService.spendEnergy(), 0);
-    });
 
     test('Una seña correcta inicia la racha y suma una sola vez por día',
         () async {
@@ -122,7 +99,6 @@ void main() {
     await tester.pump();
 
     expect(find.text('3'), findsOneWidget); // racha
-    expect(find.text('4'), findsOneWidget); // energía
     expect(find.text('30'), findsOneWidget); // XP
     expect(find.text('EMPEZAR'), findsOneWidget);
     expect(find.bySemanticsLabel(RegExp('Jaguareté dice')), findsOneWidget);

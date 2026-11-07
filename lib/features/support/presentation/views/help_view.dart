@@ -204,10 +204,9 @@ const _faqs = [
         'forma general, no como referencia oficial del idioma.',
   ),
   _Faq(
-    '¿Para qué sirven la energía y los XP?',
-    'La energía te invita a descansar y repasar: se recupera sola cada '
-        '20 minutos. Los XP muestran tu avance y suben tu nivel; no se compran '
-        'ni se gastan.',
+    '¿Cómo funcionan los XP?',
+    'Los XP muestran tu avance y suben tu nivel. Se ganan practicando y no '
+        'se compran ni se gastan.',
   ),
   _Faq(
     '¿Puedo aprender sin cámara?',
