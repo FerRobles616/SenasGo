@@ -41,6 +41,20 @@ class AppBottomNav extends StatelessWidget {
       (Icons.insights_rounded, 'Progreso', AppColors.indigo),
       (Icons.support_agent_rounded, 'Ayuda', AppColors.heart),
     ];
+    // Hero: todas las pestañas comparten esta barra; durante la transición
+    // queda quieta en su lugar en vez de desvanecerse con la pantalla.
+    return Hero(
+      tag: AppBottomNav.heroTag,
+      child: Material(
+        type: MaterialType.transparency,
+        child: _bar(items, context),
+      ),
+    );
+  }
+
+  static const heroTag = 'app-bottom-nav';
+
+  Widget _bar(List<(IconData, String, Color)> items, BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.surface,

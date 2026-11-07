@@ -507,10 +507,42 @@ class AppTheme {
   }
 }
 
-/// Transición suave para las rutas de la app: el contenido aparece con un
-/// fade y un desplazamiento vertical muy corto, sin mover toda la pantalla.
+/// Transiciones entre pantallas, al estilo "fade through" de Material.
+///
+/// Las pantallas tienen fondo transparente (el degradado de [JungleBackdrop]
+/// queda detrás de todas), así que nunca se muestran dos a la vez: la que se
+/// va desaparece en el primer tercio y recién entonces aparece la nueva. Sin
+/// eso el contenido de ambas se superponía como un fantasma.
+///
+/// - Pestañas principales: solo fundido y un leve zoom (no hay jerarquía
+///   entre ellas); la barra de navegación queda fija (Hero en AppBottomNav).
+/// - Lección, práctica, quiz y profesor: suben desde abajo, como un modo
+///   aparte del que se vuelve.
+/// - El resto (detalle, ayuda, perfil…): avanzan de derecha a izquierda.
 class JunglePageTransitionsBuilder extends PageTransitionsBuilder {
   const JunglePageTransitionsBuilder();
+
+  /// Rutas de la barra inferior (nombre = path de GoRoute).
+  static const tabRoutes = {
+    '/',
+    '/library',
+    '/challenges',
+    '/progress',
+    '/help',
+    '/streak',
+  };
+
+  /// Flujos a pantalla completa que se abren "hacia arriba".
+  static const flowRoutes = {
+    '/lesson/:id',
+    '/lesson-guide/:id',
+    '/practice',
+    '/quiz',
+    '/teacher/:signId',
+  };
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 340);
 
   @override
   Widget buildTransitions<T>(
@@ -521,20 +553,80 @@ class JunglePageTransitionsBuilder extends PageTransitionsBuilder {
     Widget child,
   ) {
     if (MediaQuery.maybeDisableAnimationsOf(context) ?? false) return child;
-    final curved = CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeOutCubic,
-      reverseCurve: Curves.easeInCubic,
+    final name = route.settings.name;
+    final axis = tabRoutes.contains(name)
+        ? _Axis.none
+        : flowRoutes.contains(name)
+            ? _Axis.vertical
+            : _Axis.horizontal;
+    return _FadeThrough(
+      animation: animation,
+      secondaryAnimation: secondaryAnimation,
+      axis: axis,
+      child: child,
     );
-    return FadeTransition(
-      opacity: curved,
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.025),
-          end: Offset.zero,
-        ).animate(curved),
-        child: child,
-      ),
+  }
+}
+
+enum _Axis { none, horizontal, vertical }
+
+class _FadeThrough extends StatelessWidget {
+  const _FadeThrough({
+    required this.animation,
+    required this.secondaryAnimation,
+    required this.axis,
+    required this.child,
+  });
+
+  final Animation<double> animation;
+  final Animation<double> secondaryAnimation;
+  final _Axis axis;
+  final Widget child;
+
+  // La pantalla saliente se apaga en el primer 35 %; la entrante aparece
+  // después. Así nunca hay dos contenidos superpuestos.
+  static const _outEnd = 0.35;
+
+  Offset _shift(double t, double distance) => switch (axis) {
+        _Axis.none => Offset.zero,
+        _Axis.horizontal => Offset(distance * t, 0),
+        _Axis.vertical => Offset(0, distance * t),
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: Listenable.merge([animation, secondaryAnimation]),
+      child: child,
+      builder: (context, child) {
+        // Entrada (o salida al volver atrás).
+        final a = animation.value;
+        final inT = Curves.easeOutCubic
+            .transform(((a - _outEnd) / (1 - _outEnd)).clamp(0.0, 1.0));
+        final moveIn = 1 - Curves.easeOutCubic.transform(a);
+        // Salida cuando otra pantalla se abre encima (o regreso).
+        final s = secondaryAnimation.value;
+        final outT =
+            Curves.easeInCubic.transform((s / _outEnd).clamp(0.0, 1.0));
+        final moveOut = Curves.easeInOutCubic.transform(s);
+
+        final opacity = inT * (1 - outT);
+        final inDist = axis == _Axis.vertical ? 56.0 : 36.0;
+        final offset = _shift(moveIn, inDist) - _shift(moveOut, 24);
+        final scale =
+            axis == _Axis.none ? (0.97 + 0.03 * inT) * (1 + 0.02 * outT) : 1.0;
+        return IgnorePointer(
+          // Mientras se va, la pantalla saliente no recibe toques.
+          ignoring: opacity < 1 && s > 0,
+          child: Opacity(
+            opacity: opacity,
+            child: Transform.translate(
+              offset: offset,
+              child: Transform.scale(scale: scale, child: child),
+            ),
+          ),
+        );
+      },
     );
   }
 }
