@@ -91,22 +91,24 @@ class _JaguarTeacherState extends State<JaguarTeacher> {
         : 'idle';
   }
 
+  // El profesor enseña con la cara y las manos: el encuadre va de la
+  // cabeza a la cintura (el espacio donde se seña), nunca de cuerpo entero.
+  // Valores medidos sobre assets/models/teacher.glb (VRoid, ~1,70 m).
   String get _orbit => _view == TeacherView.hands
-      // Primer plano de mano con contexto: la cabeza y el torso siguen
-      // visibles para que la seña no se lea como un gesto aislado.
-      ? '0deg 82deg 1.42m'
-      // Retrato de medio cuerpo: cabeza, hombros, pecho y manos. El objetivo
-      // deja fuera las piernas sin recortar la cara ni la mano que firma; la
-      // distancia mantiene ambos brazos dentro del encuadre al gesticular.
-      : '0deg 80deg 1.95m';
+      // Primer plano de la mano con la cara al lado: la expresión también
+      // es parte de la seña.
+      ? '0deg 84deg 1.02m'
+      // Cabeza, hombros, pecho y cintura; entra la mano más alta (frente)
+      // y la más baja (reposo) sin recortarse.
+      : '0deg 84deg 1.40m';
 
   String get _target {
-    if (_view == TeacherView.body) return '0m 1.42m 0m';
+    if (_view == TeacherView.body) return '0m 1.41m 0.04m';
     // Las animaciones `_forma` de todas las señas muestran la mano en el
     // mismo punto, frente al pecho (`show` en tool/avatar/generate.py,
     // llevado al cuerpo del profesor por BodyMap). Medidas en el GLB.
     // Enfocar la mano (no el pecho) es lo que hace útil el primer plano.
-    return '-0.13m 1.42m 0.33m';
+    return '-0.11m 1.47m 0.22m';
   }
 
   String get _fov => _view == TeacherView.hands ? '32deg' : '34deg';
