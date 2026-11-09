@@ -8,11 +8,13 @@ import 'package:senasgo/core/config/hive_config.dart';
 import 'package:senasgo/core/services/camera_service.dart';
 import 'package:senasgo/core/services/device_performance.dart';
 import 'package:senasgo/core/services/hive_service.dart';
+import 'package:senasgo/features/cloud/data/cloud_sync_service.dart';
 import 'package:senasgo/core/services/inference_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/core/theme/theme_controller.dart';
 import 'package:senasgo/features/avatar/presentation/views/teacher_view.dart';
 import 'package:senasgo/features/challenges/presentation/views/challenges_view.dart';
+import 'package:senasgo/features/chests/presentation/views/reward_chest_view.dart';
 import 'package:senasgo/features/home/presentation/views/learning_path_view.dart';
 import 'package:senasgo/features/learning/presentation/views/lesson_guide_view.dart';
 import 'package:senasgo/features/learning/presentation/views/lesson_list_view.dart';
@@ -49,6 +51,7 @@ Future<void> main() async {
     await HiveService.saveUser(UserModel.initial());
   }
   ThemeController.init();
+  await CloudSyncService.initialize();
 
   // Cámara disponible en el dispositivo (si falla, la app sigue navegable)
   List<CameraDescription> cameras;
@@ -162,6 +165,11 @@ GoRouter _buildRouter(List<CameraDescription> cameras) {
         path: '/teacher/:signId',
         builder: (context, state) =>
             TeacherView(signId: state.pathParameters['signId']!),
+      ),
+      GoRoute(
+        path: '/chest/:lessonId',
+        builder: (context, state) =>
+            RewardChestView(lessonId: state.pathParameters['lessonId']!),
       ),
       GoRoute(
         path: '/challenges',

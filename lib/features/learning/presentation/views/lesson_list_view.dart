@@ -204,7 +204,7 @@ class _LessonListViewState extends State<LessonListView> {
                   : 'Resultados',
               subtitle: signs.isEmpty
                   ? 'No encontramos señas con ese filtro.'
-                  : '${signs.length} seña${signs.length == 1 ? '' : 's'} disponible${signs.length == 1 ? '' : 's'}.',
+                  : '${signs.length} seña${signs.length == 1 ? '' : 's'}.',
             ),
             const SizedBox(height: 10),
             if (signs.isEmpty)
@@ -531,7 +531,7 @@ class _SignCard extends StatelessWidget {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 11),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(color: AppColors.border),
@@ -539,47 +539,40 @@ class _SignCard extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                width: 42,
-                height: 42,
+                width: 38,
+                height: 38,
                 decoration: BoxDecoration(
                   color:
                       learned ? AppColors.successSoft : AppColors.primarySoft,
-                  borderRadius: BorderRadius.circular(13),
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(
                   learned ? Icons.check_rounded : Icons.sign_language_rounded,
                   color: learned ? AppColors.success : AppColors.primary,
-                  size: 21,
+                  size: 20,
                 ),
               ),
-              const SizedBox(width: 11),
+              const SizedBox(width: 10),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Row(
                   children: [
-                    Row(
-                      children: [
-                        Text(sign.name,
-                            style: TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 14.5,
-                                color: AppColors.ink)),
-                        const SizedBox(width: 7),
-                        _CategoryTag(category: sign.category),
-                      ],
+                    Flexible(
+                      child: Text(sign.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontWeight: FontWeight.w800,
+                              fontSize: 14.5,
+                              color: AppColors.ink)),
                     ),
-                    const SizedBox(height: 2),
-                    Text(sign.description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                            color: AppColors.muted, fontSize: 12, height: 1.3)),
+                    const SizedBox(width: 7),
+                    _CategoryTag(category: sign.category),
                   ],
                 ),
               ),
-              const SizedBox(width: 5),
+              const SizedBox(width: 4),
               Icon(Icons.play_circle_outline_rounded,
-                  color: AppColors.primary, size: 23),
+                  color: AppColors.primary, size: 22),
             ],
           ),
         ),

@@ -8,7 +8,7 @@ class AppConstants {
   /// Buzón de soporte. La app no envía nada automáticamente: el reporte se
   /// guarda en el teléfono y, si la persona lo decide, se copia o se abre en
   /// su app de correo.
-  static const String supportEmail = 'soporte@senasgo.app';
+  static const String supportEmail = 'senasgolspy@gmail.com';
 
   // Camera & Vision (control térmico: nunca 60 FPS)
   static const int targetFpsMin = 10;

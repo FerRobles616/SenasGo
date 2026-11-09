@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:go_router/go_router.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
+import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/home/domain/learning_path.dart';
 import 'package:senasgo/features/home/presentation/widgets/lesson_node.dart';
@@ -217,7 +218,15 @@ class _LearningPathViewState extends State<LearningPathView> {
                   currentKey: _currentKey,
                   onNodeTap: (n, ctx) => _onNodeTap(n, unit, ctx),
                   linkFor: _linkFor,
-                  onMilestone: () => _open('/lesson-guide/${unit.lesson.id}'),
+                  onMilestone: () {
+                    final complete = unit.nodes.isNotEmpty &&
+                        unit.completedCount == unit.nodes.length;
+                    final claimed =
+                        HiveService.isChestClaimed('unit_${unit.lesson.id}');
+                    _open(complete && !claimed
+                        ? '/chest/${unit.lesson.id}'
+                        : '/lesson-guide/${unit.lesson.id}');
+                  },
                 ),
               ),
             ),

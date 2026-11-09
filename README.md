@@ -1,8 +1,9 @@
 # SeñasGo — Aprender LSPy sin conexión
 
 App Flutter para aprender Lengua de Señas Paraguaya (LSPy) con un profesor
-jaguareté 3D, práctica guiada por cámara y soporte integrado. Todo funciona
-en el teléfono: no hay backend, cuentas, Firebase ni envío automático de datos.
+3D, práctica guiada por cámara y soporte integrado. Funciona en el teléfono
+sin conexión; la sincronización en la nube es opcional y se apoya en
+Supabase/PostgreSQL.
 
 ## Qué incluye
 
@@ -23,12 +24,20 @@ animaciones respetan la opción de reducir movimiento del sistema.
 - **Retos**: metas diarias y semanales calculadas en el teléfono. Solo se
   muestran los retos activos; las recompensas reclamadas quedan plegadas y
   únicamente aparece un botón cuando hay algo para reclamar.
+- **Cofres**: recompensas locales comunes, raras y épicas al completar una
+  unidad o un hito. Se abren una sola vez, con animación y sin compras.
 - **Progreso**: nivel, XP, precisión, actividad semanal y avance por lección.
 - **Racha**: calendario de constancia, mejor racha y protectores locales.
+- **Recordatorios**: en Android/iOS se puede agendar una práctica semanal en
+  el calendario del teléfono. En web se informa que requiere la app móvil.
 - **Perfil**: meta diaria editable, calendario, liga de práctica y comunidad
   offline. No hay amigos, rankings ni cuentas inventadas: la liga compara tu
   XP semanal contra metas personales y la comunidad solo comparte tu progreso
   cuando vos lo decidís.
+- **Progreso en la nube (opcional)**: con Supabase/PostgreSQL se puede crear
+  una cuenta y recuperar XP, rachas, señas y cofres en otro teléfono. La app
+  sigue funcionando sin conexión y sin cuenta; el detalle de configuración
+  está en `docs/SUPABASE.md`.
 - **Apariencia**: modo **Oscuro**, **Claro** o **Según el sistema**, con
   persistencia local y adaptación de fondos, tarjetas, textos y navegación.
 - **Onboarding**: tres pasos (bienvenida, meta diaria y compromiso) y una
@@ -171,7 +180,7 @@ flutter test
 
 La suite cubre evaluación geométrica, tolerancias por nivel, progreso,
 rachas, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
-clips del profesor. Al momento de esta versión pasan **56 pruebas**.
+clips del profesor. Al momento de esta versión pasan **62 pruebas**.
 
 ## Notas de diseño
 
@@ -184,8 +193,9 @@ clips del profesor. Al momento de esta versión pasan **56 pruebas**.
   duplicado y opciones avanzadas plegadas.
 - Los reportes de soporte se guardan como mapas dinámicos en `support_box`,
   sin adapters nuevos ni migraciones.
-- `AppConstants.supportEmail` es un buzón de ejemplo: cambialo por uno real
-  antes de publicar.
+- El correo de soporte configurado es **senasgolspy@gmail.com**.
+- La sincronización en la nube requiere `SUPABASE_URL` y
+  `SUPABASE_ANON_KEY`; sin ellos queda desactivada y la app es local.
 - La validación de las señas con una persona experta en LSPy sigue pendiente.
   Las fuentes oficiales de referencia incluyen el Signario Digital de Lengua
   de Señas y el manual del Instituto Desarrollo.

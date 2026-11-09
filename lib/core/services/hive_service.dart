@@ -85,6 +85,33 @@ class HiveService {
     await prefsBox.put('dailyGoalMinutes', minutes.clamp(5, 30));
   }
 
+  /// Recordatorio semanal de práctica (1 = lunes, 7 = domingo).
+  static int? get reminderWeekday => prefsBox.get('reminderWeekday') as int?;
+
+  static int get reminderHour =>
+      prefsBox.get('reminderHour', defaultValue: 19) as int;
+
+  static int get reminderMinute =>
+      prefsBox.get('reminderMinute', defaultValue: 0) as int;
+
+  static bool get reminderEnabled => reminderWeekday != null;
+
+  static Future<void> setReminder({
+    required int weekday,
+    required int hour,
+    required int minute,
+  }) async {
+    await prefsBox.put('reminderWeekday', weekday);
+    await prefsBox.put('reminderHour', hour);
+    await prefsBox.put('reminderMinute', minute);
+  }
+
+  static Future<void> clearReminder() async {
+    await prefsBox.delete('reminderWeekday');
+    await prefsBox.delete('reminderHour');
+    await prefsBox.delete('reminderMinute');
+  }
+
   static Future<void> updateUsername(String username) async {
     final clean = username.trim();
     if (clean.isEmpty) return;
@@ -124,6 +151,34 @@ class HiveService {
     );
     await saveUser(updated);
     return updated;
+  }
+
+  // ─────────────────────────── Cofres ───────────────────────────
+
+  static List<String> get claimedChests {
+    final raw = prefsBox.get('claimedChests', defaultValue: const <dynamic>[]);
+    if (raw is! List) return const [];
+    return [
+      for (final item in raw)
+        if (item is String) item
+    ];
+  }
+
+  static bool isChestClaimed(String chestId) => claimedChests.contains(chestId);
+
+  /// Entrega un cofre una sola vez. Devuelve false si ya estaba reclamado.
+  static Future<bool> claimChest({
+    required String chestId,
+    required int xp,
+    int freezes = 0,
+  }) async {
+    if (isChestClaimed(chestId)) return false;
+    await prefsBox.put('claimedChests', [...claimedChests, chestId]);
+    await addXp(xp);
+    if (freezes > 0) {
+      await gameBox.put('streakFreezes', streakFreezes + freezes);
+    }
+    return true;
   }
 
   static String _dayKey(DateTime date) =>
@@ -291,6 +346,8 @@ class HiveService {
     if (gap == 2 && streakFreezes > 0) return days;
     return 0;
   }
+
+  static DateTime? get streakDate => gameBox.get('streakDate') as DateTime?;
 
   static int get bestStreak {
     final stored = gameBox.get('bestStreak', defaultValue: 0) as int;
