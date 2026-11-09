@@ -296,7 +296,7 @@ window.teacherView = (orbit, target, fov) => {
                   ? ValueKey('teacher-$_clip-${_view.name}-$_replay')
                   : const ValueKey('teacher-3d'),
               src: _asset,
-              alt: 'Profesor de LSPy demostrando una seña',
+              alt: 'Profesor jaguareté demostrando una seña de LSPy',
               loading: Loading.eager,
               reveal: Reveal.auto,
               // El profesor no es un visor libre: la cámara la controla la
@@ -374,7 +374,7 @@ window.teacherView = (orbit, target, fov) => {
         children: [
           _Pill(
             icon: Icons.school_rounded,
-            text: 'PROFESOR DE LSPY',
+            text: 'PROFESOR JAGUARETÉ',
             color: AppColors.primary,
           ),
           const Spacer(),

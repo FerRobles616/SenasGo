@@ -1,7 +1,7 @@
 # SeñasGo — Aprender LSPy sin conexión
 
-App Flutter para aprender Lengua de Señas Paraguaya (LSPy) con un profesor 3D,
-una mascota jaguareté y práctica guiada por cámara y soporte integrado. Todo funciona
+App Flutter para aprender Lengua de Señas Paraguaya (LSPy) con un profesor
+jaguareté 3D, práctica guiada por cámara y soporte integrado. Todo funciona
 en el teléfono: no hay backend, cuentas, Firebase ni envío automático de datos.
 
 ## Qué incluye
@@ -118,9 +118,9 @@ blender --background --python tool/render_teacher_poster.py
 ```
 
 Las demostraciones siguen siendo ilustrativas hasta que una persona experta
-en LSPy las valide. El avatar 3D actual se generó desde un VRM autorizado por
-el usuario; los archivos VRM fuente no se versionan. El pipeline espera un
-autor con permiso para modificarlo y distribuirlo.
+en LSPy las valide. Los archivos VRM de muestra no se versionan; el pipeline
+espera un avatar propio o uno con licencia que permita modificarlo y
+distribuirlo.
 
 ## Modelo de IA (Edge AI)
 
@@ -171,7 +171,7 @@ flutter test
 
 La suite cubre evaluación geométrica, tolerancias por nivel, progreso,
 rachas, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
-clips del profesor. Al momento de esta versión pasan **60 pruebas**.
+clips del profesor. Al momento de esta versión pasan **56 pruebas**.
 
 ## Notas de diseño
 
