@@ -16,7 +16,7 @@ class TeacherView extends StatelessWidget {
     final sign = HiveService.signById(signId);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profesor Jaguareté'),
+        title: const Text('Profesor de LSPy'),
         actions: [
           IconButton(
             tooltip: 'Ayuda y comentarios',
