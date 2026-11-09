@@ -9,7 +9,11 @@ import 'package:senasgo/shared/widgets/app_ui.dart';
 /// En release, si Supabase no está configurado, no se muestra nada. En debug
 /// sí aparece una pista de configuración para no ocultar el estado del build.
 class CloudAccountSection extends StatelessWidget {
-  const CloudAccountSection({super.key});
+  const CloudAccountSection({this.onAccountChanged, super.key});
+
+  /// Se llama al iniciar/cerrar sesión o después de sincronizar, para que la
+  /// pantalla que contiene la sección refresque el nombre y el progreso.
+  final VoidCallback? onAccountChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +39,7 @@ class CloudAccountSection extends StatelessWidget {
             ),
           )
         else
-          const _CloudCard(),
+          _CloudCard(onAccountChanged: onAccountChanged),
         const SizedBox(height: 20),
       ],
     );
@@ -43,7 +47,9 @@ class CloudAccountSection extends StatelessWidget {
 }
 
 class _CloudCard extends StatefulWidget {
-  const _CloudCard();
+  const _CloudCard({this.onAccountChanged});
+
+  final VoidCallback? onAccountChanged;
 
   @override
   State<_CloudCard> createState() => _CloudCardState();
@@ -62,18 +68,27 @@ class _CloudCardState extends State<_CloudCard> {
       ),
       builder: (_) => _AuthSheet(create: create),
     );
-    if (result == true && mounted) setState(() {});
+    if (result == true && mounted) {
+      setState(() {});
+      widget.onAccountChanged?.call();
+    }
   }
 
   Future<void> _sync() async {
     setState(() => _busy = true);
     await CloudSyncService.syncNow();
-    if (mounted) setState(() => _busy = false);
+    if (mounted) {
+      setState(() => _busy = false);
+      widget.onAccountChanged?.call();
+    }
   }
 
   Future<void> _signOut() async {
     await CloudSyncService.signOut();
-    if (mounted) setState(() {});
+    if (mounted) {
+      setState(() {});
+      widget.onAccountChanged?.call();
+    }
   }
 
   @override
@@ -106,7 +121,7 @@ class _CloudCardState extends State<_CloudCard> {
                         ),
                       ),
                       Text(
-                        'Recuperá XP, rachas y señas en otro teléfono.',
+                        'Estás como invitado. Recuperá XP, rachas y señas en otro teléfono.',
                         style: TextStyle(
                           color: AppColors.muted,
                           fontSize: 12,
@@ -305,8 +320,13 @@ class _AuthSheetState extends State<_AuthSheet> {
             ),
             const SizedBox(height: 4),
             Text(
-              'Tu progreso se sincroniza sin guardar imágenes ni reportes.',
-              style: TextStyle(color: AppColors.muted, fontSize: 12.5),
+              'Tu progreso se sincroniza sin guardar imágenes ni reportes. '
+              'Si ya tenés un apodo local, se conserva.',
+              style: TextStyle(
+                color: AppColors.muted,
+                fontSize: 12.5,
+                height: 1.35,
+              ),
             ),
             const SizedBox(height: 14),
             TextField(

@@ -4,6 +4,7 @@ import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/core/theme/theme_controller.dart';
+import 'package:senasgo/features/cloud/data/cloud_sync_service.dart';
 import 'package:senasgo/features/cloud/presentation/widgets/cloud_account_section.dart';
 import 'package:senasgo/features/profile/data/calendar_service.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
@@ -12,11 +13,11 @@ import 'package:senasgo/shared/models/user_model.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 
-/// Perfil local de quien aprende.
+/// Perfil de quien aprende.
 ///
-/// Es también la puerta a la liga y a las novedades, dos pantallas que en
-/// Duolingo son sociales. Acá son locales y honestas: no hay cuentas ni
-/// servidores, así que no inventamos amigos ni rankings falsos.
+/// Sin sesión se muestra como invitado y el apodo es local. Con una cuenta
+/// opcional, el progreso se sincroniza. La liga y las novedades siguen siendo
+/// locales: no inventamos amigos ni rankings falsos.
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
 
@@ -37,40 +38,48 @@ class _ProfileViewState extends State<ProfileView> {
     });
   }
 
+  bool get _isGuest => CloudSyncService.user == null;
+
+  String get _displayName {
+    if (_isGuest && _user.username.trim() == 'Usuario') return 'Invitado';
+    return _user.username;
+  }
+
   Future<void> _editName() async {
-    final controller = TextEditingController(text: _user.username);
+    final isGuest = _isGuest;
     final result = await showDialog<String>(
       context: context,
-      builder: (dialogContext) => AlertDialog(
-        title: const Text('¿Cómo te llamamos?'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          textCapitalization: TextCapitalization.words,
-          maxLength: 24,
-          decoration: const InputDecoration(
-            labelText: 'Tu nombre',
-            hintText: 'Aprendiz de LSPy',
-            prefixIcon: Icon(Icons.person_outline_rounded),
-          ),
-          onSubmitted: (value) => Navigator.pop(dialogContext, value),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(dialogContext),
-            child: const Text('Cancelar'),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.pop(dialogContext, controller.text),
-            child: const Text('Guardar'),
-          ),
-        ],
+      builder: (_) => _EditNameDialog(
+        initialName:
+            isGuest && _user.username.trim() == 'Usuario' ? '' : _user.username,
+        isGuest: isGuest,
       ),
     );
-    controller.dispose();
     if (result == null) return;
-    await HiveService.updateUsername(result);
-    if (mounted) _reload();
+    final clean = result.trim();
+    if (clean.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..hideCurrentSnackBar()
+          ..showSnackBar(SnackBar(
+            content: Text(isGuest
+                ? 'Escribí un apodo para guardar en este teléfono.'
+                : 'Escribí tu nombre para guardarlo en la cuenta.'),
+          ));
+      }
+      return;
+    }
+    await HiveService.updateUsername(clean);
+    if (!isGuest) await CloudSyncService.syncNow();
+    if (!mounted) return;
+    _reload();
+    if (isGuest) {
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(const SnackBar(
+          content: Text('Apodo guardado solo en este teléfono.'),
+        ));
+    }
   }
 
   Future<void> _editGoal() async {
@@ -290,7 +299,7 @@ class _ProfileViewState extends State<ProfileView> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            _user.username,
+                            _displayName,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -302,18 +311,23 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            'Nivel ${_user.level}',
+                            _isGuest
+                                ? 'Nivel ${_user.level} · Invitado'
+                                : 'Nivel ${_user.level} · ${CloudSyncService.email ?? 'Cuenta conectada'}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: Colors.white.withValues(alpha: 0.86),
                               fontWeight: FontWeight.w700,
-                              fontSize: 13,
+                              fontSize: 12.5,
                             ),
                           ),
                         ],
                       ),
                     ),
                     IconButton(
-                      tooltip: 'Editar nombre',
+                      tooltip:
+                          _isGuest ? 'Editar apodo local' : 'Editar nombre',
                       onPressed: _editName,
                       icon: const Icon(Icons.edit_rounded, color: Colors.white),
                     ),
@@ -515,7 +529,7 @@ class _ProfileViewState extends State<ProfileView> {
             ),
           ),
           const SizedBox(height: 20),
-          const CloudAccountSection(),
+          CloudAccountSection(onAccountChanged: _reload),
           const SizedBox(height: 20),
           const AppSectionTitle('Apariencia'),
           const SizedBox(height: 10),
@@ -573,7 +587,7 @@ class _ProfileViewState extends State<ProfileView> {
                   leading: const Icon(Icons.info_outline_rounded),
                   title: const Text('Acerca de SeñasGo'),
                   subtitle: const Text(
-                      'Versión ${AppConstants.appVersion} · 100% offline'),
+                      'Versión ${AppConstants.appVersion} · Funciona offline'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push('/help'),
                 ),
@@ -582,7 +596,10 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Tus datos viven en este teléfono. No hay cuentas, nube ni publicidad.',
+            _isGuest
+                ? 'Tus datos se guardan en este teléfono. La nube es opcional.'
+                : 'Tu progreso se sincroniza con tu cuenta y también se guarda '
+                    'en este teléfono.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.muted,
@@ -823,6 +840,78 @@ class _ProfileStat extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _EditNameDialog extends StatefulWidget {
+  const _EditNameDialog({
+    required this.initialName,
+    required this.isGuest,
+  });
+
+  final String initialName;
+  final bool isGuest;
+
+  @override
+  State<_EditNameDialog> createState() => _EditNameDialogState();
+}
+
+class _EditNameDialogState extends State<_EditNameDialog> {
+  late final TextEditingController _controller =
+      TextEditingController(text: widget.initialName);
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.isGuest ? 'Tu apodo local' : 'Tu nombre'),
+      content: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              widget.isGuest
+                  ? 'Solo se guarda en este teléfono. No crea una cuenta.'
+                  : 'Se sincroniza con tu cuenta y se guarda en este teléfono.',
+              style: TextStyle(
+                color: AppColors.muted,
+                fontSize: 12.5,
+                height: 1.35,
+              ),
+            ),
+            const SizedBox(height: 14),
+            TextField(
+              controller: _controller,
+              autofocus: true,
+              textCapitalization: TextCapitalization.words,
+              maxLength: 24,
+              decoration: InputDecoration(
+                labelText: widget.isGuest ? 'Apodo' : 'Nombre',
+                hintText: widget.isGuest ? 'Escribí tu apodo' : 'Tu nombre',
+                prefixIcon: const Icon(Icons.person_outline_rounded),
+              ),
+              onSubmitted: (value) => Navigator.pop(context, value),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancelar'),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.pop(context, _controller.text),
+          child: const Text('Guardar'),
+        ),
+      ],
     );
   }
 }

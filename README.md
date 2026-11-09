@@ -30,10 +30,10 @@ animaciones respetan la opción de reducir movimiento del sistema.
 - **Racha**: calendario de constancia, mejor racha y protectores locales.
 - **Recordatorios**: en Android/iOS se puede agendar una práctica semanal en
   el calendario del teléfono. En web se informa que requiere la app móvil.
-- **Perfil**: meta diaria editable, calendario, liga de práctica y comunidad
-  offline. No hay amigos, rankings ni cuentas inventadas: la liga compara tu
-  XP semanal contra metas personales y la comunidad solo comparte tu progreso
-  cuando vos lo decidís.
+- **Perfil**: sin sesión se muestra como **Invitado** y el apodo es local; con
+  cuenta se sincroniza. Incluye meta diaria editable, calendario, liga de
+  práctica y comunidad offline. No hay amigos ni rankings inventados: la liga
+  compara tu XP semanal contra metas personales.
 - **Progreso en la nube (opcional)**: con Supabase/PostgreSQL se puede crear
   una cuenta y recuperar XP, rachas, señas y cofres en otro teléfono. La app
   sigue funcionando sin conexión y sin cuenta; el detalle de configuración
@@ -180,7 +180,7 @@ flutter test
 
 La suite cubre evaluación geométrica, tolerancias por nivel, progreso,
 rachas, reportes de soporte, onboarding, pantallas nuevas y el mapeo de
-clips del profesor. Al momento de esta versión pasan **62 pruebas**.
+clips del profesor. Al momento de esta versión pasan **63 pruebas**.
 
 ## Notas de diseño
 
