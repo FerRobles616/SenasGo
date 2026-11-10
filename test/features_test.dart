@@ -42,25 +42,22 @@ void main() {
     expect(HiveService.currentUser.xp, before + 20);
   });
 
-  testWidgets(
-      'El perfil sin cuenta se muestra como invitado y explica el apodo local',
-      (tester) async {
+  testWidgets('El perfil ya no tiene modo invitado', (tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: AppTheme.dark,
       home: const ProfileView(),
     ));
     await tester.pump();
 
-    expect(find.text('Invitado'), findsOneWidget);
-    expect(find.textContaining('Invitado'), findsWidgets);
+    expect(find.textContaining('Invitado'), findsNothing);
+    expect(find.textContaining('apodo'), findsNothing);
 
-    await tester.tap(find.byTooltip('Editar apodo local'));
+    await tester.tap(find.byTooltip('Editar nombre'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 250));
 
-    expect(find.text('Tu apodo local'), findsOneWidget);
-    expect(
-        find.textContaining('Solo se guarda en este teléfono'), findsOneWidget);
+    expect(find.text('Tu nombre'), findsWidgets);
+    expect(find.textContaining('Se sincroniza con tu cuenta'), findsOneWidget);
 
     await tester.tap(find.text('Cancelar'));
     await tester.pump();

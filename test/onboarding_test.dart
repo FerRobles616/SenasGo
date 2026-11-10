@@ -9,6 +9,7 @@ import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/challenges/presentation/views/challenges_view.dart';
 import 'package:senasgo/features/profile/presentation/views/home_shortcut_view.dart';
 import 'package:senasgo/features/streak/presentation/views/streak_view.dart';
+import 'package:senasgo/features/cloud/data/cloud_sync_service.dart';
 import 'package:senasgo/main.dart';
 import 'package:senasgo/shared/models/user_model.dart';
 
@@ -24,6 +25,8 @@ void main() {
     if (HiveService.userBox.isEmpty) {
       await HiveService.saveUser(UserModel.initial());
     }
+    // La app exige cuenta: estas pruebas arrancan con sesión simulada.
+    CloudSyncService.debugSignedIn = true;
   });
 
   tearDownAll(() async {
@@ -51,13 +54,13 @@ void main() {
 
       await HiveService.claimWelcomeReward();
       expect(HiveService.welcomeRewardClaimed, isTrue);
-      expect(HiveService.currentUser.xp,
-          initialXp + AppConstants.welcomeRewardXp);
+      expect(
+          HiveService.currentUser.xp, initialXp + AppConstants.welcomeRewardXp);
 
       // Segundo intento no debe sumar más XP
       await HiveService.claimWelcomeReward();
-      expect(HiveService.currentUser.xp,
-          initialXp + AppConstants.welcomeRewardXp);
+      expect(
+          HiveService.currentUser.xp, initialXp + AppConstants.welcomeRewardXp);
     });
   });
 

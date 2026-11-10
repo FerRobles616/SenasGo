@@ -1,0 +1,448 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="2440" height="2290" viewBox="0 0 2440 2290">
+<defs><marker id="open" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto"><path d="M0,0 L10,6 L0,12" fill="none" stroke="#475569" stroke-width="1.6"/></marker><marker id="tri" markerWidth="18" markerHeight="18" refX="16" refY="9" orient="auto"><path d="M0,0 L16,9 L0,18 z" fill="#fff" stroke="#1f2937" stroke-width="1.6"/></marker></defs>
+<rect width="2440" height="2290" fill="#ffffff"/>
+<text x="1220.0" y="46" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold" text-anchor="middle" fill="#1F4E79">SeñasGo — Diagrama de casos de uso</text>
+<text x="1220.0" y="76" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="middle" fill="#475569">Roles: Usuario (con cuenta obligatoria), Soporte y Administrador · Actores secundarios: Supabase, cámara y calendario</text>
+<rect x="300" y="110" width="1180" height="1635" rx="14" fill="#f4f9fe" stroke="#1F4E79" stroke-width="2.5"/>
+<text x="890.0" y="142" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#1F4E79">App móvil SeñasGo (Android)</text>
+<text x="890.0" y="164" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" text-anchor="middle" fill="#475569" font-style="italic">Requiere cuenta; con la sesión iniciada funciona sin conexión</text>
+<rect x="324" y="178" width="1132" height="254" rx="10" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="6 5"/>
+<text x="336" y="199" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" text-anchor="start" fill="#475569">Acceso (obligatorio)</text>
+<rect x="324" y="444" width="1132" height="358" rx="10" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="6 5"/>
+<text x="336" y="465" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" text-anchor="start" fill="#475569">Aprendizaje</text>
+<rect x="324" y="814" width="1132" height="392" rx="10" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="6 5"/>
+<text x="336" y="835" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" text-anchor="start" fill="#475569">Práctica</text>
+<rect x="324" y="1208" width="1132" height="180" rx="10" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="6 5"/>
+<text x="336" y="1229" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" text-anchor="start" fill="#475569">Gamificación y progreso</text>
+<rect x="324" y="1386" width="1132" height="328" rx="10" fill="none" stroke="#94a3b8" stroke-width="1.4" stroke-dasharray="6 5"/>
+<text x="336" y="1407" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" text-anchor="start" fill="#475569">Perfil y ayuda</text>
+<ellipse cx="560" cy="240" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="236" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Registrarse</text>
+<text x="560" y="256" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(crear cuenta)</text>
+<ellipse cx="560" cy="314" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="320" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Iniciar sesión</text>
+<ellipse cx="560" cy="388" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="394" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Cerrar sesión</text>
+<ellipse cx="560" cy="506" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="502" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Completar bienvenida</text>
+<text x="560" y="522" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y elegir meta diaria</text>
+<ellipse cx="560" cy="580" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="576" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Ver camino y guía</text>
+<text x="560" y="596" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de las lecciones</text>
+<ellipse cx="560" cy="654" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="650" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Ver demostración del</text>
+<text x="560" y="670" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">profesor 3D por pasos</text>
+<ellipse cx="560" cy="758" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="754" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Consultar biblioteca</text>
+<text x="560" y="774" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de señas</text>
+<ellipse cx="560" cy="932" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="928" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Practicar seña</text>
+<text x="560" y="948" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">con la cámara</text>
+<ellipse cx="560" cy="1166" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1162" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Hacer repaso rápido</text>
+<text x="560" y="1182" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(sin cámara)</text>
+<ellipse cx="560" cy="1270" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1266" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Reclamar retos</text>
+<text x="560" y="1286" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y cofres</text>
+<ellipse cx="560" cy="1344" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1340" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Ver progreso, racha</text>
+<text x="560" y="1360" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y liga</text>
+<ellipse cx="560" cy="1448" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1444" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Gestionar perfil, meta</text>
+<text x="560" y="1464" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y apariencia</text>
+<ellipse cx="560" cy="1522" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1518" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Compartir progreso</text>
+<text x="560" y="1538" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">e invitación</text>
+<ellipse cx="560" cy="1596" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1592" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Consultar ayuda, FAQ</text>
+<text x="560" y="1612" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y acceso rápido</text>
+<ellipse cx="560" cy="1670" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1666" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Enviar reporte</text>
+<text x="560" y="1686" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de soporte</text>
+<ellipse cx="1170" cy="277.0" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="273.0" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Sincronizar progreso</text>
+<text x="1170" y="293.0" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">en la nube</text>
+<ellipse cx="1170" cy="506" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="502" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Recibir recompensa</text>
+<text x="1170" y="522" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de bienvenida</text>
+<ellipse cx="1170" cy="648" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="644" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Cambiar vista</text>
+<text x="1170" y="664" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Torso / Manos</text>
+<ellipse cx="1170" cy="716" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="712" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Repetir un paso</text>
+<text x="1170" y="732" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de la seña</text>
+<ellipse cx="1170" cy="852" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="848" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Reintentar</text>
+<text x="1170" y="868" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">captura</text>
+<ellipse cx="1170" cy="916" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="912" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Preparar encuadre</text>
+<text x="1170" y="932" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">e iluminación</text>
+<ellipse cx="1170" cy="980" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="986" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Detectar la mano</text>
+<ellipse cx="1170" cy="1044" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1040" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Evaluar parámetros</text>
+<text x="1170" y="1060" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de la seña</text>
+<ellipse cx="1170" cy="1108" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1104" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Recibir</text>
+<text x="1170" y="1124" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">retroalimentación</text>
+<ellipse cx="1170" cy="1172" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1178" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Ganar XP</text>
+<ellipse cx="1170" cy="1344" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1340" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Usar protector</text>
+<text x="1170" y="1360" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de racha</text>
+<ellipse cx="1170" cy="1448" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1444" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Programar recordatorio</text>
+<text x="1170" y="1464" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de práctica</text>
+<ellipse cx="1170" cy="388" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="384" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Recuperar contraseña</text>
+<text x="1170" y="404" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(código por correo)</text>
+<ellipse cx="1170" cy="1670" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1666" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Enviar al volver</text>
+<text x="1170" y="1686" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">la conexión</text>
+<line x1="715" y1="249" x2="1028" y2="268" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="831.6133116129805" y="246.90113529455783" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="871.6133116129805" y="262.90113529455783" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«include»</text>
+<line x1="715" y1="305" x2="1028" y2="286" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="831.6133116129805" y="283.09886470544217" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="871.6133116129805" y="299.09886470544217" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«include»</text>
+<line x1="725" y1="506" x2="1020" y2="506" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="832.5" y="494.0" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="872.5" y="510.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«include»</text>
+<line x1="1020" y1="649" x2="725" y2="652" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="832.4734893771767" y="638.9264902684213" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="872.4734893771767" y="654.9264902684213" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<line x1="1039" y1="703" x2="702" y2="668" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="830.468335798837" y="673.5557980647998" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="870.468335798837" y="689.5557980647998" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<line x1="723" y1="928" x2="1022" y2="920" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="832.3156356073237" y="911.8081144758735" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="872.3156356073237" y="927.8081144758735" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«include»</text>
+<line x1="710" y1="944" x2="1033" y2="969" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="831.1245525541698" y="944.4819320042625" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="871.1245525541698" y="960.4819320042625" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«include»</text>
+<line x1="672" y1="953" x2="1065" y2="1025" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="828.4918243602601" y="976.6411218497527" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="868.4918243602601" y="992.6411218497527" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«include»</text>
+<line x1="644" y1="956" x2="1091" y2="1085" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="827.1269703704457" y="1008.6136832544237" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="867.1269703704457" y="1024.6136832544237" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«include»</text>
+<line x1="1049" y1="868" x2="691" y2="915" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="829.6606639081906" y="879.3887653890897" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="869.6606639081906" y="895.3887653890897" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<line x1="1170" y1="1145" x2="1170" y2="1135" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="1130.0" y="1128.0" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="1170.0" y="1144.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<line x1="1020" y1="1344" x2="725" y2="1344" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="832.5" y="1332.0" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="872.5" y="1348.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<line x1="1020" y1="1448" x2="725" y2="1448" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="832.5" y="1436.0" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="872.5" y="1452.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<line x1="1046" y1="373" x2="694" y2="330" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="829.9205805362693" y="339.59692288472775" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="869.9205805362693" y="355.59692288472775" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<line x1="1020" y1="1670" x2="725" y2="1670" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="832.5" y="1658.0" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="872.5" y="1674.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<path d="M940,1520 h330 l14,14 v44 h-344 z" fill="#fffbe6" stroke="#b45309" stroke-width="1.4"/>
+<text x="1112" y="1544" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#7c2d12">Precondición de todos los casos (salvo</text>
+<text x="1112" y="1564" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="normal" text-anchor="middle" fill="#7c2d12">Registrarse e Iniciar sesión): sesión iniciada</text>
+<g stroke="#1f2937" stroke-width="2.6" fill="none"><circle cx="135" cy="854" r="15" fill="#fff"/><line x1="135" y1="869" x2="135" y2="912"/><line x1="111" y1="884" x2="159" y2="884"/><line x1="135" y1="912" x2="117" y2="944"/><line x1="135" y1="912" x2="153" y2="944"/></g>
+<text x="135" y="968" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#1f2937">Usuario</text>
+<text x="135" y="984" font-family="Arial, Helvetica, sans-serif" font-size="12.5" font-weight="normal" text-anchor="middle" fill="#475569" font-style="italic">(con cuenta)</text>
+<line x1="135" y1="884" x2="542" y2="268" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="540" y2="342" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="537" y2="416" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="530" y2="534" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="524" y2="607" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="514" y2="681" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="485" y2="783" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="409" y2="921" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="517" y2="1139" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="528" y2="1243" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="534" y2="1316" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="538" y2="1420" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="541" y2="1494" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="543" y2="1568" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="135" y1="884" x2="545" y2="1642" stroke="#1f2937" stroke-width="1.9"/>
+<rect x="1512" y="247.0" width="156" height="60" rx="6" fill="#f8fafc" stroke="#1f2937" stroke-width="2"/>
+<text x="1590" y="267.0" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="normal" text-anchor="middle" fill="#475569" font-style="italic">«sistema»</text>
+<text x="1590" y="287.0" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" text-anchor="middle" fill="#1f2937">Supabase</text>
+<text x="1590" y="304.0" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" text-anchor="middle" fill="#1f2937">(Auth y BD)</text>
+<rect x="1512" y="920" width="156" height="60" rx="6" fill="#f8fafc" stroke="#1f2937" stroke-width="2"/>
+<text x="1590" y="940" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="normal" text-anchor="middle" fill="#475569" font-style="italic">«sistema»</text>
+<text x="1590" y="960" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" text-anchor="middle" fill="#1f2937">Cámara del</text>
+<text x="1590" y="977" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" text-anchor="middle" fill="#1f2937">teléfono</text>
+<rect x="1512" y="1418" width="156" height="60" rx="6" fill="#f8fafc" stroke="#1f2937" stroke-width="2"/>
+<text x="1590" y="1438" font-family="Arial, Helvetica, sans-serif" font-size="12" font-weight="normal" text-anchor="middle" fill="#475569" font-style="italic">«sistema»</text>
+<text x="1590" y="1458" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" text-anchor="middle" fill="#1f2937">Calendario</text>
+<text x="1590" y="1475" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="bold" text-anchor="middle" fill="#1f2937">del teléfono</text>
+<line x1="1590" y1="261" x2="1320" y2="277" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="1590" y1="934" x2="1309" y2="970" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="1590" y1="934" x2="1307" y2="927" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="1590" y1="1432" x2="1320" y2="1448" stroke="#1f2937" stroke-width="1.9"/>
+<rect x="1720" y="110" width="470" height="580" rx="14" fill="#fbf7ef" stroke="#1F4E79" stroke-width="2.5"/>
+<text x="1955.0" y="142" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#1F4E79">Bandeja de soporte</text>
+<text x="1955.0" y="164" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" text-anchor="middle" fill="#475569" font-style="italic">Fuera de la app: panel de Supabase (support_inbox)</text>
+<ellipse cx="1955.0" cy="222" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="218" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Revisar reportes</text>
+<text x="1955.0" y="238" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">en la bandeja</text>
+<ellipse cx="1955.0" cy="302" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="298" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Responder al usuario</text>
+<text x="1955.0" y="318" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">por correo</text>
+<ellipse cx="1955.0" cy="382" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="378" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Diagnosticar</text>
+<text x="1955.0" y="398" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">el problema</text>
+<ellipse cx="1955.0" cy="462" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="458" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Escalar incidencia</text>
+<text x="1955.0" y="478" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">al administrador</text>
+<ellipse cx="1955.0" cy="542" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="538" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Marcar en curso</text>
+<text x="1955.0" y="558" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">o resuelto</text>
+<ellipse cx="1955.0" cy="622" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="618" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Proponer cambios en</text>
+<text x="1955.0" y="638" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">la ayuda (FAQ)</text>
+<line x1="1955" y1="330" x2="1955" y2="354" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="1915.0" y="330.0" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="1955.0" y="346.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«include»</text>
+<line x1="1955" y1="434" x2="1955" y2="410" stroke="#334155" stroke-width="1.8" stroke-dasharray="8 5" marker-end="url(#open)"/>
+<rect x="1915.0" y="410.0" width="80" height="21" fill="#ffffff" opacity="0.92"/>
+<text x="1955.0" y="426.0" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="600" text-anchor="middle" fill="#1f2937">«extend»</text>
+<g stroke="#1f2937" stroke-width="2.6" fill="none"><circle cx="2330" cy="384" r="15" fill="#fff"/><line x1="2330" y1="399" x2="2330" y2="442"/><line x1="2306" y1="414" x2="2354" y2="414"/><line x1="2330" y1="442" x2="2312" y2="474"/><line x1="2330" y1="442" x2="2348" y2="474"/></g>
+<text x="2330" y="498" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#1f2937">Soporte</text>
+<line x1="2330" y1="414" x2="2003" y2="249" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="414" x2="2028" y2="327" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="414" x2="2102" y2="449" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="414" x2="2037" y2="518" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="414" x2="2007" y2="595" stroke="#1f2937" stroke-width="1.9"/>
+<rect x="1720" y="730" width="470" height="1015" rx="14" fill="#f3f6fb" stroke="#1F4E79" stroke-width="2.5"/>
+<text x="1955.0" y="762" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" text-anchor="middle" fill="#1F4E79">Panel de administración</text>
+<text x="1955.0" y="784" font-family="Arial, Helvetica, sans-serif" font-size="14" font-weight="normal" text-anchor="middle" fill="#475569" font-style="italic">Fuera de la app: Supabase y repositorio</text>
+<ellipse cx="1955.0" cy="845" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="841" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Gestionar lecciones</text>
+<text x="1955.0" y="861" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y señas (catálogo)</text>
+<ellipse cx="1955.0" cy="932" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="938" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Gestionar retos</text>
+<ellipse cx="1955.0" cy="1019" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1015" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Registrar validación</text>
+<text x="1955.0" y="1035" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de señas (experto LSPy)</text>
+<ellipse cx="1955.0" cy="1106" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1102" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Gestionar cuentas</text>
+<text x="1955.0" y="1122" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de usuario</text>
+<ellipse cx="1955.0" cy="1193" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1189" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Configurar autenticación</text>
+<text x="1955.0" y="1209" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y seguridad (RLS)</text>
+<ellipse cx="1955.0" cy="1280" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1276" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Consultar métricas</text>
+<text x="1955.0" y="1296" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de uso</text>
+<ellipse cx="1955.0" cy="1367" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1363" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Atender incidencias</text>
+<text x="1955.0" y="1383" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">escaladas</text>
+<ellipse cx="1955.0" cy="1454" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1450" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Publicar nueva versión</text>
+<text x="1955.0" y="1470" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(APK, profesor 3D)</text>
+<ellipse cx="1955.0" cy="1541" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1537" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Respaldar la</text>
+<text x="1955.0" y="1557" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">base de datos</text>
+<ellipse cx="1955.0" cy="1628" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1624" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Actualizar la ayuda</text>
+<text x="1955.0" y="1644" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(FAQ) de la app</text>
+<g stroke="#1f2937" stroke-width="2.6" fill="none"><circle cx="2330" cy="1184" r="15" fill="#fff"/><line x1="2330" y1="1199" x2="2330" y2="1242"/><line x1="2306" y1="1214" x2="2354" y2="1214"/><line x1="2330" y1="1242" x2="2312" y2="1274"/><line x1="2330" y1="1242" x2="2348" y2="1274"/></g>
+<text x="2330" y="1298" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="bold" text-anchor="middle" fill="#1f2937">Administrador</text>
+<line x1="2330" y1="1214" x2="1982" y2="873" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="1990" y2="959" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="2003" y2="1046" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="2031" y2="1131" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="2101" y2="1207" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="2087" y2="1262" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="2025" y2="1341" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="2000" y2="1427" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="1988" y2="1514" stroke="#1f2937" stroke-width="1.9"/>
+<line x1="2330" y1="1214" x2="1981" y2="1600" stroke="#1f2937" stroke-width="1.9"/>
+<ellipse cx="560" cy="240" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="236" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Registrarse</text>
+<text x="560" y="256" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(crear cuenta)</text>
+<ellipse cx="560" cy="314" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="320" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Iniciar sesión</text>
+<ellipse cx="560" cy="388" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="394" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Cerrar sesión</text>
+<ellipse cx="560" cy="506" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="502" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Completar bienvenida</text>
+<text x="560" y="522" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y elegir meta diaria</text>
+<ellipse cx="560" cy="580" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="576" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Ver camino y guía</text>
+<text x="560" y="596" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de las lecciones</text>
+<ellipse cx="560" cy="654" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="650" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Ver demostración del</text>
+<text x="560" y="670" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">profesor 3D por pasos</text>
+<ellipse cx="560" cy="758" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="754" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Consultar biblioteca</text>
+<text x="560" y="774" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de señas</text>
+<ellipse cx="560" cy="932" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="928" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Practicar seña</text>
+<text x="560" y="948" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">con la cámara</text>
+<ellipse cx="560" cy="1166" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1162" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Hacer repaso rápido</text>
+<text x="560" y="1182" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(sin cámara)</text>
+<ellipse cx="560" cy="1270" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1266" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Reclamar retos</text>
+<text x="560" y="1286" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y cofres</text>
+<ellipse cx="560" cy="1344" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1340" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Ver progreso, racha</text>
+<text x="560" y="1360" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y liga</text>
+<ellipse cx="560" cy="1448" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1444" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Gestionar perfil, meta</text>
+<text x="560" y="1464" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y apariencia</text>
+<ellipse cx="560" cy="1522" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1518" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Compartir progreso</text>
+<text x="560" y="1538" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">e invitación</text>
+<ellipse cx="560" cy="1596" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1592" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Consultar ayuda, FAQ</text>
+<text x="560" y="1612" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y acceso rápido</text>
+<ellipse cx="560" cy="1670" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="560" y="1666" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Enviar reporte</text>
+<text x="560" y="1686" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de soporte</text>
+<ellipse cx="1170" cy="277.0" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="273.0" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Sincronizar progreso</text>
+<text x="1170" y="293.0" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">en la nube</text>
+<ellipse cx="1170" cy="506" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="502" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Recibir recompensa</text>
+<text x="1170" y="522" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de bienvenida</text>
+<ellipse cx="1170" cy="648" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="644" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Cambiar vista</text>
+<text x="1170" y="664" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Torso / Manos</text>
+<ellipse cx="1170" cy="716" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="712" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Repetir un paso</text>
+<text x="1170" y="732" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de la seña</text>
+<ellipse cx="1170" cy="852" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="848" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Reintentar</text>
+<text x="1170" y="868" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">captura</text>
+<ellipse cx="1170" cy="916" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="912" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Preparar encuadre</text>
+<text x="1170" y="932" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">e iluminación</text>
+<ellipse cx="1170" cy="980" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="986" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Detectar la mano</text>
+<ellipse cx="1170" cy="1044" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1040" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Evaluar parámetros</text>
+<text x="1170" y="1060" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de la seña</text>
+<ellipse cx="1170" cy="1108" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1104" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Recibir</text>
+<text x="1170" y="1124" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">retroalimentación</text>
+<ellipse cx="1170" cy="1172" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1178" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Ganar XP</text>
+<ellipse cx="1170" cy="1344" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1340" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Usar protector</text>
+<text x="1170" y="1360" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de racha</text>
+<ellipse cx="1170" cy="1448" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1444" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Programar recordatorio</text>
+<text x="1170" y="1464" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de práctica</text>
+<ellipse cx="1170" cy="388" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="384" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Recuperar contraseña</text>
+<text x="1170" y="404" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(código por correo)</text>
+<ellipse cx="1170" cy="1670" rx="150.0" ry="27.0" fill="#fbfdff" stroke="#6b7f96" stroke-width="2.4"/>
+<text x="1170" y="1666" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Enviar al volver</text>
+<text x="1170" y="1686" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">la conexión</text>
+<ellipse cx="1955.0" cy="222" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="218" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Revisar reportes</text>
+<text x="1955.0" y="238" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">en la bandeja</text>
+<ellipse cx="1955.0" cy="302" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="298" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Responder al usuario</text>
+<text x="1955.0" y="318" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">por correo</text>
+<ellipse cx="1955.0" cy="382" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="378" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Diagnosticar</text>
+<text x="1955.0" y="398" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">el problema</text>
+<ellipse cx="1955.0" cy="462" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="458" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Escalar incidencia</text>
+<text x="1955.0" y="478" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">al administrador</text>
+<ellipse cx="1955.0" cy="542" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="538" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Marcar en curso</text>
+<text x="1955.0" y="558" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">o resuelto</text>
+<ellipse cx="1955.0" cy="622" rx="165.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="618" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Proponer cambios en</text>
+<text x="1955.0" y="638" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">la ayuda (FAQ)</text>
+<ellipse cx="1955.0" cy="845" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="841" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Gestionar lecciones</text>
+<text x="1955.0" y="861" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y señas (catálogo)</text>
+<ellipse cx="1955.0" cy="932" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="938" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Gestionar retos</text>
+<ellipse cx="1955.0" cy="1019" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1015" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Registrar validación</text>
+<text x="1955.0" y="1035" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de señas (experto LSPy)</text>
+<ellipse cx="1955.0" cy="1106" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1102" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Gestionar cuentas</text>
+<text x="1955.0" y="1122" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de usuario</text>
+<ellipse cx="1955.0" cy="1193" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1189" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Configurar autenticación</text>
+<text x="1955.0" y="1209" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">y seguridad (RLS)</text>
+<ellipse cx="1955.0" cy="1280" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1276" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Consultar métricas</text>
+<text x="1955.0" y="1296" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">de uso</text>
+<ellipse cx="1955.0" cy="1367" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1363" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Atender incidencias</text>
+<text x="1955.0" y="1383" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">escaladas</text>
+<ellipse cx="1955.0" cy="1454" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1450" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Publicar nueva versión</text>
+<text x="1955.0" y="1470" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(APK, profesor 3D)</text>
+<ellipse cx="1955.0" cy="1541" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1537" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Respaldar la</text>
+<text x="1955.0" y="1557" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">base de datos</text>
+<ellipse cx="1955.0" cy="1628" rx="170.0" ry="28.0" fill="#ffffff" stroke="#5B9BD5" stroke-width="2.4"/>
+<text x="1955.0" y="1624" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">Actualizar la ayuda</text>
+<text x="1955.0" y="1644" font-family="Arial, Helvetica, sans-serif" font-size="17" font-weight="600" text-anchor="middle" fill="#1f2937">(FAQ) de la app</text>
+<text x="60" y="1790" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="bold" text-anchor="start" fill="#1F4E79">Especificación de roles</text>
+<rect x="60" y="1810" width="2320" height="40" fill="#5B9BD5"/>
+<text x="185.0" y="1836" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#ffffff">Rol</text>
+<text x="400.0" y="1836" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#ffffff">Tipo</text>
+<text x="980.0" y="1836" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#ffffff">Descripción y permisos</text>
+<text x="1925.0" y="1836" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="#ffffff">Dónde interviene</text>
+<rect x="60" y="1850" width="2320" height="83" fill="#ffffff" stroke="#1f2937" stroke-width="1"/>
+<text x="72" y="1874" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="start" fill="#1f2937">Usuario</text>
+<line x1="310" y1="1850" x2="310" y2="1933" stroke="#1f2937" stroke-width="1"/>
+<text x="322" y="1874" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Principal (humano)</text>
+<line x1="490" y1="1850" x2="490" y2="1933" stroke="#1f2937" stroke-width="1"/>
+<text x="502" y="1874" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Debe registrarse o iniciar sesión para usar la app. Después aprende con lecciones y el profesor 3D, practica,</text>
+<text x="502" y="1895" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">repasa, gana retos y cofres, gestiona su perfil y pide ayuda. Su progreso se sincroniza con su cuenta; solo puede</text>
+<text x="502" y="1916" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">leer y modificar sus propios datos (RLS).</text>
+<line x1="1470" y1="1850" x2="1470" y2="1933" stroke="#1f2937" stroke-width="1"/>
+<text x="1482" y="1874" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">App móvil + Supabase</text>
+<rect x="60" y="1933" width="2320" height="83" fill="#ffffff" stroke="#1f2937" stroke-width="1"/>
+<text x="72" y="1957" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="start" fill="#1f2937">Soporte</text>
+<line x1="310" y1="1933" x2="310" y2="2016" stroke="#1f2937" stroke-width="1"/>
+<text x="322" y="1957" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Principal (humano)</text>
+<line x1="490" y1="1933" x2="490" y2="2016" stroke="#1f2937" stroke-width="1"/>
+<text x="502" y="1957" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Revisa en la bandeja (support_inbox) los reportes que llegan desde la app, con el nombre y correo de quien</text>
+<text x="502" y="1978" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">escribió; diagnostica, responde por correo, marca el estado (en curso / resuelto) y escala al administrador. El</text>
+<text x="502" y="1999" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">usuario ve el estado en su historial.</text>
+<line x1="1470" y1="1933" x2="1470" y2="2016" stroke="#1f2937" stroke-width="1"/>
+<text x="1482" y="1957" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Panel de Supabase (fuera de la app)</text>
+<rect x="60" y="2016" width="2320" height="62" fill="#ffffff" stroke="#1f2937" stroke-width="1"/>
+<text x="72" y="2040" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="start" fill="#1f2937">Administrador</text>
+<line x1="310" y1="2016" x2="310" y2="2078" stroke="#1f2937" stroke-width="1"/>
+<text x="322" y="2040" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Principal (humano)</text>
+<line x1="490" y1="2016" x2="490" y2="2078" stroke="#1f2937" stroke-width="1"/>
+<text x="502" y="2040" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Gestiona el catálogo (lecciones, señas, retos), las cuentas, la seguridad y los respaldos; registra la validación</text>
+<text x="502" y="2061" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">de las señas y publica nuevas versiones.</text>
+<line x1="1470" y1="2016" x2="1470" y2="2078" stroke="#1f2937" stroke-width="1"/>
+<text x="1482" y="2040" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Panel de Supabase y repositorio (fuera de la app)</text>
+<rect x="60" y="2078" width="2320" height="62" fill="#ffffff" stroke="#1f2937" stroke-width="1"/>
+<text x="72" y="2102" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="start" fill="#1f2937">Cámara / Calendario</text>
+<line x1="310" y1="2078" x2="310" y2="2140" stroke="#1f2937" stroke-width="1"/>
+<text x="322" y="2102" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Secundario</text>
+<text x="322" y="2123" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">(dispositivo)</text>
+<line x1="490" y1="2078" x2="490" y2="2140" stroke="#1f2937" stroke-width="1"/>
+<text x="502" y="2102" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Servicios del teléfono que la app usa con permiso del usuario. La cámara se procesa en el teléfono; no se guardan</text>
+<text x="502" y="2123" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">ni envían imágenes.</text>
+<line x1="1470" y1="2078" x2="1470" y2="2140" stroke="#1f2937" stroke-width="1"/>
+<text x="1482" y="2102" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">App móvil</text>
+<rect x="60" y="2140" width="2320" height="62" fill="#ffffff" stroke="#1f2937" stroke-width="1"/>
+<text x="72" y="2164" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="bold" text-anchor="start" fill="#1f2937">Supabase</text>
+<line x1="310" y1="2140" x2="310" y2="2202" stroke="#1f2937" stroke-width="1"/>
+<text x="322" y="2164" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Secundario</text>
+<text x="322" y="2185" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">(sistema)</text>
+<line x1="490" y1="2140" x2="490" y2="2202" stroke="#1f2937" stroke-width="1"/>
+<text x="502" y="2164" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Autenticación (registro, sesión, código para recuperar la contraseña) y base de datos PostgreSQL para el progreso</text>
+<text x="502" y="2185" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">y los reportes. Sin Supabase no se puede crear cuenta ni entrar.</text>
+<line x1="1470" y1="2140" x2="1470" y2="2202" stroke="#1f2937" stroke-width="1"/>
+<text x="1482" y="2164" font-family="Arial, Helvetica, sans-serif" font-size="16" font-weight="normal" text-anchor="start" fill="#1f2937">Nube</text>
+<text x="60" y="2236" font-family="Arial, Helvetica, sans-serif" font-size="13.5" font-weight="normal" text-anchor="start" fill="#475569" font-style="italic">Notación UML: línea continua = asociación; «include» = siempre ocurre; «extend» = ocurre solo en ciertos casos; nota = precondición común.</text>
+</svg>

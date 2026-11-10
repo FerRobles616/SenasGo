@@ -130,6 +130,21 @@ class HiveService {
     return addXp(AppConstants.welcomeRewardXp);
   }
 
+  /// Borra el progreso, los reportes y las preferencias de la cuenta que
+  /// cerró sesión. Se conservan el catálogo y la apariencia elegida.
+  static Future<void> clearUserData() async {
+    final appearance = prefsBox.get('appearance');
+    await userBox.clear();
+    await progressBox.clear();
+    await gameBox.clear();
+    await Hive.box<dynamic>(AppConstants.hiveBoxSupport).clear();
+    await prefsBox.clear();
+    if (appearance != null) await prefsBox.put('appearance', appearance);
+    await lessonsBox.clear();
+    await seedIfEmpty();
+    await saveUser(UserModel.initial());
+  }
+
   // ─────────────────────────── Usuario ───────────────────────────
   static UserModel get currentUser =>
       userBox.values.isEmpty ? UserModel.initial() : userBox.values.first;

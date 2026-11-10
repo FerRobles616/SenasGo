@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
+import 'package:senasgo/features/cloud/data/cloud_sync_service.dart';
 import 'package:senasgo/features/support/data/support_diagnostics.dart';
 import 'package:senasgo/features/support/data/support_repository.dart';
 import 'package:senasgo/features/support/domain/support_ticket.dart';
-import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
 
-/// Formulario offline de comentarios, ideas y problemas.
+/// Formulario de comentarios, ideas y problemas.
 ///
-/// El reporte se guarda en Hive y queda disponible en el historial. Desde ahí
-/// se puede copiar o abrir en la app de correo; nunca se envía en segundo plano.
+/// Un solo botón: el reporte se envía a Soporte (Supabase) y queda en el
+/// historial del teléfono. Sin conexión queda pendiente y se envía solo en la
+/// próxima sincronización. El contacto es el correo de la cuenta.
 class SupportFormView extends StatefulWidget {
   const SupportFormView({
     this.initialCategory = SupportCategory.comment,
@@ -27,7 +28,6 @@ class SupportFormView extends StatefulWidget {
 
 class _SupportFormViewState extends State<SupportFormView> {
   final _message = TextEditingController();
-  final _email = TextEditingController();
   late SupportCategory _category = widget.initialCategory;
   bool _includeDiagnostics = true;
   bool _saving = false;
@@ -37,7 +37,6 @@ class _SupportFormViewState extends State<SupportFormView> {
   @override
   void dispose() {
     _message.dispose();
-    _email.dispose();
     super.dispose();
   }
 
@@ -60,23 +59,22 @@ class _SupportFormViewState extends State<SupportFormView> {
     final ticket = SupportTicket.create(
       category: _category,
       message: text,
-      email: _email.text,
       context: widget.contextLabel ?? '',
       appVersion: app.replaceFirst('SeñasGo ', ''),
       platform: diagnostics['plataforma'] ?? '',
       diagnostics: diagnostics,
     );
     await SupportRepository.save(ticket);
+    final sent = await CloudSyncService.sendTicket(ticket);
     if (!mounted) return;
     setState(() {
       _saving = false;
-      _saved = ticket;
+      _saved = sent ? ticket.copyWith(sentAt: DateTime.now()) : ticket;
     });
   }
 
   void _reset() {
     _message.clear();
-    _email.clear();
     setState(() {
       _saved = null;
       _error = null;
@@ -87,8 +85,7 @@ class _SupportFormViewState extends State<SupportFormView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title:
-            Text(_saved == null ? 'Ayuda y comentarios' : 'Reporte guardado'),
+        title: Text(_saved == null ? 'Ayuda y comentarios' : 'Reporte enviado'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_rounded),
           onPressed: () =>
@@ -191,26 +188,6 @@ class _SupportFormViewState extends State<SupportFormView> {
           },
         ),
         const SizedBox(height: 6),
-        TextField(
-          controller: _email,
-          keyboardType: TextInputType.emailAddress,
-          autocorrect: false,
-          decoration: InputDecoration(
-            labelText: 'Correo de contacto (opcional)',
-            hintText: 'Para que podamos responderte',
-            filled: true,
-            fillColor: AppColors.surface,
-            prefixIcon: const Icon(Icons.alternate_email_rounded),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: AppColors.outlineStrong),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(18),
-              borderSide: BorderSide(color: AppColors.outlineStrong),
-            ),
-          ),
-        ),
         const SizedBox(height: 8),
         SwitchListTile.adaptive(
           value: _includeDiagnostics,
@@ -220,7 +197,7 @@ class _SupportFormViewState extends State<SupportFormView> {
           title: const Text('Incluir datos técnicos',
               style: TextStyle(fontWeight: FontWeight.w700)),
           subtitle: Text(
-            'Versión, plataforma y avance. Sin fotos, sin nombre y sin cámara.',
+            'Versión, plataforma y tipo de equipo. Sin fotos ni cámara.',
             style: TextStyle(color: AppColors.muted, fontSize: 12.5),
           ),
         ),
@@ -258,7 +235,7 @@ class _SupportFormViewState extends State<SupportFormView> {
                   child: CircularProgressIndicator(
                       strokeWidth: 2.5, color: Colors.white),
                 )
-              : const Text('GUARDAR REPORTE',
+              : const Text('ENVIAR REPORTE',
                   style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
@@ -294,7 +271,7 @@ class _SupportFormViewState extends State<SupportFormView> {
           ),
         ),
         const SizedBox(height: 18),
-        Text('¡Gracias por escribirnos!',
+        Text(ticket.isSent ? '¡Reporte enviado!' : '¡Gracias por escribirnos!',
             textAlign: TextAlign.center,
             style: TextStyle(
                 fontSize: 25,
@@ -302,8 +279,11 @@ class _SupportFormViewState extends State<SupportFormView> {
                 color: AppColors.ink)),
         const SizedBox(height: 8),
         Text(
-          'El reporte quedó guardado en tu teléfono. Podés copiarlo o abrirlo '
-          'en tu app de correo cuando quieras.',
+          ticket.isSent
+              ? 'Le llegó al equipo de soporte. Te respondemos al correo de tu '
+                  'cuenta y vas a ver el estado en Ayuda → Tus reportes.'
+              : 'No hay conexión ahora. Tu reporte quedó guardado y se envía '
+                  'solo apenas vuelva internet.',
           textAlign: TextAlign.center,
           style: TextStyle(color: AppColors.muted, height: 1.45),
         ),
@@ -337,35 +317,6 @@ class _SupportFormViewState extends State<SupportFormView> {
           ),
         ),
         const SizedBox(height: 18),
-        PushableButton(
-          onPressed: () => SupportActions.copy(context, ticket),
-          color: AppColors.primary,
-          shadowColor: const Color(0xFF115E59),
-          child: const Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.copy_rounded, color: Colors.white, size: 20),
-              SizedBox(width: 8),
-              Text('COPIAR REPORTE',
-                  style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 16)),
-            ],
-          ),
-        ),
-        const SizedBox(height: 10),
-        OutlinedButton.icon(
-          onPressed: () => SupportActions.email(context, ticket),
-          icon: const Icon(Icons.mail_outline_rounded),
-          label: const Text('Abrir en mi correo'),
-          style: OutlinedButton.styleFrom(
-            minimumSize: const Size.fromHeight(52),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-          ),
-        ),
-        const SizedBox(height: 10),
         TextButton.icon(
           onPressed: _reset,
           icon: const Icon(Icons.add_comment_outlined),

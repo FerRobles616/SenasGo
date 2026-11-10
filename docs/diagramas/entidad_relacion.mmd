@@ -1,115 +1,140 @@
+---
+title: SeñasGo — Modelo entidad-relación (Supabase / PostgreSQL, 3FN)
+---
 erDiagram
-    USUARIO ||--|| ESTADO_JUEGO : "tiene"
-    USUARIO }o--o| LECCION : "cursa actualmente"
-    USUARIO ||--o{ INTENTO : "realiza"
-    USUARIO ||--o{ SENA_APRENDIDA : "aprende"
-    USUARIO ||--o{ LECCION_COMPLETADA : "completa"
-    USUARIO ||--o{ USUARIO_INSIGNIA : "obtiene"
-    LECCION ||--|{ LECCION_SENA : "agrupa"
-    SENA ||--o{ LECCION_SENA : "pertenece a"
-    CATEGORIA ||--o{ SENA : "clasifica"
-    SENA ||--o{ SENA_ETIQUETA : "se etiqueta"
-    SENA ||--o| REFERENCIA_SENA : "se evalúa con"
-    SENA ||--o{ INTENTO : "se practica en"
-    LECCION |o--o{ INTENTO : "contexto"
-    INTENTO ||--|{ INTENTO_PARAMETRO : "evalúa"
-    PARAMETRO_FORMATIVO ||--o{ INTENTO_PARAMETRO : "resultado de"
-    SENA ||--o{ SENA_APRENDIDA : ""
-    LECCION ||--o{ LECCION_COMPLETADA : ""
-    INSIGNIA ||--o{ USUARIO_INSIGNIA : "se otorga en"
+    AUTH_USERS ||--|| PROFILES : "tiene"
+    PROFILES ||--|| PREFERENCES : "configura"
+    PROFILES ||--|| STREAKS : "mantiene"
+    PROFILES ||--o{ USER_SIGNS : "aprende"
+    PROFILES ||--o{ ATTEMPTS : "realiza"
+    PROFILES ||--o{ USER_CHALLENGES : "reclama"
+    PROFILES ||--o{ USER_CHESTS : "abre"
+    PROFILES ||--o{ SUPPORT_TICKETS : "envía"
+    APPEARANCE_MODES ||--o{ PREFERENCES : "se elige en"
+    CATEGORIES ||--o{ LESSONS : "clasifica"
+    LESSONS ||--|{ SIGNS : "agrupa"
+    LESSONS ||--|| CHESTS : "premia con"
+    CHEST_RARITIES ||--o{ CHESTS : "define el premio de"
+    SIGNS ||--o{ USER_SIGNS : "es aprendida en"
+    SIGNS ||--o{ ATTEMPTS : "se practica en"
+    CHALLENGE_PERIODS ||--o{ CHALLENGES : "tipifica"
+    CHALLENGES ||--o{ USER_CHALLENGES : "se reclama en"
+    CHESTS ||--o{ USER_CHESTS : "se abre en"
+    SUPPORT_CATEGORIES ||--o{ SUPPORT_TICKETS : "clasifica"
+    TICKET_STATUSES ||--o{ SUPPORT_TICKETS : "indica el estado de"
 
-    USUARIO {
-        TEXT id PK "UUID local"
-        TEXT nombre
-        INTEGER nivel "1 a 5"
-        INTEGER xp ">= 0"
-        TEXT leccion_actual_id FK
-        TEXT creado_en
-        TEXT ultimo_ingreso
+    AUTH_USERS {
+        uuid id PK "Supabase Auth"
+        text email
     }
-    ESTADO_JUEGO {
-        TEXT usuario_id PK, FK
-        INTEGER racha_dias
-        TEXT fecha_racha
+    PROFILES {
+        uuid user_id PK, FK
+        text username
+        int xp
+        timestamptz created_at
+        timestamptz updated_at
     }
-    CATEGORIA {
-        TEXT id PK
-        TEXT nombre UK
+    PREFERENCES {
+        uuid user_id PK, FK
+        smallint daily_goal
+        text appearance FK
+        smallint reminder_weekday
+        smallint reminder_hour
+        smallint reminder_minute
+        timestamptz updated_at
     }
-    LECCION {
-        TEXT id PK
-        TEXT titulo
-        TEXT descripcion
-        INTEGER dificultad "1 a 5"
-        INTEGER orden UK
+    APPEARANCE_MODES {
+        text id PK
+        text name UK
     }
-    SENA {
-        TEXT id PK
-        TEXT nombre
-        TEXT categoria_id FK
-        TEXT descripcion
-        TEXT imagen
-        TEXT animacion
-        INTEGER rive_indice UK
-        TEXT etiqueta_modelo
-        INTEGER activa
-        INTEGER validada_lspy
+    STREAKS {
+        uuid user_id PK, FK
+        int current_days
+        date last_practice_date
+        int best_days
+        smallint freezes
+        timestamptz updated_at
     }
-    SENA_ETIQUETA {
-        TEXT sena_id PK, FK
-        TEXT etiqueta PK
+    CATEGORIES {
+        text id PK
+        text name UK
     }
-    LECCION_SENA {
-        TEXT leccion_id PK, FK
-        TEXT sena_id PK, FK
-        INTEGER orden
+    LESSONS {
+        text id PK
+        text category_id FK
+        text title
+        text description
+        smallint difficulty
+        smallint position UK
     }
-    REFERENCIA_SENA {
-        TEXT sena_id PK, FK
-        TEXT dedos "E/D/- x5"
-        TEXT palma
-        TEXT movimiento
-        INTEGER usa_rostro
+    SIGNS {
+        text id PK
+        text lesson_id FK
+        text name
+        text description
+        smallint position "UK con lesson_id"
     }
-    PARAMETRO_FORMATIVO {
-        TEXT id PK
-        TEXT nombre UK
-        INTEGER orden
+    CHALLENGE_PERIODS {
+        text id PK
+        text name UK
     }
-    INTENTO {
-        INTEGER id PK
-        TEXT usuario_id FK
-        TEXT sena_id FK
-        TEXT leccion_id FK
-        TEXT fecha
-        TEXT modo "edge_ai | conceptual"
-        INTEGER nivel_usuario
-        INTEGER correcto
-        INTEGER xp_otorgado "0 o 10"
+    CHALLENGES {
+        text id PK
+        text period_id FK
+        text title
+        int target
+        int reward_xp
     }
-    INTENTO_PARAMETRO {
-        INTEGER intento_id PK, FK
-        TEXT parametro_id PK, FK
-        TEXT estado "bien | a_mejorar | no_evaluado"
-        TEXT indicacion
+    CHEST_RARITIES {
+        text id PK
+        text name UK
+        int reward_xp
+        smallint reward_freezes
     }
-    SENA_APRENDIDA {
-        TEXT usuario_id PK, FK
-        TEXT sena_id PK, FK
-        TEXT aprendida_en
+    CHESTS {
+        text lesson_id PK, FK
+        text rarity_id FK
     }
-    LECCION_COMPLETADA {
-        TEXT usuario_id PK, FK
-        TEXT leccion_id PK, FK
-        TEXT completada_en
+    USER_SIGNS {
+        uuid user_id PK, FK
+        text sign_id PK, FK
+        timestamptz learned_at
     }
-    INSIGNIA {
-        TEXT id PK
-        TEXT nombre UK
-        TEXT descripcion
+    ATTEMPTS {
+        bigint id PK
+        uuid user_id FK
+        text sign_id FK
+        boolean correct
+        timestamptz attempted_at
     }
-    USUARIO_INSIGNIA {
-        TEXT usuario_id PK, FK
-        TEXT insignia_id PK, FK
-        TEXT obtenida_en
+    USER_CHALLENGES {
+        uuid user_id PK, FK
+        text challenge_id PK, FK
+        timestamptz claimed_at
+    }
+    USER_CHESTS {
+        uuid user_id PK, FK
+        text lesson_id PK, FK
+        timestamptz opened_at
+    }
+    SUPPORT_CATEGORIES {
+        text id PK
+        text name UK
+    }
+    TICKET_STATUSES {
+        text id PK
+        text name UK
+    }
+    SUPPORT_TICKETS {
+        uuid id PK "generado en el teléfono"
+        uuid user_id FK
+        text category FK
+        text status FK
+        text message
+        text screen
+        text app_version
+        text platform
+        text device_tier
+        timestamptz created_at
+        timestamptz resolved_at
     }

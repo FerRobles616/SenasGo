@@ -55,6 +55,22 @@ void main() {
     expect(SupportRepository.tickets.single.isResolved, isFalse);
   });
 
+  test('Sin conexión el reporte queda pendiente y luego se marca enviado',
+      () async {
+    final ticket = SupportTicket.create(
+      category: SupportCategory.bug,
+      message: 'El profesor 3D no carga en mi teléfono.',
+    );
+    await SupportRepository.save(ticket);
+    expect(SupportRepository.pending.map((t) => t.id), [ticket.id]);
+    expect(SupportRepository.tickets.single.isSent, isFalse);
+
+    final at = DateTime(2026, 11, 9, 15, 30);
+    await SupportRepository.markSent(ticket.id, at);
+    expect(SupportRepository.pending, isEmpty);
+    expect(SupportRepository.tickets.single.sentAt, at);
+  });
+
   test('El reporte de texto no incluye datos vacíos', () {
     final ticket = SupportTicket.create(
       category: SupportCategory.content,

@@ -2,7 +2,8 @@ import 'package:hive/hive.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/features/support/domain/support_ticket.dart';
 
-/// Persistencia local de reportes. Sin backend ni envío automático.
+/// Copia local de los reportes (historial en el teléfono). El envío a
+/// Supabase lo hace CloudSyncService.
 class SupportRepository {
   const SupportRepository._();
 
@@ -22,6 +23,17 @@ class SupportRepository {
   }
 
   static int get count => tickets.length;
+
+  /// Reportes que todavía no llegaron a Supabase.
+  static List<SupportTicket> get pending =>
+      tickets.where((t) => !t.isSent).toList();
+
+  static Future<void> markSent(String id, DateTime at) async {
+    final value = _box.get(id);
+    if (value is! Map) return;
+    final ticket = SupportTicket.fromMap(value).copyWith(sentAt: at);
+    await _box.put(id, ticket.toMap());
+  }
 
   static Future<SupportTicket> save(SupportTicket ticket) async {
     await _box.put(ticket.id, ticket.toMap());

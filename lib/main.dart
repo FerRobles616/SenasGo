@@ -12,6 +12,7 @@ import 'package:senasgo/features/cloud/data/cloud_sync_service.dart';
 import 'package:senasgo/core/services/inference_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/core/theme/theme_controller.dart';
+import 'package:senasgo/features/auth/presentation/views/auth_view.dart';
 import 'package:senasgo/features/avatar/presentation/views/teacher_view.dart';
 import 'package:senasgo/features/challenges/presentation/views/challenges_view.dart';
 import 'package:senasgo/features/chests/presentation/views/reward_chest_view.dart';
@@ -128,11 +129,24 @@ class _MyAppState extends State<MyApp> {
 GoRouter _buildRouter(List<CameraDescription> cameras) {
   return GoRouter(
     initialLocation: HiveService.onboardingDone ? '/' : '/welcome',
+    // Cuenta obligatoria: sin sesión todo lleva a /auth. Al iniciar sesión,
+    // una cuenta nueva pasa por la bienvenida y una existente va al camino.
+    refreshListenable: CloudSyncService.session,
+    redirect: (context, state) {
+      final atAuth = state.matchedLocation == '/auth';
+      if (!CloudSyncService.signedIn) return atAuth ? null : '/auth';
+      if (atAuth) return HiveService.onboardingDone ? '/' : '/welcome';
+      return null;
+    },
     errorBuilder: (context, state) => Scaffold(
       appBar: AppBar(title: const Text('SeñasGo')),
       body: Center(child: Text('Pantalla no encontrada: ${state.uri}')),
     ),
     routes: [
+      GoRoute(
+        path: '/auth',
+        builder: (context, state) => const AuthView(),
+      ),
       GoRoute(
         path: '/welcome',
         builder: (context, state) => const OnboardingView(),

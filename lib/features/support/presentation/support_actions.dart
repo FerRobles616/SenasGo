@@ -1,64 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
-import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/support/domain/support_ticket.dart';
-import 'package:url_launcher/url_launcher.dart';
-
-/// Acciones compartidas por el formulario y el historial de reportes.
-class SupportActions {
-  const SupportActions._();
-
-  static Future<bool> copy(BuildContext context, SupportTicket ticket) async {
-    try {
-      await Clipboard.setData(ClipboardData(text: ticket.toReport()));
-      if (context.mounted) {
-        _snack(context, 'Reporte copiado. Ya podés pegarlo donde quieras.');
-      }
-      return true;
-    } catch (_) {
-      if (context.mounted) {
-        _snack(context, 'No se pudo copiar. Probá seleccionar el texto.');
-      }
-      return false;
-    }
-  }
-
-  static Future<bool> email(BuildContext context, SupportTicket ticket) async {
-    final uri = Uri(
-      scheme: 'mailto',
-      path: AppConstants.supportEmail,
-      queryParameters: {
-        'subject': ticket.subject,
-        'body': ticket.toReport(),
-      },
-    );
-    try {
-      final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
-      if (!opened && context.mounted) {
-        await copy(context, ticket);
-      }
-      return opened;
-    } catch (_) {
-      if (context.mounted) {
-        await copy(context, ticket);
-      }
-      return false;
-    }
-  }
-
-  static void _snack(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        content:
-            Text(message, style: const TextStyle(fontWeight: FontWeight.w700)),
-      ));
-  }
-}
 
 /// Hoja rápida para pedir ayuda sin perder el contexto de la lección.
 class SupportSheet extends StatelessWidget {
@@ -115,7 +58,7 @@ class SupportSheet extends StatelessWidget {
                     color: AppColors.ink)),
             const SizedBox(height: 6),
             Text(
-              'Todo queda en tu teléfono. Nada se envía solo.',
+              'Tu mensaje le llega directo al equipo de soporte.',
               style: TextStyle(color: AppColors.muted, fontSize: 14.5),
             ),
             const SizedBox(height: 16),

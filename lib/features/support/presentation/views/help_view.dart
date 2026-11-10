@@ -4,7 +4,6 @@ import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/support/data/support_repository.dart';
 import 'package:senasgo/features/support/domain/support_ticket.dart';
-import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
 
@@ -180,15 +179,39 @@ class _Faq {
 
 const _faqs = [
   _Faq(
+    '¿Necesito una cuenta?',
+    'Sí. Para usar SeñasGo creás una cuenta con tu nombre, tu correo y una '
+        'contraseña. Así tu progreso queda guardado y lo recuperás en '
+        'cualquier teléfono.',
+  ),
+  _Faq(
     '¿Necesito internet para usar SeñasGo?',
-    'No. Las lecciones, la práctica con cámara, el profesor 3D y tus '
-        'reportes funcionan sin conexión. La app no tiene servidores ni '
-        'cuentas en la nube.',
+    'Solo para crear la cuenta o iniciar sesión. Después, las lecciones, el '
+        'profesor 3D y la práctica funcionan sin conexión, y tu progreso se '
+        'sincroniza solo cuando vuelve internet.',
+  ),
+  _Faq(
+    'Olvidé mi contraseña, ¿qué hago?',
+    'En la pantalla de inicio, entrá a Iniciar sesión y tocá «¿Olvidaste tu '
+        'contraseña?». Escribí tu correo, te llega un código de 6 dígitos y '
+        'con ese código creás una contraseña nueva.',
+  ),
+  _Faq(
+    '¿Qué pasa si cambio de teléfono o cierro sesión?',
+    'Tu progreso está en tu cuenta: en otro teléfono iniciás sesión y sigue '
+        'todo. Al cerrar sesión, el progreso se borra de este teléfono (no de '
+        'tu cuenta), para que otra persona no vea tus datos.',
+  ),
+  _Faq(
+    '¿Qué datos guarda mi cuenta?',
+    'Tu nombre, correo, XP, señas aprendidas, intentos de práctica, racha, '
+        'retos, cofres y preferencias. Nunca imágenes de la cámara. Solo vos '
+        'podés ver tus datos; Soporte ve únicamente los reportes que enviás.',
   ),
   _Faq(
     '¿La cámara graba o envía mis imágenes?',
     'No. La cámara se usa solo para analizar la forma de tu mano en el '
-        'momento. Los fotogramas no se guardan, no se suben y no salen del '
+        'momento. Las imágenes no se guardan, no se suben y no salen del '
         'teléfono.',
   ),
   _Faq(
@@ -198,32 +221,33 @@ const _faqs = [
         'dentro del recuadro y tocás Comenzar.',
   ),
   _Faq(
+    '¿Puedo aprender sin cámara?',
+    'Sí. La biblioteca, el profesor 3D paso a paso y el repaso rápido '
+        'funcionan aunque el teléfono no tenga cámara o no des permiso. Solo '
+        'la práctica con la mano la necesita.',
+  ),
+  _Faq(
     '¿Por qué la demostración dice “por validar”?',
-    'Las animaciones del jaguareté son ilustrativas y están pendientes de '
+    'Las señas del profesor 3D son ilustrativas y están pendientes de '
         'revisión por una persona experta en LSPy. Sirven para practicar la '
         'forma general, no como referencia oficial del idioma.',
   ),
   _Faq(
-    '¿Cómo funcionan los XP?',
-    'Los XP muestran tu avance y suben tu nivel. Se ganan practicando y no '
-        'se compran ni se gastan.',
-  ),
-  _Faq(
-    '¿Puedo aprender sin cámara?',
-    'Sí. La biblioteca, las explicaciones de los cinco parámetros y las '
-        'demostraciones 3D funcionan aunque el equipo no tenga cámara o no '
-        'des permiso. La práctica gestual es la única parte que la necesita.',
-  ),
-  _Faq(
-    '¿Dónde se guarda mi progreso?',
-    'En este teléfono, en una base local. Si desinstalás la app o borrás sus '
-        'datos, el progreso y los reportes se pierden. No hay copia en la nube.',
+    '¿Cómo funcionan los XP, los retos y los cofres?',
+    'Ganás XP con cada seña correcta y al reclamar retos. Al completar una '
+        'lección se abre un cofre con XP extra o un protector de racha. Los XP '
+        'suben tu nivel; no se compran ni se gastan.',
   ),
   _Faq(
     '¿Cómo envío un reporte?',
-    'Después de guardarlo, abrí Tus reportes y elegí Copiar o Abrir en mi '
-        'correo. SeñasGo no envía nada automáticamente: vos decidís cuándo y '
-        'desde qué cuenta.',
+    'En Ayuda, escribí lo que pasó y tocá Enviar reporte: le llega directo '
+        'al equipo de soporte. Si no tenés conexión, se envía solo cuando '
+        'vuelva internet. En Tus reportes ves si ya está resuelto.',
+  ),
+  _Faq(
+    '¿Cómo borro mi cuenta?',
+    'Enviá un reporte pidiéndolo desde la cuenta que querés borrar. El '
+        'equipo la elimina junto con todos tus datos.',
   ),
 ];
 
@@ -399,14 +423,21 @@ class _TicketCard extends StatelessWidget {
                       style: TextStyle(
                           color: AppColors.muted, fontSize: 13, height: 1.35),
                     ),
-                    if (resolved) ...[
-                      const SizedBox(height: 5),
-                      Text('Marcado como resuelto',
-                          style: TextStyle(
-                              color: AppColors.success,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w700)),
-                    ],
+                    const SizedBox(height: 5),
+                    Text(
+                        resolved
+                            ? 'Resuelto por soporte'
+                            : ticket.isSent
+                                ? 'Enviado · en revisión'
+                                : 'Pendiente de envío (sin conexión)',
+                        style: TextStyle(
+                            color: resolved
+                                ? AppColors.success
+                                : ticket.isSent
+                                    ? AppColors.primary
+                                    : AppColors.muted,
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.w700)),
                   ],
                 ),
               ),
@@ -432,7 +463,8 @@ class _TicketSheet extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: const Text('¿Borrar este reporte?'),
         content: const Text(
-            'Se elimina solo de este teléfono. No se puede recuperar.'),
+            'Se borra del historial de este teléfono. Si ya se envió, el '
+            'equipo de soporte lo sigue teniendo.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(dialogContext).pop(false),
@@ -448,11 +480,6 @@ class _TicketSheet extends StatelessWidget {
     );
     if (confirmed != true) return;
     await SupportRepository.delete(ticket.id);
-    onChanged();
-  }
-
-  Future<void> _toggleResolved() async {
-    await SupportRepository.setResolved(ticket.id, !ticket.isResolved);
     onChanged();
   }
 
@@ -498,7 +525,8 @@ class _TicketSheet extends StatelessWidget {
             Text(
               '${ticket.createdAt.day.toString().padLeft(2, '0')}/'
               '${ticket.createdAt.month.toString().padLeft(2, '0')}/'
-              '${ticket.createdAt.year} · guardado en este teléfono',
+              '${ticket.createdAt.year} · '
+              '${ticket.isSent ? 'enviado a soporte' : 'pendiente de envío'}',
               style: TextStyle(color: AppColors.muted, fontSize: 12.5),
             ),
             const SizedBox(height: 14),
@@ -515,36 +543,7 @@ class _TicketSheet extends StatelessWidget {
                         color: AppColors.ink, height: 1.45, fontSize: 14)),
               ),
             ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => SupportActions.copy(context, ticket),
-                    icon: const Icon(Icons.copy_rounded, size: 19),
-                    label: const Text('Copiar'),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => SupportActions.email(context, ticket),
-                    icon: const Icon(Icons.mail_outline_rounded, size: 19),
-                    label: const Text('Correo'),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            TextButton.icon(
-              onPressed: _toggleResolved,
-              icon: Icon(ticket.isResolved
-                  ? Icons.undo_rounded
-                  : Icons.check_circle_outline_rounded),
-              label: Text(ticket.isResolved
-                  ? 'Marcar como pendiente'
-                  : 'Marcar como resuelto'),
-            ),
+            const SizedBox(height: 10),
             TextButton.icon(
               onPressed: () => _delete(context),
               icon: const Icon(Icons.delete_outline_rounded),

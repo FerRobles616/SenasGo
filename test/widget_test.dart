@@ -14,6 +14,7 @@ import 'package:senasgo/core/vision/tolerance_profile.dart';
 import 'package:senasgo/features/learning/presentation/views/lesson_list_view.dart';
 import 'package:senasgo/features/practice/domain/sign_evaluation.dart';
 import 'package:senasgo/features/practice/domain/sign_reference.dart';
+import 'package:senasgo/features/cloud/data/cloud_sync_service.dart';
 import 'package:senasgo/main.dart';
 import 'package:senasgo/shared/models/user_model.dart';
 
@@ -30,6 +31,8 @@ void main() {
     if (HiveService.userBox.isEmpty) {
       await HiveService.saveUser(UserModel.initial());
     }
+    // La app exige cuenta: estas pruebas arrancan con sesión simulada.
+    CloudSyncService.debugSignedIn = true;
     // Los tests de la app arrancan en el camino, no en la bienvenida.
     await HiveService.setOnboardingDone(true);
   });

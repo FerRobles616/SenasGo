@@ -52,3 +52,6 @@ app.*.map.json
 
 # Modelos VRM de trabajo (no versionar muestras con licencia)
 *.vrm
+
+# Configuración local de Supabase (no subir)
+supabase.json

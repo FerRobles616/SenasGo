@@ -15,9 +15,9 @@ import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 
 /// Perfil de quien aprende.
 ///
-/// Sin sesión se muestra como invitado y el apodo es local. Con una cuenta
-/// opcional, el progreso se sincroniza. La liga y las novedades siguen siendo
-/// locales: no inventamos amigos ni rankings falsos.
+/// Siempre hay una cuenta iniciada: el nombre y el progreso se sincronizan.
+/// La liga y las novedades siguen siendo locales: no inventamos amigos ni
+/// rankings falsos.
 class ProfileView extends StatefulWidget {
   const ProfileView({super.key});
 
@@ -38,22 +38,12 @@ class _ProfileViewState extends State<ProfileView> {
     });
   }
 
-  bool get _isGuest => CloudSyncService.user == null;
-
-  String get _displayName {
-    if (_isGuest && _user.username.trim() == 'Usuario') return 'Invitado';
-    return _user.username;
-  }
+  String get _displayName => _user.username;
 
   Future<void> _editName() async {
-    final isGuest = _isGuest;
     final result = await showDialog<String>(
       context: context,
-      builder: (_) => _EditNameDialog(
-        initialName:
-            isGuest && _user.username.trim() == 'Usuario' ? '' : _user.username,
-        isGuest: isGuest,
-      ),
+      builder: (_) => _EditNameDialog(initialName: _user.username),
     );
     if (result == null) return;
     final clean = result.trim();
@@ -62,24 +52,15 @@ class _ProfileViewState extends State<ProfileView> {
         ScaffoldMessenger.of(context)
           ..hideCurrentSnackBar()
           ..showSnackBar(SnackBar(
-            content: Text(isGuest
-                ? 'Escribí un apodo para guardar en este teléfono.'
-                : 'Escribí tu nombre para guardarlo en la cuenta.'),
+            content: Text('Escribí tu nombre para guardarlo en la cuenta.'),
           ));
       }
       return;
     }
     await HiveService.updateUsername(clean);
-    if (!isGuest) await CloudSyncService.syncNow();
+    await CloudSyncService.syncNow();
     if (!mounted) return;
     _reload();
-    if (isGuest) {
-      ScaffoldMessenger.of(context)
-        ..hideCurrentSnackBar()
-        ..showSnackBar(const SnackBar(
-          content: Text('Apodo guardado solo en este teléfono.'),
-        ));
-    }
   }
 
   Future<void> _editGoal() async {
@@ -311,9 +292,7 @@ class _ProfileViewState extends State<ProfileView> {
                           ),
                           const SizedBox(height: 3),
                           Text(
-                            _isGuest
-                                ? 'Nivel ${_user.level} · Invitado'
-                                : 'Nivel ${_user.level} · ${CloudSyncService.email ?? 'Cuenta conectada'}',
+                            'Nivel ${_user.level} · ${CloudSyncService.email ?? 'Cuenta conectada'}',
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
@@ -326,8 +305,7 @@ class _ProfileViewState extends State<ProfileView> {
                       ),
                     ),
                     IconButton(
-                      tooltip:
-                          _isGuest ? 'Editar apodo local' : 'Editar nombre',
+                      tooltip: 'Editar nombre',
                       onPressed: _editName,
                       icon: const Icon(Icons.edit_rounded, color: Colors.white),
                     ),
@@ -596,10 +574,8 @@ class _ProfileViewState extends State<ProfileView> {
           ),
           const SizedBox(height: 16),
           Text(
-            _isGuest
-                ? 'Tus datos se guardan en este teléfono. La nube es opcional.'
-                : 'Tu progreso se sincroniza con tu cuenta y también se guarda '
-                    'en este teléfono.',
+            'Tu progreso se sincroniza con tu cuenta y también se guarda '
+            'en este teléfono.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.muted,
@@ -845,13 +821,9 @@ class _ProfileStat extends StatelessWidget {
 }
 
 class _EditNameDialog extends StatefulWidget {
-  const _EditNameDialog({
-    required this.initialName,
-    required this.isGuest,
-  });
+  const _EditNameDialog({required this.initialName});
 
   final String initialName;
-  final bool isGuest;
 
   @override
   State<_EditNameDialog> createState() => _EditNameDialogState();
@@ -870,16 +842,14 @@ class _EditNameDialogState extends State<_EditNameDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text(widget.isGuest ? 'Tu apodo local' : 'Tu nombre'),
+      title: const Text('Tu nombre'),
       content: SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(
-              widget.isGuest
-                  ? 'Solo se guarda en este teléfono. No crea una cuenta.'
-                  : 'Se sincroniza con tu cuenta y se guarda en este teléfono.',
+              'Se sincroniza con tu cuenta y se guarda en este teléfono.',
               style: TextStyle(
                 color: AppColors.muted,
                 fontSize: 12.5,
@@ -892,10 +862,10 @@ class _EditNameDialogState extends State<_EditNameDialog> {
               autofocus: true,
               textCapitalization: TextCapitalization.words,
               maxLength: 24,
-              decoration: InputDecoration(
-                labelText: widget.isGuest ? 'Apodo' : 'Nombre',
-                hintText: widget.isGuest ? 'Escribí tu apodo' : 'Tu nombre',
-                prefixIcon: const Icon(Icons.person_outline_rounded),
+              decoration: const InputDecoration(
+                labelText: 'Nombre',
+                hintText: 'Tu nombre',
+                prefixIcon: Icon(Icons.person_outline_rounded),
               ),
               onSubmitted: (value) => Navigator.pop(context, value),
             ),

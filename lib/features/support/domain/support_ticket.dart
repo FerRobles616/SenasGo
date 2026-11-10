@@ -19,8 +19,9 @@ enum SupportCategory {
       );
 }
 
-/// Reporte guardado localmente. No se envía solo: la persona decide si lo
-/// copia o lo abre en su app de correo.
+/// Reporte de soporte. Se guarda en el teléfono y se envía a Supabase
+/// (tabla support_tickets). Si no hay conexión queda pendiente y se envía en
+/// la próxima sincronización. [isResolved] lo marca Soporte desde el panel.
 class SupportTicket extends Equatable {
   const SupportTicket({
     required this.id,
@@ -33,6 +34,7 @@ class SupportTicket extends Equatable {
     this.platform = '',
     this.diagnostics = const {},
     this.isResolved = false,
+    this.sentAt,
   });
 
   factory SupportTicket.create({
@@ -73,6 +75,7 @@ class SupportTicket extends Equatable {
               entry.key.toString(): entry.value.toString(),
         },
         isResolved: map['isResolved'] as bool? ?? false,
+        sentAt: DateTime.tryParse(map['sentAt'] as String? ?? ''),
       );
 
   final String id;
@@ -85,6 +88,11 @@ class SupportTicket extends Equatable {
   final String platform;
   final Map<String, String> diagnostics;
   final bool isResolved;
+
+  /// Cuándo llegó a Supabase. null = pendiente de envío.
+  final DateTime? sentAt;
+
+  bool get isSent => sentAt != null;
 
   String get subject =>
       '[SeñasGo] ${category.label} · ${_shortDate(createdAt)}';
@@ -100,9 +108,10 @@ class SupportTicket extends Equatable {
         'platform': platform,
         'diagnostics': diagnostics,
         'isResolved': isResolved,
+        if (sentAt != null) 'sentAt': sentAt!.toIso8601String(),
       };
 
-  SupportTicket copyWith({bool? isResolved}) => SupportTicket(
+  SupportTicket copyWith({bool? isResolved, DateTime? sentAt}) => SupportTicket(
         id: id,
         createdAt: createdAt,
         category: category,
@@ -113,6 +122,7 @@ class SupportTicket extends Equatable {
         platform: platform,
         diagnostics: diagnostics,
         isResolved: isResolved ?? this.isResolved,
+        sentAt: sentAt ?? this.sentAt,
       );
 
   /// Texto listo para copiar o pegar en un correo.
