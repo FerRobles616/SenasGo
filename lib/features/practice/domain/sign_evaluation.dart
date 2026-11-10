@@ -3,12 +3,15 @@ import 'package:senasgo/features/practice/domain/sign_reference.dart';
 enum ParameterStatus { passed, failed, notEvaluated }
 
 class ParameterResult {
-  const ParameterResult(this.status, {this.hint = ''});
+  const ParameterResult(this.status, {this.hint = '', this.score});
 
   final ParameterStatus status;
 
   /// Indicación cualitativa para corregir (nunca un porcentaje).
   final String hint;
+
+  /// Puntaje interno 0-1 para comparar intentos. No se muestra en la UI.
+  final double? score;
 }
 
 /// Resultado de evaluar una seña sobre los 5 parámetros formativos.
@@ -19,6 +22,17 @@ class SignEvaluation {
 
   bool get isCorrect =>
       parameters.values.every((p) => p.status != ParameterStatus.failed);
+
+  /// Para elegir el mejor tramo: cada parámetro aprobado vale 1 y los
+  /// puntajes parciales desempatan. No se muestra en la UI.
+  double get score {
+    var s = 0.0;
+    for (final p in parameters.values) {
+      if (p.status != ParameterStatus.failed) s += 1;
+      s += (p.score ?? 0) * 0.1;
+    }
+    return s;
+  }
 
   /// Primer parámetro que falló, en orden pedagógico.
   SignParameter? get primaryIssue {

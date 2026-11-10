@@ -193,10 +193,9 @@ class LeagueView extends StatelessWidget {
                       ),
                       const SizedBox(height: 3),
                       Text(
-                        'SeñasGo no tiene cuentas ni servidores. Esta liga se '
-                        'calcula solo con tu XP semanal guardado en este '
-                        'teléfono; no compite con otras personas ni comparte '
-                        'tus datos.',
+                        'Esta liga se calcula solo con tu XP de la semana: no '
+                        'compite con otras personas ni muestra tus datos a '
+                        'nadie.',
                         style: TextStyle(
                           color: AppColors.primaryDeep.withValues(alpha: 0.9),
                           fontSize: 12.5,

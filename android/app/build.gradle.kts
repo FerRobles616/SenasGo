@@ -30,6 +30,11 @@ android {
         versionName = flutter.versionName
     }
 
+    // MediaPipe abre los modelos directamente desde los assets: sin comprimir.
+    androidResources {
+        noCompress += "task"
+    }
+
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
@@ -47,4 +52,10 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+// Detección de manos y pose para la práctica con cámara (MediaPipe Tasks,
+// oficial de Google). Los modelos están en src/main/assets/mediapipe/.
+dependencies {
+    implementation("com.google.mediapipe:tasks-vision:1.2.2")
 }

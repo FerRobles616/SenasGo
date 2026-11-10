@@ -591,7 +591,7 @@ class SessionCard extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.w600)),
               Spacer(),
-              Text('Sesión local',
+              Text('Esta práctica',
                   style: TextStyle(color: Colors.white70, fontSize: 13)),
             ],
           ),

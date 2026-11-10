@@ -18,7 +18,7 @@ class CommunityView extends StatelessWidget {
 
   Future<void> _copyInvite(BuildContext context) async {
     const message = 'Estoy aprendiendo Lengua de Señas Paraguaya con SeñasGo. '
-        'Tiene un profesor 3D, lecciones cortas y funciona sin internet. '
+        'Tiene un profesor 3D, lecciones cortas y práctica con cámara. '
         '¿Me acompañás?';
     await Clipboard.setData(const ClipboardData(text: message));
     if (!context.mounted) return;
@@ -94,8 +94,8 @@ class CommunityView extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Sin cuentas ni datos en la nube. Compartí la app y '
-                        'tu progreso cuando vos quieras.',
+                        'Nada se publica solo. Compartí la app y tu progreso '
+                        'cuando vos quieras.',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.88),
                           fontWeight: FontWeight.w600,
@@ -203,7 +203,7 @@ class CommunityView extends StatelessWidget {
           const SizedBox(height: 20),
           const AppSectionTitle(
             'Novedades',
-            subtitle: 'Tus hitos y prácticas recientes, solo en este teléfono.',
+            subtitle: 'Tus hitos y prácticas recientes.',
           ),
           const SizedBox(height: 10),
           if (feed.isEmpty)

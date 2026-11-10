@@ -5,36 +5,47 @@ import 'package:flutter/foundation.dart';
 import 'package:logger/logger.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/landmark_engine.dart';
-import 'package:senasgo/core/services/landmark_engine_stub.dart'
-    if (dart.library.io) 'package:senasgo/core/services/landmark_engine_io.dart'
-    as engine;
 import 'package:senasgo/core/vision/frame_processor.dart';
-import 'package:senasgo/core/vision/hand_landmarks.dart';
 import 'package:senasgo/core/vision/sign_evaluator.dart';
 import 'package:senasgo/core/vision/tolerance_profile.dart';
+import 'package:senasgo/core/vision/vision_frame.dart';
 import 'package:senasgo/features/practice/domain/sign_evaluation.dart';
 import 'package:senasgo/features/practice/domain/sign_reference.dart';
 
-/// edgeAi: MediaPipe Hands (.tflite) real en el dispositivo.
-/// conceptual: sin modelos en assets/models/ -> reconocimiento simulado,
-/// tal como define el alcance de la documentación v3_04.
+/// edgeAi: MediaPipe (manos + cuerpo) real en el dispositivo.
+/// conceptual: sin detector disponible -> reconocimiento simulado, tal como
+/// define el alcance de la documentación v3_04.
 enum EngineMode { edgeAi, conceptual }
 
 class FrameAnalysis {
-  const FrameAnalysis(
-      {required this.lighting, required this.handVisible, this.hand});
+  const FrameAnalysis({
+    required this.lighting,
+    required this.handVisible,
+    this.bodyVisible = false,
+    this.frame,
+  });
 
   final LightingStatus lighting;
   final bool handVisible;
-  final HandLandmarks? hand;
+
+  /// Se ven la cara y los hombros (necesario para evaluar el lugar).
+  final bool bodyVisible;
+  final VisionFrame? frame;
 }
 
 /// Motor de inferencia local (Edge AI). Nada sale del teléfono.
 class InferenceService extends ChangeNotifier {
+  InferenceService({LandmarkEngine? engine})
+      : _engine = engine ?? MediaPipeLandmarkEngine();
+
+  /// Lado mayor de la imagen que recibe MediaPipe: suficiente para ver los
+  /// dedos con la persona a medio cuerpo, sin calentar el teléfono.
+  static const int detectorMaxSide = 512;
+
   final Logger _logger = Logger();
   final Random _random = Random();
   final SignEvaluator _evaluator = const SignEvaluator();
-  final LandmarkEngine _engine = engine.createLandmarkEngine();
+  final LandmarkEngine _engine;
 
   bool _loaded = false;
   bool _busy = false;
@@ -53,9 +64,7 @@ class InferenceService extends ChangeNotifier {
     _loaded = true;
     final edge = await _engine.load();
     _mode = edge ? EngineMode.edgeAi : EngineMode.conceptual;
-    if (!edge) {
-      _logger.w('Sin modelo de landmarks. Modo conceptual activo.');
-    }
+    if (!edge) _logger.w('Sin detector de manos. Modo conceptual activo.');
     notifyListeners();
   }
 
@@ -78,11 +87,12 @@ class InferenceService extends ChangeNotifier {
     if (_busy) return null;
     _busy = true;
     try {
+      final timestamp = DateTime.now();
       final edge = _mode == EngineMode.edgeAi;
       final request = FrameRequest(
         FrameData.fromCameraImage(image,
             rotationDeg: rotationDeg, mirror: mirror),
-        inputSize: edge ? _engine.inputSize : null,
+        maxSide: edge ? detectorMaxSide : null,
       );
       // compute() con función top-level: no captura `this` (no enviable).
       final processed = await compute(processFrame, request);
@@ -95,16 +105,34 @@ class InferenceService extends ChangeNotifier {
         // La mano "aparece" tras ~1 s de captura si el sorteo lo permite.
         final visible =
             _simHandVisible && _simFrames > AppConstants.targetFpsMin;
-        return FrameAnalysis(lighting: LightingStatus.ok, handVisible: visible);
+        return FrameAnalysis(
+            lighting: LightingStatus.ok, handVisible: visible);
       }
 
-      final hand = await _engine.detect(processed.modelInput!);
-      final visible =
-          hand != null && hand.presence >= tolerance.minHandPresence;
+      final raw = await _engine.detect(
+        processed.rgba!,
+        width: processed.width,
+        height: processed.height,
+        timestamp: timestamp,
+      );
+      if (raw == null) {
+        return const FrameAnalysis(
+            lighting: LightingStatus.ok, handVisible: false);
+      }
+      final frame = VisionFrame(
+        hands: [
+          for (final h in raw.hands)
+            if (h.presence >= tolerance.minHandPresence) h
+        ],
+        body: raw.body,
+        aspect: raw.aspect,
+        timestamp: raw.timestamp,
+      );
       return FrameAnalysis(
         lighting: LightingStatus.ok,
-        handVisible: visible,
-        hand: visible ? hand : null,
+        handVisible: frame.hands.isNotEmpty,
+        bodyVisible: frame.shoulderWidth != null,
+        frame: frame,
       );
     } catch (e) {
       _logger.e('Error analizando fotograma: $e');
@@ -115,15 +143,12 @@ class InferenceService extends ChangeNotifier {
   }
 
   /// Evalúa los fotogramas capturados contra la seña objetivo.
-  Future<SignEvaluation> evaluate({
-    required List<HandLandmarks> frames,
+  SignEvaluation evaluate({
+    required List<VisionFrame> frames,
     required String signId,
-    required String? classifierLabel,
     required ToleranceProfile tolerance,
-  }) async {
-    final reference = SignReference.of(signId);
-
-    if (_mode == EngineMode.conceptual || frames.isEmpty) {
+  }) {
+    if (_mode == EngineMode.conceptual) {
       const simulated = ParameterResult(ParameterStatus.notEvaluated,
           hint: 'Evaluación simulada.');
       return SignEvaluation({
@@ -136,20 +161,10 @@ class InferenceService extends ChangeNotifier {
           ),
       });
     }
-
-    double? classifierScore;
-    if (classifierLabel != null) {
-      classifierScore = await _engine.classify(
-        frames.last.toClassifierFeatures(),
-        classifierLabel,
-      );
-    }
-
-    return _evaluator.evaluate(
+    return _evaluator.evaluateBest(
       frames: frames,
-      reference: reference,
+      reference: SignReference.of(signId),
       tolerance: tolerance,
-      classifierScore: classifierScore,
     );
   }
 

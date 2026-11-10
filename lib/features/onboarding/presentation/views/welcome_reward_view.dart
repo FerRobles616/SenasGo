@@ -183,7 +183,7 @@ class _WelcomeRewardViewState extends State<WelcomeRewardView> {
                                 ),
                                 Text(
                                   claimed
-                                      ? 'Tu XP ya está guardado en este teléfono.'
+                                      ? 'Tu XP ya está guardado en tu cuenta.'
                                       : 'Sumá +${AppConstants.welcomeRewardXp} XP para arrancar.',
                                   style: TextStyle(
                                     color: AppColors.muted,
@@ -236,8 +236,8 @@ class _WelcomeRewardViewState extends State<WelcomeRewardView> {
                     ),
                     const SizedBox(height: 3),
                     Text(
-                      'Sin cuentas, sin nube: tu recompensa y tu progreso se '
-                      'guardan solo en este teléfono.',
+                      'Tu recompensa y tu progreso se guardan en tu cuenta: '
+                      'no los perdés si cambiás de teléfono.',
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.68),

@@ -1,81 +1,124 @@
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-/// Los 21 puntos de MediaPipe Hands, normalizados a [0,1] dentro del
-/// recuadro guía (x a la derecha, y hacia abajo, z negativo = hacia la cámara).
+/// Los 21 puntos de una mano según MediaPipe Hand Landmarker.
 ///
-/// Trabajar sobre landmarks (y no sobre píxeles) hace que anillos, relojes,
-/// mangas largas o el color de piel no afecten la evaluación: solo cuenta la
-/// geometría de las articulaciones.
+/// - [points]: en la imagen (espejada, como la vista previa), x e y en [0,1]
+///   (x a la derecha, y hacia abajo); z relativo a la muñeca.
+/// - [world]: los mismos puntos en 3D, en metros, centrados en la mano y con
+///   los mismos ejes (z negativo = hacia la cámara). Son la base de la forma
+///   de la mano y de la orientación de la palma: no dependen de la distancia a
+///   la cámara ni de cómo se inclina la mano en la imagen.
+///
+/// Trabajar sobre puntos (y no sobre píxeles) hace que anillos, relojes,
+/// mangas largas o el color de piel no afecten la evaluación.
 class HandLandmarks {
   HandLandmarks({
     required this.points,
+    Float32List? world,
     required this.presence,
     required this.isRightHand,
     required this.timestamp,
-  }) : assert(points.length == 63);
+  })  : world = world ?? points,
+        assert(points.length == 63);
 
-  /// x0, y0, z0, x1, y1, z1, ... (21 puntos).
+  /// x0, y0, z0, x1, y1, z1, ... (21 puntos) en la imagen.
   final Float32List points;
 
-  /// Confianza del modelo de que hay una mano (0-1).
+  /// Puntos 3D en metros (si el detector no los da, se usan los de imagen).
+  final Float32List world;
+
+  /// Confianza del detector en la mano y su lateralidad (0-1).
   final double presence;
 
-  /// Lateralidad según MediaPipe (asume imagen espejada, como la nuestra).
+  /// Mano derecha real de la persona.
   final bool isRightHand;
 
   final DateTime timestamp;
 
   static const int wrist = 0;
   static const int thumbIp = 3, thumbTip = 4;
-  static const int indexMcp = 5, middleMcp = 9, pinkyMcp = 17;
+  static const int indexMcp = 5, middleMcp = 9, ringMcp = 13, pinkyMcp = 17;
+  static const int indexTip = 8, middleTip = 12;
 
-  /// (PIP, TIP) de índice, medio, anular y meñique.
-  static const List<(int, int)> _fingerJoints = [
-    (6, 8),
-    (10, 12),
-    (14, 16),
-    (18, 20)
+  /// (MCP, PIP, DIP, TIP) de índice, medio, anular y meñique.
+  static const List<List<int>> fingerChains = [
+    [5, 6, 7, 8],
+    [9, 10, 11, 12],
+    [13, 14, 15, 16],
+    [17, 18, 19, 20],
   ];
 
+  /// Punto en la imagen.
   Vec3 point(int i) =>
       Vec3(points[i * 3], points[i * 3 + 1], points[i * 3 + 2]);
 
-  /// Tamaño de la palma (muñeca -> nudillo medio); escala de referencia.
+  /// Punto en 3D (metros).
+  Vec3 worldPoint(int i) =>
+      Vec3(world[i * 3], world[i * 3 + 1], world[i * 3 + 2]);
+
+  /// Tamaño de la palma en la imagen (muñeca -> nudillo medio).
   double get palmSize => point(wrist).distanceTo(point(middleMcp));
+
+  /// Centro de la palma en la imagen.
+  Vec3 get palmCenter {
+    final a = point(wrist), b = point(indexMcp);
+    final c = point(middleMcp), d = point(pinkyMcp);
+    return Vec3((a.x + b.x + c.x + d.x) / 4, (a.y + b.y + c.y + d.y) / 4, 0);
+  }
+
+  /// Qué tan recto está cada dedo (índice, medio, anular, meñique):
+  /// distancia nudillo-punta dividida por el largo del dedo. ~1 = recto,
+  /// ~0.4 = doblado contra la palma. Se mide en 3D.
+  List<double> get fingerStraightness => [
+        for (final c in fingerChains)
+          _straightness(worldPoint(c[0]), worldPoint(c[1]), worldPoint(c[2]),
+              worldPoint(c[3])),
+      ];
+
+  static double _straightness(Vec3 mcp, Vec3 pip, Vec3 dip, Vec3 tip) {
+    final length =
+        mcp.distanceTo(pip) + pip.distanceTo(dip) + dip.distanceTo(tip);
+    return length < 1e-9 ? 0 : mcp.distanceTo(tip) / length;
+  }
+
+  /// Rectitud por debajo de la cual el dedo cuenta como doblado y por encima
+  /// de la cual cuenta como extendido. Calibrado con video real y con el
+  /// esqueleto del profesor (extendido 0.93-1.0; doblado 0.36-0.65).
+  static const double curledBelow = 0.66, extendedAbove = 0.86;
 
   /// Grado de extensión de cada dedo (pulgar, índice, medio, anular, meñique)
   /// entre 0 (doblado) y 1 (extendido).
   List<double> get fingerExtension {
-    final w = point(wrist);
-    double soft(double ratio) =>
-        ((ratio - 0.95) / (1.30 - 0.95)).clamp(0.0, 1.0);
+    double map(double s) =>
+        ((s - curledBelow) / (extendedAbove - curledBelow)).clamp(0.0, 1.0);
 
-    // Pulgar: punta más lejos del nudillo medio que la articulación IP.
-    final m = point(middleMcp);
-    final thumb = soft(point(thumbTip).distanceTo(m) /
-        math.max(point(thumbIp).distanceTo(m), 1e-6));
-
-    return [
-      thumb,
-      for (final (pip, tip) in _fingerJoints)
-        soft(point(tip).distanceTo(w) /
-            math.max(point(pip).distanceTo(w), 1e-6)),
-    ];
+    // Pulgar: punta separada del nudillo del índice, relativo al ancho de la
+    // palma. Es el dedo menos confiable; ninguna seña lo exige hoy.
+    final width = worldPoint(indexMcp).distanceTo(worldPoint(pinkyMcp));
+    final thumb = width < 1e-9
+        ? 0.0
+        : ((worldPoint(thumbTip).distanceTo(worldPoint(indexMcp)) / width -
+                    0.55) /
+                0.35)
+            .clamp(0.0, 1.0);
+    return [thumb, for (final s in fingerStraightness) map(s)];
   }
 
-  /// Vector normal hacia afuera de la palma (unitario).
+  /// Vector normal a la palma, hacia el lado de la palma (unitario, en 3D).
+  /// z negativo = la palma mira a la cámara.
   Vec3 get palmNormal {
-    final w = point(wrist);
-    final a = point(indexMcp) - w;
-    final b = point(pinkyMcp) - w;
+    final w = worldPoint(wrist);
+    final a = worldPoint(indexMcp) - w;
+    final b = worldPoint(pinkyMcp) - w;
     final n = a.cross(b).normalized();
-    // En imagen espejada, la mano derecha da la normal hacia el dorso.
+    // Calibrado con video real: para la mano derecha la normal geométrica
+    // apunta al dorso.
     return isRightHand ? -n : n;
   }
 
-  /// Rasgos invariantes a posición y escala para el clasificador TFLite:
-  /// puntos relativos a la muñeca divididos por el tamaño de la palma.
+  /// Rasgos invariantes a posición y escala: puntos relativos a la muñeca
+  /// divididos por el tamaño de la palma.
   Float32List toClassifierFeatures() {
     final w = point(wrist);
     final s = math.max(palmSize, 1e-6);

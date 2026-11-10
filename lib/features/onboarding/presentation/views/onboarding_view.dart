@@ -213,7 +213,7 @@ class _WelcomePage extends StatelessWidget {
           SizedBox(height: compact ? 6 : 10),
           Text(
             'Lecciones cortas, un profesor 3D que te muestra cada paso y '
-            'práctica con cámara. Todo funciona sin internet.',
+            'práctica con cámara que te dice qué corregir.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Colors.white.withValues(alpha: 0.88),
@@ -234,14 +234,15 @@ class _WelcomePage extends StatelessWidget {
             compact: compact,
             icon: Icons.videocam_rounded,
             title: 'Práctica con cámara',
-            subtitle: 'La app analiza tu mano sin guardar ni enviar imágenes.',
+            subtitle: 'La app analiza tu mano en el teléfono, sin guardar ni '
+                'enviar imágenes.',
           ),
           SizedBox(height: compact ? 6 : 9),
           _FeatureRow(
             compact: compact,
-            icon: Icons.offline_bolt_rounded,
-            title: '100% offline',
-            subtitle: 'Tus lecciones y tu progreso viven en este teléfono.',
+            icon: Icons.cloud_done_rounded,
+            title: 'Tu progreso en tu cuenta',
+            subtitle: 'Practicá aunque no tengas internet; se sincroniza solo.',
           ),
           SizedBox(height: compact ? 14 : 26),
           PushableButton(

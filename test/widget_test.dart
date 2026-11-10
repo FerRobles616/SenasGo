@@ -11,6 +11,7 @@ import 'package:senasgo/core/vision/frame_processor.dart';
 import 'package:senasgo/core/vision/hand_landmarks.dart';
 import 'package:senasgo/core/vision/sign_evaluator.dart';
 import 'package:senasgo/core/vision/tolerance_profile.dart';
+import 'package:senasgo/core/vision/vision_frame.dart';
 import 'package:senasgo/features/learning/presentation/views/lesson_list_view.dart';
 import 'package:senasgo/features/practice/domain/sign_evaluation.dart';
 import 'package:senasgo/features/practice/domain/sign_reference.dart';
@@ -100,10 +101,12 @@ void main() {
   group('Evaluación de los parámetros formativos', () {
     const evaluator = SignEvaluator();
     final tolerance = ToleranceProfile.forLevel(1);
+    List<VisionFrame> load(String name) => VisionFrame.listFromJson(
+        File('test/fixtures/vision/$name.json').readAsStringSync());
 
-    test('Mano abierta con palma a la cámara cumple "Hola"', () {
-      final result = evaluator.evaluate(
-        frames: [_hand(open: true)],
+    test('Una grabación real de "Hola" cumple los parámetros', () {
+      final result = evaluator.evaluateBest(
+        frames: load('real_hola'),
         reference: SignReference.of('saludo_hola'),
         tolerance: tolerance,
       );
@@ -112,11 +115,13 @@ void main() {
           ParameterStatus.passed);
       expect(result.parameters[SignParameter.palmOrientation]!.status,
           ParameterStatus.passed);
+      expect(result.parameters[SignParameter.facialExpression]!.status,
+          ParameterStatus.notEvaluated);
     });
 
     test('Puño cerrado falla "Hola" con mensaje cualitativo', () {
-      final result = evaluator.evaluate(
-        frames: [_hand(open: false)],
+      final result = evaluator.evaluateBest(
+        frames: load('synth_basico_si'),
         reference: SignReference.of('saludo_hola'),
         tolerance: tolerance,
       );
@@ -127,8 +132,27 @@ void main() {
     });
 
     test('Dorso de la mano hacia la cámara falla la orientación', () {
-      final result = evaluator.evaluate(
-        frames: [_hand(open: true, rightHand: false)],
+      // Misma grabación, con la palma girada: se invierte la lateralidad.
+      final flipped = [
+        for (final f in load('real_hola'))
+          VisionFrame(
+            hands: [
+              for (final h in f.hands)
+                HandLandmarks(
+                  points: h.points,
+                  world: h.world,
+                  presence: h.presence,
+                  isRightHand: !h.isRightHand,
+                  timestamp: h.timestamp,
+                )
+            ],
+            body: f.body,
+            aspect: f.aspect,
+            timestamp: f.timestamp,
+          )
+      ];
+      final result = evaluator.evaluateBest(
+        frames: flipped,
         reference: SignReference.of('saludo_hola'),
         tolerance: tolerance,
       );
@@ -149,54 +173,35 @@ void main() {
           LightingStatus.backlit);
     });
 
-    test('Luz pareja se acepta y genera la entrada del modelo', () {
+    test('Luz pareja se acepta y genera la imagen para el detector', () {
       final result = processFrame(
-          FrameRequest(_frame(center: 120, border: 130), inputSize: 32));
+          FrameRequest(_frame(center: 120, border: 130), maxSide: 50));
       expect(result.lighting, LightingStatus.ok);
-      expect(result.modelInput!.length, 32 * 32 * 3);
+      expect(result.width, 40);
+      expect(result.height, 50);
+      expect(result.rgba!.length, 40 * 50 * 4);
+      // Gris neutro (U=V=128): R=G=B y opaco.
+      final o = (25 * 40 + 20) * 4;
+      expect(result.rgba![o], result.rgba![o + 1]);
+      expect(result.rgba![o + 3], 255);
+    });
+
+    test('Sin pedir imagen solo se mide la luz', () {
+      final result =
+          processFrame(FrameRequest(_frame(center: 120, border: 130)));
+      expect(result.rgba, isNull);
     });
   });
 }
 
-/// Mano sintética vertical (selfie espejada): índice a la izquierda del meñique.
-HandLandmarks _hand({required bool open, bool rightHand = true}) {
-  final p = Float32List(63);
-  void set(int i, double x, double y) {
-    p[i * 3] = x;
-    p[i * 3 + 1] = y;
-  }
-
-  set(0, 0.5, 0.9); // muñeca
-  // Pulgar: CMC, MCP, IP, TIP
-  set(1, 0.40, 0.82);
-  set(2, 0.33, 0.74);
-  set(3, open ? 0.27 : 0.40, open ? 0.66 : 0.70);
-  set(4, open ? 0.21 : 0.45, open ? 0.58 : 0.66);
-  // Índice, medio, anular, meñique: MCP, PIP, DIP, TIP
-  const xs = [0.38, 0.46, 0.54, 0.62];
-  for (var f = 0; f < 4; f++) {
-    final base = 5 + f * 4;
-    final x = xs[f];
-    set(base, x, 0.60);
-    set(base + 1, x, 0.47);
-    set(base + 2, x, open ? 0.37 : 0.55);
-    set(base + 3, x, open ? 0.28 : 0.64);
-  }
-  return HandLandmarks(
-    points: p,
-    presence: 0.99,
-    isRightHand: rightHand,
-    timestamp: DateTime.now(),
-  );
-}
-
-/// Fotograma YUV420 sintético de 80x100 (recuadro guía 60x60) con luma distinta dentro y fuera del recuadro.
+/// Fotograma YUV420 sintético de 80x100 con luma distinta en la zona central
+/// (donde está la persona) y en los bordes.
 FrameData _frame({required int center, required int border}) {
   const w = 80, h = 100;
   final y = Uint8List(w * h);
   for (var r = 0; r < h; r++) {
     for (var c = 0; c < w; c++) {
-      final inside = c >= 10 && c < 70 && r >= 20 && r < 80;
+      final inside = c >= 16 && c < 64 && r >= 10 && r < 90;
       y[r * w + c] = inside ? center : border;
     }
   }

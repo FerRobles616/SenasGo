@@ -14,20 +14,12 @@ class AppConstants {
   static const int targetFpsMin = 10;
   static const int targetFpsMax = 15;
 
-  /// Fracción del ancho de la imagen que ocupa el recuadro guía (encuadre).
-  static const double guideBoxFraction = 0.75;
-
   /// Tiempo máximo de captura sin ver la mano antes de pausar (estado 6).
   static const Duration captureTimeout = Duration(seconds: 4);
 
-  /// Ventana de fotogramas usada para evaluar el movimiento de la seña.
-  static const Duration evaluationWindow = Duration(milliseconds: 1500);
-
-  // Modelos Edge AI (opcionales; sin ellos la app usa el modo conceptual)
-  static const String handLandmarkModel = 'assets/models/hand_landmark.tflite';
-  static const String signClassifierModel =
-      'assets/models/gesture_model.tflite';
-  static const String signClassifierLabels = 'assets/models/gesture_labels.txt';
+  /// Tiempo máximo para hacer la seña una vez que se ve la mano. Si se
+  /// completa antes, se responde enseguida.
+  static const Duration evaluationWindow = Duration(milliseconds: 3000);
 
   // Iluminación (luma 0-255)
   static const double minCenterLuma = 45; // ambiente oscuro

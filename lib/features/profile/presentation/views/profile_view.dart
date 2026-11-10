@@ -531,7 +531,7 @@ class _ProfileViewState extends State<ProfileView> {
                   icon: Icons.people_alt_rounded,
                   color: AppColors.indigo,
                   title: 'Novedades',
-                  subtitle: 'Tu actividad, solo en este teléfono',
+                  subtitle: 'Tus hitos y tu actividad reciente',
                   onTap: () => context.push('/community'),
                 ),
               ],
@@ -565,7 +565,7 @@ class _ProfileViewState extends State<ProfileView> {
                   leading: const Icon(Icons.info_outline_rounded),
                   title: const Text('Acerca de SeñasGo'),
                   subtitle: const Text(
-                      'Versión ${AppConstants.appVersion} · Funciona offline'),
+                      'Versión ${AppConstants.appVersion} · Preguntas y reportes'),
                   trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => context.push('/help'),
                 ),

@@ -22,13 +22,8 @@ dependencies:
 
   # Cámara y Visión Computacional (Edge AI, 100% offline)
   camera: ^0.11.0+2
-  # Ejecuta el modelo de landmarks de MediaPipe Hands (.tflite) y el
-  # clasificador de señas. Sin modelos en assets/models/ la app usa el
-  # modo conceptual descrito en la documentación v3_04.
-  # 0.12.1 usa LiteRT (com.google.ai.edge.litert) con namespaces únicos;
-  # 0.11.0 traía tensorflow-lite 2.11.0 cuyo namespace duplicado
-  # (org.tensorflow.lite en 3 AARs) rompe el manifest merger de AGP 9.
-  tflite_flutter: ^0.12.1
+  # Los puntos de manos y cuerpo los da MediaPipe Tasks (Google) desde
+  # Android: ver android/app/src/main/kotlin/.../VisionChannel.kt.
 
   # Permisos
   permission_handler: ^11.3.1

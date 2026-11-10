@@ -124,8 +124,8 @@ class HomeShortcutView extends StatelessWidget {
             number: '3',
             icon: Icons.offline_bolt_rounded,
             title: 'Practicá sin buscar',
-            text: 'El acceso abre SeñasGo directo. Las lecciones y tu progreso '
-                'siguen funcionando sin internet.',
+            text: 'El acceso abre SeñasGo directo. Las lecciones siguen '
+                'funcionando aunque no tengas internet.',
           ),
           const SizedBox(height: 20),
           AppCard(

@@ -216,7 +216,7 @@ class _PracticeViewState extends State<PracticeView>
           ? s.combo >= 2
               ? '${s.combo} señas seguidas · +${AppConstants.xpPerCorrectSign} XP'
               : '+${AppConstants.xpPerCorrectSign} XP · Una seña más en tu camino.'
-          : 'Mirá arriba qué ajustar y probá otra vez.',
+          : 'Mira arriba qué ajustar y prueba otra vez.',
       child: actions,
     );
   }
@@ -242,9 +242,10 @@ class _PracticeViewState extends State<PracticeView>
               title: 'Busca buena iluminación',
               text: 'Evita una luz intensa detrás de ti.'),
           const _Tip(
-              icon: Icons.crop_free,
-              title: 'Mantén la mano visible',
-              text: 'Colócala por completo dentro del recuadro.'),
+              icon: Icons.accessibility_new_rounded,
+              title: 'Encuadre de medio cuerpo',
+              text: 'Apoya el teléfono a un brazo de distancia: que se vean '
+                  'tu cara, tus hombros y la mano.'),
         ]);
       case PracticeStage.capturing:
       case PracticeStage.evaluating:
@@ -396,19 +397,19 @@ class _StageCopy {
             name, 'Observa la representación antes de practicar.');
       case PracticeStage.framing:
         return _StageCopy('PRACTICAR · $name', 'Preparando práctica...',
-            'Coloca tu mano dentro del área indicada');
+            'Ubica tu cabeza y tus hombros dentro de la silueta');
       case PracticeStage.capturing:
         return _StageCopy('PRACTICAR · $name', 'Detectando...',
-            'Mantén la mano dentro del recuadro y procura que se vea completa.');
+            'Levanta la mano para empezar; que se vea completa.');
       case PracticeStage.handNotDetected:
         return _StageCopy('MANO NO DETECTADA · $name', 'Ajustemos el encuadre',
-            'No pudimos detectar correctamente la mano. Centra tu mano dentro del área indicada');
+            'No pudimos ver la mano. Revisa que tu cara, tus hombros y la mano entren en la imagen.');
       case PracticeStage.environmentIssue:
         return _StageCopy('ILUMINACIÓN · $name', 'Revisemos la luz',
             'Necesitamos ver bien tu mano para evaluar la seña.');
       case PracticeStage.evaluating:
-        return _StageCopy('$evalLabel · $name', 'Evaluando ejecución...',
-            'Un momento. Estamos analizando tu postura manual.');
+        return _StageCopy('$evalLabel · $name', 'Haz la seña',
+            'Hazla completa y a tu ritmo; te avisamos apenas la reconozcamos.');
       case PracticeStage.incorrect:
         return _StageCopy(
             '$resultLabel · $name',

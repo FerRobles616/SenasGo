@@ -72,7 +72,7 @@ class _HelpViewState extends State<HelpView> {
             title: 'Tus reportes',
             subtitle: _tickets.isEmpty
                 ? 'Todavía no guardaste ninguno.'
-                : '${_tickets.length} guardado${_tickets.length == 1 ? '' : 's'} en este teléfono.',
+                : '${_tickets.length} enviado${_tickets.length == 1 ? '' : 's'} al equipo de soporte.',
           ),
           const SizedBox(height: 10),
           if (_tickets.isEmpty)
@@ -142,7 +142,8 @@ class _Hero extends StatelessWidget {
           const SizedBox(height: 8),
           const Text(
             'Contanos si algo no funciona, si una seña no se entiende o si '
-            'tenés una idea. Tu mensaje queda guardado en tu teléfono.',
+            'tenés una idea. Tu mensaje llega al equipo de soporte y acá '
+            'ves cuando lo resuelven.',
             style: TextStyle(color: Colors.white70, height: 1.4),
           ),
           const SizedBox(height: 16),

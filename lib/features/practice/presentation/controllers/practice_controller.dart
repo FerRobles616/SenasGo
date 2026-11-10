@@ -8,8 +8,9 @@ import 'package:senasgo/core/services/device_performance.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/services/inference_service.dart';
 import 'package:senasgo/core/vision/frame_processor.dart';
-import 'package:senasgo/core/vision/hand_landmarks.dart';
+import 'package:senasgo/core/vision/sign_evaluator.dart';
 import 'package:senasgo/core/vision/tolerance_profile.dart';
+import 'package:senasgo/core/vision/vision_frame.dart';
 import 'package:senasgo/features/practice/domain/sign_evaluation.dart';
 import 'package:senasgo/shared/models/sign_model.dart';
 import 'package:senasgo/shared/models/user_model.dart';
@@ -43,6 +44,8 @@ class PracticeState {
     this.combo = 0,
     this.lighting = LightingStatus.ok,
     this.handVisible = false,
+    this.bodyVisible = false,
+    this.frame,
     this.cameraIssue = CameraIssue.none,
     this.evaluation,
     this.mode = EngineMode.conceptual,
@@ -59,6 +62,12 @@ class PracticeState {
   final int combo;
   final LightingStatus lighting;
   final bool handVisible;
+
+  /// Se ven la cara y los hombros (encuadre de medio cuerpo).
+  final bool bodyVisible;
+
+  /// Último cuadro analizado (para dibujar los puntos de la mano en vivo).
+  final VisionFrame? frame;
   final CameraIssue cameraIssue;
   final SignEvaluation? evaluation;
   final EngineMode mode;
@@ -84,6 +93,9 @@ class PracticeState {
     int? combo,
     LightingStatus? lighting,
     bool? handVisible,
+    bool? bodyVisible,
+    VisionFrame? frame,
+    bool clearFrame = false,
     CameraIssue? cameraIssue,
     SignEvaluation? evaluation,
     EngineMode? mode,
@@ -98,6 +110,8 @@ class PracticeState {
       combo: combo ?? this.combo,
       lighting: lighting ?? this.lighting,
       handVisible: handVisible ?? this.handVisible,
+      bodyVisible: bodyVisible ?? this.bodyVisible,
+      frame: clearFrame ? null : frame ?? this.frame,
       cameraIssue: cameraIssue ?? this.cameraIssue,
       evaluation: evaluation ?? this.evaluation,
       mode: mode ?? this.mode,
@@ -127,7 +141,8 @@ class PracticeController extends ChangeNotifier {
   int _stableFrames = 0;
   int _missedFrames = 0;
   int _badLightFrames = 0;
-  final List<HandLandmarks> _window = [];
+  DateTime _lastCheck = DateTime.now();
+  final List<VisionFrame> _window = [];
   bool _disposed = false;
 
   void _emit(PracticeState next) {
@@ -182,8 +197,10 @@ class PracticeController extends ChangeNotifier {
       cameraIssue: CameraIssue.none,
       lighting: LightingStatus.ok,
       handVisible: false,
+      bodyVisible: false,
+      clearFrame: true,
     ));
-    await WakelockPlus.enable();
+    await _keepScreenOn(true);
     await cameraService.startImageStream(_onFrame);
   }
 
@@ -266,14 +283,22 @@ class PracticeController extends ChangeNotifier {
       default:
         break;
     }
+    if (analysis.frame != null && _state.showsCamera && attempt == _attempt) {
+      _emit(_state.copyWith(frame: analysis.frame));
+    }
   }
 
   /// Estado 3: solo informa luz y mano en vivo; no evalúa nada.
   /// En modo conceptual no hay detector real: no se afirma ver la mano.
   void _onFramingFrame(FrameAnalysis a) {
-    final visible = _state.mode == EngineMode.edgeAi && a.handVisible;
-    if (a.lighting != _state.lighting || visible != _state.handVisible) {
-      _emit(_state.copyWith(lighting: a.lighting, handVisible: visible));
+    final edge = _state.mode == EngineMode.edgeAi;
+    final visible = edge && a.handVisible;
+    final body = edge && a.bodyVisible;
+    if (a.lighting != _state.lighting ||
+        visible != _state.handVisible ||
+        body != _state.bodyVisible) {
+      _emit(_state.copyWith(
+          lighting: a.lighting, handVisible: visible, bodyVisible: body));
     }
   }
 
@@ -283,9 +308,10 @@ class PracticeController extends ChangeNotifier {
 
     if (a.handVisible) {
       _stableFrames++;
-      if (a.hand != null) _window.add(a.hand!);
+      if (a.frame != null) _window.add(a.frame!);
       if (_stableFrames >= _tolerance.stableFramesRequired) {
         _evalStart = DateTime.now();
+        _lastCheck = _evalStart;
         _missedFrames = 0;
         _emit(_state.copyWith(
             stage: PracticeStage.evaluating, handVisible: true));
@@ -303,8 +329,10 @@ class PracticeController extends ChangeNotifier {
         return;
       }
     }
-    if (a.handVisible != _state.handVisible) {
-      _emit(_state.copyWith(handVisible: a.handVisible));
+    if (a.handVisible != _state.handVisible ||
+        a.bodyVisible != _state.bodyVisible) {
+      _emit(_state.copyWith(
+          handVisible: a.handVisible, bodyVisible: a.bodyVisible));
     }
   }
 
@@ -314,26 +342,37 @@ class PracticeController extends ChangeNotifier {
 
     if (a.handVisible) {
       _missedFrames = 0;
-      if (a.hand != null) _window.add(a.hand!);
-    } else if (++_missedFrames > DevicePerformance.targetFps ~/ 2) {
+      if (a.frame != null) _window.add(a.frame!);
+    } else if (++_missedFrames > DevicePerformance.targetFps) {
+      // Más de un segundo sin ver la mano: se perdió el encuadre.
       await _stopAnalysis();
       _emit(_state.copyWith(
           stage: PracticeStage.handNotDetected, handVisible: false));
       return;
     }
 
-    if (DateTime.now().difference(_evalStart) < AppConstants.evaluationWindow) {
-      return;
+    final now = DateTime.now();
+    final elapsed = now.difference(_evalStart);
+    final sign = _state.currentSign!;
+    final edge = _state.mode == EngineMode.edgeAi;
+
+    SignEvaluation? evaluation;
+    if (elapsed >= AppConstants.evaluationWindow) {
+      evaluation = inferenceService.evaluate(
+          frames: List.of(_window), signId: sign.id, tolerance: _tolerance);
+    } else if (edge &&
+        elapsed >= SignEvaluator.segment &&
+        now.difference(_lastCheck) >= const Duration(milliseconds: 400)) {
+      // Respuesta rápida: si la seña ya está completa, no hace falta
+      // esperar el resto de la ventana.
+      _lastCheck = now;
+      final partial = inferenceService.evaluate(
+          frames: List.of(_window), signId: sign.id, tolerance: _tolerance);
+      if (partial.isCorrect) evaluation = partial;
     }
+    if (evaluation == null) return;
 
     await _stopAnalysis();
-    final sign = _state.currentSign!;
-    final evaluation = await inferenceService.evaluate(
-      frames: List.of(_window),
-      signId: sign.id,
-      classifierLabel: sign.keypointsLabel,
-      tolerance: _tolerance,
-    );
     final user = await HiveService.recordAttempt(
       signId: sign.id,
       correct: evaluation.isCorrect,
@@ -373,10 +412,18 @@ class PracticeController extends ChangeNotifier {
     return false;
   }
 
+  /// Pantalla encendida durante la práctica. Si el sistema no lo permite
+  /// (por ejemplo, ahorro de energía), la práctica sigue igual.
+  Future<void> _keepScreenOn(bool on) async {
+    try {
+      on ? await WakelockPlus.enable() : await WakelockPlus.disable();
+    } catch (_) {}
+  }
+
   Future<void> _stopAnalysis() async {
     _attempt++;
     await cameraService.stopImageStream();
-    await WakelockPlus.disable();
+    await _keepScreenOn(false);
   }
 
   // ───────────────────────── Ciclo de vida ─────────────────────────
@@ -398,7 +445,7 @@ class PracticeController extends ChangeNotifier {
     _disposed = true;
     _attempt++;
     cameraService.stopImageStream();
-    WakelockPlus.disable();
+    _keepScreenOn(false);
     super.dispose();
   }
 }

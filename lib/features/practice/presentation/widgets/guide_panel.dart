@@ -153,7 +153,9 @@ class GuidePanel extends StatelessWidget {
               _ParamTile(
                 icon: Icons.my_location,
                 parameter: SignParameter.articulationPlace,
-                detail: 'Dónde se ejecuta la seña respecto al cuerpo.',
+                detail: ref.place.hint.isEmpty
+                    ? 'Dónde se ejecuta la seña respecto al cuerpo.'
+                    : ref.place.hint,
               ),
               _ParamTile(
                 icon: Icons.swap_horiz,

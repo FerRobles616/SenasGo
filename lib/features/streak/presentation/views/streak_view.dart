@@ -276,7 +276,7 @@ class _StreakViewState extends State<StreakView> {
           const SizedBox(height: 12),
           Text(
             'Meta: ${AppConstants.defaultDailyGoalMinutes} min recomendados · '
-            'tu progreso se guarda solo en este teléfono.',
+            'tu racha se guarda en tu cuenta.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: AppColors.muted,

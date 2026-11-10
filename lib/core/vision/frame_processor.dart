@@ -58,43 +58,52 @@ class ProcessedFrame {
     required this.lighting,
     required this.centerLuma,
     required this.borderLuma,
-    this.modelInput,
+    this.rgba,
+    this.width = 0,
+    this.height = 0,
   });
 
   final LightingStatus lighting;
   final double centerLuma;
   final double borderLuma;
 
-  /// Recorte del recuadro guía en RGB normalizado [0,1], NHWC.
-  /// Null si no se pidió entrada para el modelo.
-  final Float32List? modelInput;
+  /// Imagen derecha y espejada (como la ve la persona), reducida, en RGBA.
+  /// Null si no se pidió o si la luz no alcanza para detectar.
+  final Uint8List? rgba;
+  final int width;
+  final int height;
+
+  double get aspect => height == 0 ? 0.75 : width / height;
 }
 
-/// Pide al procesador la entrada del modelo solo si hay modelo cargado.
+/// [maxSide]: lado mayor de la imagen para el detector; null = solo luz.
 class FrameRequest {
-  const FrameRequest(this.frame, {this.inputSize});
+  const FrameRequest(this.frame, {this.maxSide});
 
   final FrameData frame;
-  final int? inputSize;
+  final int? maxSide;
 }
 
-/// Función pura pensada para `Isolate.run`: analiza iluminación y recorta
-/// el recuadro guía para el modelo, sin bloquear la UI.
+/// Función pura pensada para `compute`: mide la luz y prepara la imagen para
+/// MediaPipe sin bloquear la UI.
+///
+/// La luz se mide en la zona central (donde está la persona: cara, torso y
+/// manos) contra los bordes, para detectar contraluz (ventana detrás).
 ProcessedFrame processFrame(FrameRequest request) {
   final f = request.frame;
   final sampler = _PixelSampler(f);
-
-  // ── 1. Iluminación: luma dentro del recuadro vs. fondo ──
   final upW = sampler.uprightWidth;
   final upH = sampler.uprightHeight;
-  final box = _guideBox(upW, upH);
 
+  // ── 1. Iluminación ──
+  final left = (upW * 0.2).toInt(), right = (upW * 0.8).toInt();
+  final top = (upH * 0.1).toInt(), bottom = (upH * 0.9).toInt();
   var centerSum = 0.0, centerN = 0, borderSum = 0.0, borderN = 0;
   const step = 8; // submuestreo: ~1/64 de los píxeles alcanza
   for (var y = 0; y < upH; y += step) {
     for (var x = 0; x < upW; x += step) {
       final luma = sampler.luma(x, y);
-      if (x >= box.left && x < box.right && y >= box.top && y < box.bottom) {
+      if (x >= left && x < right && y >= top && y < bottom) {
         centerSum += luma;
         centerN++;
       } else {
@@ -105,57 +114,46 @@ ProcessedFrame processFrame(FrameRequest request) {
   }
   final center = centerN == 0 ? 0.0 : centerSum / centerN;
   final border = borderN == 0 ? center : borderSum / borderN;
+  final lighting = classifyLighting(center, border);
 
-  final LightingStatus lighting;
-  if (center < AppConstants.minCenterLuma) {
-    lighting = LightingStatus.tooDark;
-  } else if (border > AppConstants.backlightMinBorderLuma &&
-      border - center > AppConstants.backlightMinDelta) {
-    lighting = LightingStatus.backlit;
-  } else if (center > AppConstants.maxCenterLuma) {
-    lighting = LightingStatus.overexposed;
-  } else {
-    lighting = LightingStatus.ok;
+  // ── 2. Imagen para el detector ──
+  final maxSide = request.maxSide;
+  if (maxSide == null || lighting != LightingStatus.ok) {
+    return ProcessedFrame(
+        lighting: lighting, centerLuma: center, borderLuma: border);
   }
-
-  // ── 2. Recorte del recuadro guía para el modelo de landmarks ──
-  Float32List? input;
-  final size = request.inputSize;
-  if (size != null && lighting == LightingStatus.ok) {
-    input = Float32List(size * size * 3);
-    final scale = box.width / size;
-    var i = 0;
-    for (var v = 0; v < size; v++) {
-      final y = (box.top + v * scale).toInt();
-      for (var u = 0; u < size; u++) {
-        final x = (box.left + u * scale).toInt();
-        sampler.rgbInto(x, y, input, i);
-        i += 3;
-      }
+  final long = upW > upH ? upW : upH;
+  final scale = long > maxSide ? long / maxSide : 1.0;
+  final outW = (upW / scale).floor(), outH = (upH / scale).floor();
+  final rgba = Uint8List(outW * outH * 4);
+  var i = 0;
+  for (var v = 0; v < outH; v++) {
+    final y = ((v + 0.5) * scale).toInt().clamp(0, upH - 1);
+    for (var u = 0; u < outW; u++) {
+      final x = ((u + 0.5) * scale).toInt().clamp(0, upW - 1);
+      sampler.rgbaInto(x, y, rgba, i);
+      i += 4;
     }
   }
-
   return ProcessedFrame(
     lighting: lighting,
     centerLuma: center,
     borderLuma: border,
-    modelInput: input,
+    rgba: rgba,
+    width: outW,
+    height: outH,
   );
 }
 
-class _Box {
-  const _Box(this.left, this.top, this.width);
-  final int left;
-  final int top;
-  final int width;
-  int get right => left + width;
-  int get bottom => top + width;
-}
-
-/// Recuadro cuadrado centrado, igual al que dibuja la UI sobre la vista previa.
-_Box _guideBox(int w, int h) {
-  final side = (w * AppConstants.guideBoxFraction).toInt().clamp(1, h);
-  return _Box((w - side) ~/ 2, (h - side) ~/ 2, side);
+/// Umbrales de luz (luma 0-255) de la zona central y de los bordes.
+LightingStatus classifyLighting(double center, double border) {
+  if (center < AppConstants.minCenterLuma) return LightingStatus.tooDark;
+  if (border > AppConstants.backlightMinBorderLuma &&
+      border - center > AppConstants.backlightMinDelta) {
+    return LightingStatus.backlit;
+  }
+  if (center > AppConstants.maxCenterLuma) return LightingStatus.overexposed;
+  return LightingStatus.ok;
 }
 
 /// Lee píxeles en coordenadas "derechas" (ya rotadas y espejadas) desde
@@ -194,15 +192,15 @@ class _PixelSampler {
     return f.planes[0][ry * f.rowStrides[0] + rx].toDouble();
   }
 
-  void rgbInto(int x, int y, Float32List out, int i) {
+  void rgbaInto(int x, int y, Uint8List out, int i) {
     final (rx, ry) = _raw(x, y);
-    double r, g, b;
+    int r, g, b;
     if (f.isBgra) {
       final o = ry * f.rowStrides[0] + rx * 4;
       final p = f.planes[0];
-      b = p[o].toDouble();
-      g = p[o + 1].toDouble();
-      r = p[o + 2].toDouble();
+      b = p[o];
+      g = p[o + 1];
+      r = p[o + 2];
     } else {
       final yy = f.planes[0][ry * f.rowStrides[0] + rx].toDouble();
       final double u, v;
@@ -216,12 +214,13 @@ class _PixelSampler {
         u = f.planes[1][o] - 128.0;
         v = f.planes[2][o] - 128.0;
       }
-      r = yy + 1.402 * v;
-      g = yy - 0.344 * u - 0.714 * v;
-      b = yy + 1.772 * u;
+      r = (yy + 1.402 * v).round().clamp(0, 255);
+      g = (yy - 0.344 * u - 0.714 * v).round().clamp(0, 255);
+      b = (yy + 1.772 * u).round().clamp(0, 255);
     }
-    out[i] = r.clamp(0, 255) / 255;
-    out[i + 1] = g.clamp(0, 255) / 255;
-    out[i + 2] = b.clamp(0, 255) / 255;
+    out[i] = r;
+    out[i + 1] = g;
+    out[i + 2] = b;
+    out[i + 3] = 255;
   }
 }

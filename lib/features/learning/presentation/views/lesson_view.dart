@@ -281,8 +281,9 @@ class _ParametersCard extends StatelessWidget {
           _ParamRow(
             icon: Icons.my_location_rounded,
             title: SignParameter.articulationPlace.label,
-            detail:
-                'Frente, mentón, pecho o espacio neutro: el lugar cambia la seña.',
+            detail: ref.place.hint.isEmpty
+                ? 'Frente, mentón, pecho o espacio neutro: el lugar cambia la seña.'
+                : ref.place.hint,
           ),
           _ParamRow(
             icon: Icons.swap_horiz_rounded,

@@ -128,8 +128,8 @@ class _SupportFormViewState extends State<SupportFormView> {
                             fontWeight: FontWeight.w900)),
                     SizedBox(height: 4),
                     Text(
-                      'Contanos qué pasó o qué te gustaría ver. Guardamos el '
-                      'mensaje en tu teléfono para que no se pierda.',
+                      'Contanos qué pasó o qué te gustaría ver. El mensaje '
+                      'llega directo al equipo de soporte.',
                       style: TextStyle(color: Colors.white70, height: 1.35),
                     ),
                   ],
@@ -244,9 +244,9 @@ class _SupportFormViewState extends State<SupportFormView> {
         ),
         const SizedBox(height: 12),
         Text(
-          'El reporte queda en este teléfono. Para enviarlo, después podés '
-          'copiarlo o abrir tu correo. SeñasGo no tiene servidores ni recibe '
-          'datos automáticamente.',
+          'Se envía con tu cuenta. Si no hay internet, queda guardado y se '
+          'envía solo cuando vuelve la conexión. Nunca incluye fotos ni '
+          'video de la cámara.',
           textAlign: TextAlign.center,
           style: TextStyle(color: AppColors.muted, fontSize: 12.5, height: 1.4),
         ),

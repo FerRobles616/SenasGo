@@ -66,9 +66,19 @@ Future<void> main() async {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({required this.cameras, super.key});
+  const MyApp({
+    required this.cameras,
+    this.cameraServiceBuilder,
+    this.inferenceServiceBuilder,
+    super.key,
+  });
 
   final List<CameraDescription> cameras;
+
+  /// Permiten reemplazar la cámara y el detector (pruebas y modo
+  /// demostración para capturas). Null = los reales.
+  final CameraService Function()? cameraServiceBuilder;
+  final InferenceService Function()? inferenceServiceBuilder;
 
   @override
   State<MyApp> createState() => _MyAppState();
@@ -78,7 +88,11 @@ class _MyAppState extends State<MyApp> {
   // Se crea una sola vez: si se recreara en cada build (p. ej. cuando
   // ScreenUtilInit reacciona a un cambio de MediaQuery) la navegación
   // volvería al inicio y se cerraría la pantalla de práctica.
-  late final GoRouter _router = _buildRouter(widget.cameras);
+  late final GoRouter _router = _buildRouter(
+    cameraService:
+        widget.cameraServiceBuilder ?? () => CameraService(widget.cameras),
+    inferenceService: widget.inferenceServiceBuilder ?? InferenceService.new,
+  );
 
   @override
   void dispose() {
@@ -126,7 +140,10 @@ class _MyAppState extends State<MyApp> {
   }
 }
 
-GoRouter _buildRouter(List<CameraDescription> cameras) {
+GoRouter _buildRouter({
+  required CameraService Function() cameraService,
+  required InferenceService Function() inferenceService,
+}) {
   return GoRouter(
     initialLocation: HiveService.onboardingDone ? '/' : '/welcome',
     // Cuenta obligatoria: sin sesión todo lleva a /auth. Al iniciar sesión,
@@ -235,10 +252,10 @@ GoRouter _buildRouter(List<CameraDescription> cameras) {
         builder: (context, state) => prov.MultiProvider(
           providers: [
             prov.ChangeNotifierProvider(
-              create: (_) => CameraService(cameras),
+              create: (_) => cameraService(),
             ),
             prov.ChangeNotifierProvider(
-              create: (_) => InferenceService(),
+              create: (_) => inferenceService(),
             ),
             prov.ChangeNotifierProxyProvider2<CameraService, InferenceService,
                 PracticeController>(
