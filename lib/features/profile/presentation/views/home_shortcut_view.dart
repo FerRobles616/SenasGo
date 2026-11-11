@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
@@ -23,7 +24,12 @@ class HomeShortcutView extends StatelessWidget {
             tooltip: 'Ayuda y comentarios',
             onPressed: () =>
                 SupportSheet.show(context, contextLabel: 'Acceso rápido'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -115,6 +121,7 @@ class HomeShortcutView extends StatelessWidget {
           const _ShortcutStep(
             number: '2',
             icon: Icons.add_to_home_screen_rounded,
+            asset: AppFeatureAssets.access,
             title: 'Elegí el acceso directo',
             text:
                 'Tocá "Añadir a pantalla de inicio" o "Acceso rápido" en el menú.',
@@ -135,8 +142,12 @@ class HomeShortcutView extends StatelessWidget {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline_rounded,
-                    color: AppColors.primary, size: 21),
+                AppFeatureIcon(
+                  asset: AppFeatureAssets.info,
+                  fallbackIcon: Icons.info_outline_rounded,
+                  color: AppColors.primary,
+                  size: 22,
+                ),
                 const SizedBox(width: 9),
                 Expanded(
                   child: Text(
@@ -186,10 +197,12 @@ class _ShortcutStep extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.text,
+    this.asset,
   });
 
   final String number;
   final IconData icon;
+  final String? asset;
   final String title;
   final String text;
 
@@ -205,6 +218,7 @@ class _ShortcutStep extends StatelessWidget {
             children: [
               AppIconBadge(
                 icon: icon,
+                asset: asset,
                 color: AppColors.primary,
                 size: 44,
                 radius: 14,

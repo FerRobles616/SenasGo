@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 
 /// Título de sección con subtítulo opcional y acción a la derecha.
 class AppSectionTitle extends StatelessWidget {
@@ -162,6 +163,7 @@ class AppPill extends StatelessWidget {
 class AppIconBadge extends StatelessWidget {
   const AppIconBadge({
     required this.icon,
+    this.asset,
     required this.color,
     this.size = 46,
     this.radius = 15,
@@ -169,6 +171,10 @@ class AppIconBadge extends StatelessWidget {
   });
 
   final IconData icon;
+
+  /// Si se indica, se muestra el icono ilustrado en lugar del de Material.
+  final String? asset;
+
   final Color color;
   final double size;
   final double radius;
@@ -182,7 +188,16 @@ class AppIconBadge extends StatelessWidget {
         color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(radius),
       ),
-      child: Icon(icon, color: color, size: size * 0.48),
+      child: Center(
+        child: asset == null
+            ? Icon(icon, color: color, size: size * 0.48)
+            : AppFeatureIcon(
+                asset: asset!,
+                fallbackIcon: icon,
+                color: color,
+                size: size * 0.62,
+              ),
+      ),
     );
   }
 }

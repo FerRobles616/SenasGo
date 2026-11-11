@@ -11,6 +11,7 @@ import 'package:senasgo/features/practice/presentation/widgets/camera_overlay.da
 import 'package:senasgo/features/practice/presentation/widgets/feedback_panel.dart';
 import 'package:senasgo/features/practice/presentation/widgets/guide_panel.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/exit_lesson_dialog.dart';
 import 'package:senasgo/shared/widgets/lesson_progress_bar.dart';
 
@@ -311,14 +312,24 @@ class _PracticeViewState extends State<PracticeView>
       case PracticeStage.environmentIssue:
         return FilledButton.icon(
           onPressed: c.retryFraming,
-          icon: const Icon(Icons.refresh),
+          icon: AppFeatureIcon(
+            asset: AppFeatureAssets.review,
+            fallbackIcon: Icons.refresh,
+            color: AppColors.onPrimary,
+            size: 20,
+          ),
           label: const Text('Intentar nuevamente'),
         );
       case PracticeStage.incorrect:
         return Column(mainAxisSize: MainAxisSize.min, children: [
           FilledButton.icon(
             onPressed: c.tryAgain,
-            icon: const Icon(Icons.refresh),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.review,
+              fallbackIcon: Icons.refresh,
+              color: AppColors.onPrimary,
+              size: 20,
+            ),
             label: const Text('INTENTAR DE NUEVO'),
           ),
           const SizedBox(height: 10),
@@ -348,19 +359,26 @@ class _PracticeViewState extends State<PracticeView>
             _secondary(Icons.settings_outlined, 'Abrir ajustes de permisos',
                 c.cameraService.openSettings)
           else if (s.cameraIssue != CameraIssue.noCamera)
-            _secondary(Icons.refresh, 'Reintentar cámara', c.goToFraming),
+            _secondary(Icons.refresh, 'Reintentar cámara', c.goToFraming,
+                asset: AppFeatureAssets.review),
           const SizedBox(height: 10),
           _secondary(
               Icons.support_agent_rounded,
               'Necesito ayuda',
               () => SupportSheet.show(context,
                   contextLabel:
-                      'Cámara · ${s.currentSign?.name ?? 'práctica'}')),
+                      'Cámara · ${s.currentSign?.name ?? 'práctica'}'),
+              asset: AppFeatureAssets.help),
         ]);
     }
   }
 
-  Widget _secondary(IconData icon, String label, VoidCallback onPressed) {
+  Widget _secondary(
+    IconData icon,
+    String label,
+    VoidCallback onPressed, {
+    String? asset,
+  }) {
     return SizedBox(
       width: double.infinity,
       child: FilledButton.tonalIcon(
@@ -369,7 +387,14 @@ class _PracticeViewState extends State<PracticeView>
           backgroundColor: AppColors.primarySoft,
           foregroundColor: AppColors.primary,
         ),
-        icon: Icon(icon),
+        icon: asset == null
+            ? Icon(icon)
+            : AppFeatureIcon(
+                asset: asset,
+                fallbackIcon: icon,
+                color: AppColors.primary,
+                size: 20,
+              ),
         label: Text(label),
       ),
     );

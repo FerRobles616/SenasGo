@@ -5,6 +5,7 @@ import 'package:senasgo/features/avatar/presentation/widgets/guided_teacher.dart
 import 'package:senasgo/features/practice/domain/sign_reference.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/models/sign_model.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 
 /// Estado 2 (Demostración): el profesor 3D muestra la seña.
 ///
@@ -61,6 +62,7 @@ class GuidePanel extends StatelessWidget {
             Expanded(
               child: _MiniParam(
                 icon: Icons.back_hand_outlined,
+                asset: AppFeatureAssets.practice,
                 label: 'Forma',
                 onTap: () => _showAllParameters(context, ref),
               ),
@@ -77,6 +79,7 @@ class GuidePanel extends StatelessWidget {
             Expanded(
               child: _MiniParam(
                 icon: Icons.swap_horiz_rounded,
+                asset: AppFeatureAssets.swap,
                 label: 'Movimiento',
                 onTap: () => _showAllParameters(context, ref),
               ),
@@ -142,6 +145,7 @@ class GuidePanel extends StatelessWidget {
               const SizedBox(height: 10),
               _ParamTile(
                 icon: Icons.back_hand_outlined,
+                asset: AppFeatureAssets.practice,
                 parameter: SignParameter.manualConfig,
                 detail: 'Forma de la mano y de los dedos.',
               ),
@@ -159,6 +163,7 @@ class GuidePanel extends StatelessWidget {
               ),
               _ParamTile(
                 icon: Icons.swap_horiz,
+                asset: AppFeatureAssets.swap,
                 parameter: SignParameter.movement,
                 detail: ref.movement.hint.isEmpty
                     ? 'Trayectoria y ritmo.'
@@ -166,6 +171,7 @@ class GuidePanel extends StatelessWidget {
               ),
               _ParamTile(
                 icon: Icons.sentiment_satisfied_alt,
+                asset: AppFeatureAssets.feedback,
                 parameter: SignParameter.facialExpression,
                 detail: ref.usesFace
                     ? 'Esta seña se acompaña con el rostro.'
@@ -189,9 +195,11 @@ class _MiniParam extends StatelessWidget {
     required this.icon,
     required this.label,
     required this.onTap,
+    this.asset,
   });
 
   final IconData icon;
+  final String? asset;
   final String label;
   final VoidCallback onTap;
 
@@ -208,7 +216,14 @@ class _MiniParam extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: AppColors.primary, size: 19),
+              asset == null
+                  ? Icon(icon, color: AppColors.primary, size: 19)
+                  : AppFeatureIcon(
+                      asset: asset!,
+                      fallbackIcon: icon,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
               const SizedBox(height: 4),
               Text(
                 label,
@@ -229,10 +244,15 @@ class _MiniParam extends StatelessWidget {
 }
 
 class _ParamTile extends StatelessWidget {
-  const _ParamTile(
-      {required this.icon, required this.parameter, required this.detail});
+  const _ParamTile({
+    required this.icon,
+    required this.parameter,
+    required this.detail,
+    this.asset,
+  });
 
   final IconData icon;
+  final String? asset;
   final SignParameter parameter;
   final String detail;
 
@@ -249,7 +269,16 @@ class _ParamTile extends StatelessWidget {
               color: AppColors.primarySoft,
               borderRadius: BorderRadius.circular(13),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 21),
+            child: Center(
+              child: asset == null
+                  ? Icon(icon, color: AppColors.primary, size: 21)
+                  : AppFeatureIcon(
+                      asset: asset!,
+                      fallbackIcon: icon,
+                      color: AppColors.primary,
+                      size: 25,
+                    ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

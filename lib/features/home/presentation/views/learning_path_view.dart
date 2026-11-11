@@ -13,6 +13,7 @@ import 'package:senasgo/features/home/presentation/widgets/path_painter.dart';
 import 'package:senasgo/features/home/presentation/widgets/top_stats_bar.dart';
 import 'package:senasgo/features/home/presentation/widgets/unit_header.dart';
 import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
 
@@ -446,11 +447,20 @@ class _UnitChest extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: Icon(
-                  complete ? Icons.redeem_rounded : Icons.lock_rounded,
-                  color: complete ? const Color(0xFF7A4B00) : Colors.white,
-                  size: 30,
-                ),
+                child: complete
+                    ? const Center(
+                        child: AppFeatureIcon(
+                          asset: AppFeatureAssets.reward,
+                          fallbackIcon: Icons.redeem_rounded,
+                          color: Color(0xFF7A4B00),
+                          size: 38,
+                        ),
+                      )
+                    : const Icon(
+                        Icons.lock_rounded,
+                        color: Colors.white,
+                        size: 30,
+                      ),
               ),
               const SizedBox(height: 5),
               DecoratedBox(

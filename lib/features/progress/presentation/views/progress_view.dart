@@ -8,6 +8,7 @@ import 'package:senasgo/shared/models/practice_attempt.dart';
 import 'package:senasgo/shared/models/progress_model.dart';
 import 'package:senasgo/shared/models/user_model.dart';
 import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
 
 /// Pantalla de progreso: nivel, racha, precisión y avance por lección.
@@ -69,7 +70,12 @@ class _ProgressViewState extends State<ProgressView> {
             tooltip: 'Ayuda y comentarios',
             onPressed: () => SupportSheet.show(context,
                 contextLabel: 'Pantalla de progreso'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -224,8 +230,12 @@ class _LevelCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(Icons.bolt_rounded,
-                  color: Color(0xFFFFD86B), size: 30),
+              const AppFeatureIcon(
+                asset: AppFeatureAssets.xp,
+                fallbackIcon: Icons.bolt_rounded,
+                color: Color(0xFFFFD86B),
+                size: 32,
+              ),
               Text('$xp XP',
                   style: const TextStyle(
                       color: Colors.white,
@@ -277,6 +287,7 @@ class _StatsGrid extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.local_fire_department_rounded,
+            asset: AppFeatureAssets.streak,
             color: AppColors.streak,
             value: '$streak',
             label: streak == 1 ? 'día de racha' : 'días de racha',
@@ -286,6 +297,7 @@ class _StatsGrid extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.sign_language_rounded,
+            asset: AppFeatureAssets.progress,
             color: AppColors.primary,
             value: '$learned',
             label: 'aprendidas',
@@ -296,6 +308,7 @@ class _StatsGrid extends StatelessWidget {
         Expanded(
           child: _StatCard(
             icon: Icons.track_changes_rounded,
+            asset: AppFeatureAssets.goal,
             color: AppColors.success,
             value: '${(accuracy * 100).round()}%',
             label: 'precisión',
@@ -313,10 +326,12 @@ class _StatCard extends StatelessWidget {
     required this.color,
     required this.value,
     required this.label,
+    this.asset,
     this.hint,
   });
 
   final IconData icon;
+  final String? asset;
   final Color color;
   final String value;
   final String label;
@@ -341,7 +356,16 @@ class _StatCard extends StatelessWidget {
               color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(11),
             ),
-            child: Icon(icon, color: color, size: 18),
+            child: Center(
+              child: asset == null
+                  ? Icon(icon, color: color, size: 18)
+                  : AppFeatureIcon(
+                      asset: asset!,
+                      fallbackIcon: icon,
+                      color: color,
+                      size: 22,
+                    ),
+            ),
           ),
           const SizedBox(height: 7),
           Text(
@@ -567,11 +591,18 @@ class _AttemptRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            attempt.correct ? Icons.check_circle_rounded : Icons.cancel_rounded,
-            color: attempt.correct ? AppColors.success : AppColors.error,
-            size: 22,
-          ),
+          attempt.correct
+              ? AppFeatureIcon(
+                  asset: AppFeatureAssets.correct,
+                  fallbackIcon: Icons.check_circle_rounded,
+                  color: AppColors.success,
+                  size: 22,
+                )
+              : Icon(
+                  Icons.cancel_rounded,
+                  color: AppColors.error,
+                  size: 22,
+                ),
           const SizedBox(width: 9),
           Expanded(
             child: Text(

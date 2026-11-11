@@ -6,6 +6,7 @@ import 'package:senasgo/features/avatar/presentation/widgets/guided_teacher.dart
 import 'package:senasgo/features/practice/domain/sign_reference.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/models/sign_model.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
 
 /// Fase "Aprender": el profesor 3D demuestra la seña y se explican los cinco
@@ -62,7 +63,12 @@ class _LessonViewState extends State<LessonView> {
             tooltip: 'Ayuda y comentarios',
             onPressed: () => SupportSheet.show(context,
                 contextLabel: 'Lección ${lesson.title}'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -270,6 +276,7 @@ class _ParametersCard extends StatelessWidget {
           const SizedBox(height: 12),
           _ParamRow(
             icon: Icons.back_hand_outlined,
+            asset: AppFeatureAssets.practice,
             title: SignParameter.manualConfig.label,
             detail: _fingerSummary(sign.id),
           ),
@@ -287,6 +294,7 @@ class _ParametersCard extends StatelessWidget {
           ),
           _ParamRow(
             icon: Icons.swap_horiz_rounded,
+            asset: AppFeatureAssets.swap,
             title: SignParameter.movement.label,
             detail: ref.movement.hint.isEmpty
                 ? 'Trayectoria y ritmo de la mano.'
@@ -294,6 +302,7 @@ class _ParametersCard extends StatelessWidget {
           ),
           _ParamRow(
             icon: Icons.sentiment_satisfied_alt_rounded,
+            asset: AppFeatureAssets.feedback,
             title: SignParameter.facialExpression.label,
             detail: ref.usesFace
                 ? 'Esta seña se acompaña con el rostro.'
@@ -325,10 +334,12 @@ class _ParamRow extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.detail,
+    this.asset,
     this.last = false,
   });
 
   final IconData icon;
+  final String? asset;
   final String title;
   final String detail;
   final bool last;
@@ -347,7 +358,16 @@ class _ParamRow extends StatelessWidget {
               color: AppColors.primarySoft,
               borderRadius: BorderRadius.circular(11),
             ),
-            child: Icon(icon, size: 18, color: AppColors.primary),
+            child: Center(
+              child: asset == null
+                  ? Icon(icon, size: 18, color: AppColors.primary)
+                  : AppFeatureIcon(
+                      asset: asset!,
+                      fallbackIcon: icon,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+            ),
           ),
           const SizedBox(width: 10),
           Expanded(

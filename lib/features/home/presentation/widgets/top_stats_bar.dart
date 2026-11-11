@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/home/domain/learning_path.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 
 /// Barra superior fija con perfil, racha y XP.
@@ -37,8 +38,10 @@ class TopStatsBar extends StatelessWidget {
           const Spacer(),
           _Stat(
             icon: Icons.local_fire_department_rounded,
+            asset: AppFeatureAssets.streak,
             color:
                 stats.practicedToday ? AppColors.streak : AppColors.lockedInk,
+            iconOpacity: stats.practicedToday ? 1 : 0.55,
             value: '${stats.streak}',
             label: 'Racha',
             help: stats.practicedToday
@@ -48,6 +51,7 @@ class TopStatsBar extends StatelessWidget {
           ),
           _Stat(
             icon: Icons.bolt_rounded,
+            asset: AppFeatureAssets.xp,
             color: AppColors.primary,
             value: '${stats.xp}',
             label: 'XP',
@@ -143,11 +147,15 @@ class _Stat extends StatelessWidget {
     required this.value,
     required this.label,
     required this.help,
+    this.asset,
+    this.iconOpacity = 1,
     this.onTap,
   });
 
   final IconData icon;
+  final String? asset;
   final Color color;
+  final double iconOpacity;
   final String value;
   final String label;
   final String help;
@@ -168,7 +176,17 @@ class _Stat extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, color: color, size: 24),
+              Opacity(
+                opacity: iconOpacity,
+                child: asset == null
+                    ? Icon(icon, color: color, size: 24)
+                    : AppFeatureIcon(
+                        asset: asset!,
+                        fallbackIcon: icon,
+                        color: color,
+                        size: 26,
+                      ),
+              ),
               const SizedBox(width: 2),
               Text(
                 value,

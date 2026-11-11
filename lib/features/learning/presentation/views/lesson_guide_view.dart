@@ -4,6 +4,7 @@ import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/models/sign_model.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
@@ -188,6 +189,7 @@ class LessonGuideView extends StatelessWidget {
           _HowStep(
             number: '1',
             icon: Icons.back_hand_outlined,
+            asset: AppFeatureAssets.practice,
             title: 'Forma',
             text: 'La posición de los dedos y la orientación de la palma.',
             color: AppColors.primary,
@@ -204,6 +206,7 @@ class LessonGuideView extends StatelessWidget {
           _HowStep(
             number: '3',
             icon: Icons.swap_horiz_rounded,
+            asset: AppFeatureAssets.swap,
             title: 'Movimiento',
             text: 'El recorrido de la seña, con una pausa para observarla.',
             color: AppColors.sky,
@@ -349,10 +352,12 @@ class _HowStep extends StatelessWidget {
     required this.title,
     required this.text,
     required this.color,
+    this.asset,
   });
 
   final String number;
   final IconData icon;
+  final String? asset;
   final String title;
   final String text;
   final Color color;
@@ -366,7 +371,13 @@ class _HowStep extends StatelessWidget {
           Stack(
             alignment: Alignment.center,
             children: [
-              AppIconBadge(icon: icon, color: color, size: 44, radius: 14),
+              AppIconBadge(
+                icon: icon,
+                asset: asset,
+                color: color,
+                size: 44,
+                radius: 14,
+              ),
               Positioned(
                 right: 0,
                 top: 0,

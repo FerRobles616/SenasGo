@@ -58,6 +58,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/icons/nav/
+    - assets/icons/features/
     - assets/animations/
     - assets/rive/
     - assets/data/

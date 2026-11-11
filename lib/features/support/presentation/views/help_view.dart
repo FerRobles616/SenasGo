@@ -5,6 +5,7 @@ import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/support/data/support_repository.dart';
 import 'package:senasgo/features/support/domain/support_ticket.dart';
 import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
 
 /// Centro de ayuda offline: preguntas frecuentes, reportes guardados y
@@ -128,7 +129,12 @@ class _Hero extends StatelessWidget {
         children: [
           const Row(
             children: [
-              Icon(Icons.support_agent_rounded, color: Colors.white, size: 34),
+              AppFeatureIcon(
+                asset: AppFeatureAssets.help,
+                fallbackIcon: Icons.support_agent_rounded,
+                color: Colors.white,
+                size: 38,
+              ),
               SizedBox(width: 10),
               Expanded(
                 child: Text('Estamos para ayudarte',

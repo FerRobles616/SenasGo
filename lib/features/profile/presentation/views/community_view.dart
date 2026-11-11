@@ -5,6 +5,7 @@ import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/models/practice_attempt.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 
@@ -61,7 +62,12 @@ class CommunityView extends StatelessWidget {
             tooltip: 'Ayuda y comentarios',
             onPressed: () => SupportSheet.show(context,
                 contextLabel: 'Novedades y comunidad'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -119,6 +125,7 @@ class CommunityView extends StatelessWidget {
                   children: [
                     AppIconBadge(
                       icon: Icons.person_add_alt_1_rounded,
+                      asset: AppFeatureAssets.community,
                       color: AppColors.indigo,
                       size: 46,
                     ),
@@ -278,6 +285,7 @@ class CommunityView extends StatelessWidget {
     if (streak > 0) {
       items.add(_FeedItem(
         icon: Icons.local_fire_department_rounded,
+        asset: AppFeatureAssets.streak,
         color: AppColors.streak,
         title: 'Racha de $streak ${streak == 1 ? 'día' : 'días'}',
         subtitle: 'La constancia está dando frutos.',
@@ -287,6 +295,7 @@ class CommunityView extends StatelessWidget {
     if (learned > 0) {
       items.add(_FeedItem(
         icon: Icons.sign_language_rounded,
+        asset: AppFeatureAssets.progress,
         color: AppColors.primary,
         title:
             '$learned ${learned == 1 ? 'seña aprendida' : 'señas aprendidas'}',
@@ -297,6 +306,7 @@ class CommunityView extends StatelessWidget {
     if (level > 1) {
       items.add(_FeedItem(
         icon: Icons.workspace_premium_rounded,
+        asset: AppFeatureAssets.reward,
         color: AppColors.gold,
         title: 'Nivel $level alcanzado',
         subtitle: 'Seguí practicando para desbloquear más.',
@@ -309,6 +319,9 @@ class CommunityView extends StatelessWidget {
         icon: attempt.correct
             ? Icons.check_circle_rounded
             : Icons.refresh_rounded,
+        asset: attempt.correct
+            ? AppFeatureAssets.correct
+            : AppFeatureAssets.review,
         color: attempt.correct ? AppColors.success : AppColors.warning,
         title: attempt.correct
             ? 'Practicaste ${sign?.name ?? attempt.signId}'
@@ -331,9 +344,11 @@ class _FeedItem {
     required this.title,
     required this.subtitle,
     required this.at,
+    this.asset,
   });
 
   final IconData icon;
+  final String? asset;
   final Color color;
   final String title;
   final String subtitle;
@@ -352,7 +367,12 @@ class _FeedCard extends StatelessWidget {
       child: Row(
         children: [
           AppIconBadge(
-              icon: item.icon, color: item.color, size: 42, radius: 13),
+            icon: item.icon,
+            asset: item.asset,
+            color: item.color,
+            size: 42,
+            radius: 13,
+          ),
           const SizedBox(width: 11),
           Expanded(
             child: Column(

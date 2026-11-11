@@ -6,6 +6,7 @@ import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/home/domain/learning_path.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
@@ -59,7 +60,12 @@ class _StreakViewState extends State<StreakView> {
             tooltip: 'Ayuda y comentarios',
             onPressed: () =>
                 SupportSheet.show(context, contextLabel: 'Pantalla de racha'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -82,8 +88,14 @@ class _StreakViewState extends State<StreakView> {
                       width: 2,
                     ),
                   ),
-                  child: Icon(Icons.local_fire_department_rounded,
-                      color: Colors.white, size: compact ? 40 : 50),
+                  child: Center(
+                    child: AppFeatureIcon(
+                      asset: AppFeatureAssets.streak,
+                      fallbackIcon: Icons.local_fire_department_rounded,
+                      color: Colors.white,
+                      size: compact ? 46 : 58,
+                    ),
+                  ),
                 ),
                 SizedBox(width: compact ? 10 : 15),
                 Expanded(
@@ -161,9 +173,15 @@ class _StreakViewState extends State<StreakView> {
             child: _WeekStrip(days: _days),
           ),
           const SizedBox(height: 20),
-          const AppSectionTitle(
+          AppSectionTitle(
             'Calendario',
             subtitle: 'Tu constancia, mes a mes.',
+            trailing: AppFeatureIcon(
+              asset: AppFeatureAssets.calendar,
+              fallbackIcon: Icons.calendar_month_rounded,
+              color: AppColors.streak,
+              size: 30,
+            ),
           ),
           const SizedBox(height: 10),
           AppCard(
@@ -218,6 +236,7 @@ class _StreakViewState extends State<StreakView> {
               children: [
                 AppIconBadge(
                   icon: Icons.timer_outlined,
+                  asset: AppFeatureAssets.progress,
                   color: AppColors.teal,
                 ),
                 const SizedBox(width: 12),

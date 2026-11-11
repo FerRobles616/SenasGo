@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/shared/models/lesson_model.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 
 /// Cofre de recompensa local al completar una unidad.
@@ -201,9 +202,16 @@ class _RewardChestViewState extends State<RewardChestView>
                   const SizedBox(height: 22),
                   FilledButton.icon(
                     onPressed: _complete && !_claiming ? _open : null,
-                    icon: Icon(_claiming
-                        ? Icons.hourglass_top_rounded
-                        : Icons.redeem_rounded),
+                    icon: _claiming
+                        ? const Icon(Icons.hourglass_top_rounded)
+                        : _complete
+                            ? const AppFeatureIcon(
+                                asset: AppFeatureAssets.reward,
+                                fallbackIcon: Icons.redeem_rounded,
+                                color: Colors.white,
+                                size: 22,
+                              )
+                            : const Icon(Icons.redeem_rounded),
                     label: Text(_claiming ? 'ABRIENDO…' : 'ABRIR COFRE'),
                   ),
                 ],
@@ -501,8 +509,14 @@ class _RewardCard extends StatelessWidget {
               color: reward.color.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(16),
             ),
-            child:
-                Icon(Icons.auto_awesome_rounded, color: reward.color, size: 28),
+            child: Center(
+              child: AppFeatureIcon(
+                asset: AppFeatureAssets.reward,
+                fallbackIcon: Icons.auto_awesome_rounded,
+                color: reward.color,
+                size: 34,
+              ),
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(

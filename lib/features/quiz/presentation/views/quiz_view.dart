@@ -6,6 +6,7 @@ import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/practice/presentation/widgets/feedback_panel.dart';
 import 'package:senasgo/shared/models/sign_model.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/exit_lesson_dialog.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 import 'package:senasgo/shared/widgets/lesson_progress_bar.dart';
@@ -316,8 +317,7 @@ class _QuizViewState extends State<QuizView> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(_iconOf(option.category),
-                    size: 30, color: _inkOf(option, q)),
+                _categoryIcon(option.category, _inkOf(option, q)),
                 const SizedBox(height: 8),
                 Text(
                   option.name,
@@ -402,6 +402,7 @@ class _QuizViewState extends State<QuizView> {
               Expanded(
                 child: _SummaryStat(
                   icon: Icons.bolt_rounded,
+                  asset: AppFeatureAssets.xp,
                   color: AppColors.gold,
                   value: '+$_earnedXp',
                   label: 'XP',
@@ -411,6 +412,7 @@ class _QuizViewState extends State<QuizView> {
               Expanded(
                 child: _SummaryStat(
                   icon: Icons.track_changes_rounded,
+                  asset: AppFeatureAssets.goal,
                   color: AppColors.success,
                   value: '$percent%',
                   label: 'aciertos',
@@ -475,6 +477,25 @@ class _QuizViewState extends State<QuizView> {
         SignCategory.family => Icons.family_restroom_rounded,
         SignCategory.emotions => Icons.emoji_emotions_outlined,
       };
+
+  String? _assetOf(SignCategory category) => switch (category) {
+        SignCategory.greetings => AppFeatureAssets.practice,
+        SignCategory.family => AppFeatureAssets.community,
+        SignCategory.emotions => AppFeatureAssets.feedback,
+        _ => null,
+      };
+
+  Widget _categoryIcon(SignCategory category, Color color) {
+    final asset = _assetOf(category);
+    final icon = _iconOf(category);
+    if (asset == null) return Icon(icon, size: 30, color: color);
+    return AppFeatureIcon(
+      asset: asset,
+      fallbackIcon: icon,
+      color: color,
+      size: 32,
+    );
+  }
 }
 
 enum _OptionState { idle, selected, correct, wrong, dimmed }
@@ -597,9 +618,11 @@ class _SummaryStat extends StatelessWidget {
     required this.color,
     required this.value,
     required this.label,
+    this.asset,
   });
 
   final IconData icon;
+  final String? asset;
   final Color color;
   final String value;
   final String label;
@@ -615,7 +638,14 @@ class _SummaryStat extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: 28),
+          asset == null
+              ? Icon(icon, color: color, size: 28)
+              : AppFeatureIcon(
+                  asset: asset!,
+                  fallbackIcon: icon,
+                  color: color,
+                  size: 30,
+                ),
           const SizedBox(height: 4),
           Text(value,
               style: TextStyle(

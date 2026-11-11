@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
@@ -44,7 +45,12 @@ class LeagueView extends StatelessWidget {
             tooltip: 'Ayuda y comentarios',
             onPressed: () =>
                 SupportSheet.show(context, contextLabel: 'Liga de práctica'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],

@@ -6,6 +6,7 @@ import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/models/lesson_model.dart';
 import 'package:senasgo/shared/models/sign_model.dart';
 import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 
 /// Biblioteca: lecciones y señas del vocabulario acotado, con búsqueda y
 /// filtros. Cada seña se puede abrir directamente en la demostración 3D.
@@ -92,7 +93,12 @@ class _LessonListViewState extends State<LessonListView> {
             tooltip: 'Ayuda y comentarios',
             onPressed: () =>
                 SupportSheet.show(context, contextLabel: 'Biblioteca de señas'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -154,6 +160,7 @@ class _LessonListViewState extends State<LessonListView> {
                 _FilterChip(
                   label: 'Saludos',
                   icon: Icons.waving_hand_rounded,
+                  asset: AppFeatureAssets.practice,
                   selected: _category == SignCategory.greetings,
                   onTap: () =>
                       setState(() => _category = SignCategory.greetings),
@@ -254,10 +261,12 @@ class _FilterChip extends StatelessWidget {
     required this.icon,
     required this.selected,
     required this.onTap,
+    this.asset,
   });
 
   final String label;
   final IconData icon;
+  final String? asset;
   final bool selected;
   final VoidCallback onTap;
 
@@ -266,8 +275,16 @@ class _FilterChip extends StatelessWidget {
     return ChoiceChip(
       selected: selected,
       onSelected: (_) => onTap(),
-      avatar: Icon(icon,
-          size: 14, color: selected ? AppColors.onPrimary : AppColors.primary),
+      avatar: asset == null
+          ? Icon(icon,
+              size: 14,
+              color: selected ? AppColors.onPrimary : AppColors.primary)
+          : AppFeatureIcon(
+              asset: asset!,
+              fallbackIcon: icon,
+              color: selected ? AppColors.onPrimary : AppColors.primary,
+              size: 16,
+            ),
       label: Text(label),
       selectedColor: AppColors.primary,
       backgroundColor: AppColors.surface,

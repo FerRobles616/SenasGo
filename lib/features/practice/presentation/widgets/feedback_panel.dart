@@ -8,6 +8,7 @@ import 'package:senasgo/features/practice/domain/sign_evaluation.dart';
 import 'package:senasgo/features/practice/domain/sign_reference.dart';
 import 'package:senasgo/features/practice/presentation/controllers/practice_controller.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 
 /// Ícono grande de resultado (✓ / ✕) de los estados 9 y 10. Entra con un
 /// rebote; el acierto suelta una ráfaga de partículas y el error se sacude.
@@ -293,8 +294,12 @@ class ComboChip extends StatelessWidget {
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(Icons.local_fire_department_rounded,
-                          size: 16, color: AppColors.streak),
+                      AppFeatureIcon(
+                        asset: AppFeatureAssets.streak,
+                        fallbackIcon: Icons.local_fire_department_rounded,
+                        color: AppColors.streak,
+                        size: 18,
+                      ),
                       const SizedBox(width: 4),
                       Text('¡$combo seguidas!',
                           style: const TextStyle(
@@ -394,7 +399,14 @@ class ParameterChecklist extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Icon(icon, size: 20, color: color),
+          r?.status == ParameterStatus.passed
+              ? AppFeatureIcon(
+                  asset: AppFeatureAssets.correct,
+                  fallbackIcon: icon,
+                  color: color,
+                  size: 20,
+                )
+              : Icon(icon, size: 20, color: color),
           const SizedBox(width: 10),
           Expanded(child: Text(p.label)),
           Text(text,
@@ -427,7 +439,12 @@ class CorrectFeedback extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.bolt, color: AppColors.success, size: 34),
+              AppFeatureIcon(
+                asset: AppFeatureAssets.xp,
+                fallbackIcon: Icons.bolt,
+                color: AppColors.success,
+                size: 36,
+              ),
               SizedBox(width: 10),
               Text('+${AppConstants.xpPerCorrectSign} XP',
                   style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
@@ -468,8 +485,12 @@ class LessonSummary extends StatelessWidget {
           ),
           child: Row(
             children: [
-              Icon(Icons.emoji_events_outlined,
-                  color: AppColors.primary, size: 34),
+              AppFeatureIcon(
+                asset: AppFeatureAssets.celebrate,
+                fallbackIcon: Icons.emoji_events_outlined,
+                color: AppColors.primary,
+                size: 38,
+              ),
               SizedBox(width: 14),
               Expanded(
                 child: Column(
@@ -517,14 +538,17 @@ class LessonSummary extends StatelessWidget {
                       ],
                     ),
                   ),
-                  Icon(
-                    state.completedIds.contains(s.id)
-                        ? Icons.check_circle_outline
-                        : Icons.radio_button_unchecked,
-                    color: state.completedIds.contains(s.id)
-                        ? AppColors.success
-                        : AppColors.muted,
-                  ),
+                  state.completedIds.contains(s.id)
+                      ? AppFeatureIcon(
+                          asset: AppFeatureAssets.correct,
+                          fallbackIcon: Icons.check_circle_outline,
+                          color: AppColors.success,
+                          size: 22,
+                        )
+                      : Icon(
+                          Icons.radio_button_unchecked,
+                          color: AppColors.muted,
+                        ),
                 ],
               ),
             ),

@@ -10,6 +10,7 @@ import 'package:senasgo/features/profile/data/calendar_service.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/models/progress_model.dart';
 import 'package:senasgo/shared/models/user_model.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 
@@ -234,7 +235,12 @@ class _ProfileViewState extends State<ProfileView> {
             tooltip: 'Ayuda y comentarios',
             onPressed: () =>
                 SupportSheet.show(context, contextLabel: 'Mi perfil'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -354,6 +360,7 @@ class _ProfileViewState extends State<ProfileView> {
               Expanded(
                 child: _ProfileStat(
                   icon: Icons.sign_language_rounded,
+                  asset: AppFeatureAssets.progress,
                   color: AppColors.primary,
                   value: '$learned',
                   label: 'señas aprendidas',
@@ -364,6 +371,7 @@ class _ProfileViewState extends State<ProfileView> {
               Expanded(
                 child: _ProfileStat(
                   icon: Icons.local_fire_department_rounded,
+                  asset: AppFeatureAssets.streak,
                   color: AppColors.streak,
                   value: '${HiveService.streak}',
                   label: 'días de racha',
@@ -373,6 +381,7 @@ class _ProfileViewState extends State<ProfileView> {
               Expanded(
                 child: _ProfileStat(
                   icon: Icons.bolt_rounded,
+                  asset: AppFeatureAssets.xp,
                   color: AppColors.teal,
                   value: '$weeklyXp',
                   label: 'XP semanal',
@@ -418,7 +427,12 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 OutlinedButton.icon(
                   onPressed: _editGoal,
-                  icon: const Icon(Icons.tune_rounded, size: 17),
+                  icon: AppFeatureIcon(
+                    asset: AppFeatureAssets.swap,
+                    fallbackIcon: Icons.tune_rounded,
+                    color: AppColors.primary,
+                    size: 20,
+                  ),
                   label: const Text('Cambiar'),
                   style: OutlinedButton.styleFrom(
                     minimumSize: const Size(0, 40),
@@ -436,6 +450,7 @@ class _ProfileViewState extends State<ProfileView> {
               children: [
                 AppIconBadge(
                   icon: Icons.calendar_month_rounded,
+                  asset: AppFeatureAssets.calendar,
                   color: AppColors.streak,
                   size: 50,
                 ),
@@ -475,6 +490,7 @@ class _ProfileViewState extends State<ProfileView> {
               children: [
                 AppIconBadge(
                   icon: Icons.notifications_active_rounded,
+                  asset: AppFeatureAssets.reminder,
                   color: AppColors.primary,
                   size: 50,
                 ),
@@ -521,6 +537,7 @@ class _ProfileViewState extends State<ProfileView> {
               children: [
                 _ProfileLinkRow(
                   icon: Icons.emoji_events_rounded,
+                  asset: AppFeatureAssets.reward,
                   color: AppColors.gold,
                   title: 'Liga de práctica',
                   subtitle: '$weeklyXp XP esta semana',
@@ -529,6 +546,7 @@ class _ProfileViewState extends State<ProfileView> {
                 const Divider(height: 1, indent: 66),
                 _ProfileLinkRow(
                   icon: Icons.people_alt_rounded,
+                  asset: AppFeatureAssets.community,
                   color: AppColors.indigo,
                   title: 'Novedades',
                   subtitle: 'Tus hitos y tu actividad reciente',
@@ -545,7 +563,12 @@ class _ProfileViewState extends State<ProfileView> {
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.support_agent_rounded),
+                  leading: AppFeatureIcon(
+                    asset: AppFeatureAssets.help,
+                    fallbackIcon: Icons.support_agent_rounded,
+                    color: AppColors.primary,
+                    size: 26,
+                  ),
                   title: const Text('Ayuda y comentarios'),
                   subtitle: const Text('Preguntas, ideas o problemas'),
                   trailing: const Icon(Icons.chevron_right_rounded),
@@ -554,7 +577,12 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.add_to_home_screen_rounded),
+                  leading: AppFeatureIcon(
+                    asset: AppFeatureAssets.access,
+                    fallbackIcon: Icons.add_to_home_screen_rounded,
+                    color: AppColors.primary,
+                    size: 26,
+                  ),
                   title: const Text('Acceso rápido en tu teléfono'),
                   subtitle: const Text('Tené SeñasGo a un toque'),
                   trailing: const Icon(Icons.chevron_right_rounded),
@@ -562,7 +590,12 @@ class _ProfileViewState extends State<ProfileView> {
                 ),
                 const Divider(height: 1, indent: 56),
                 ListTile(
-                  leading: const Icon(Icons.info_outline_rounded),
+                  leading: AppFeatureIcon(
+                    asset: AppFeatureAssets.info,
+                    fallbackIcon: Icons.info_outline_rounded,
+                    color: AppColors.primary,
+                    size: 26,
+                  ),
                   title: const Text('Acerca de SeñasGo'),
                   subtitle: const Text(
                       'Versión ${AppConstants.appVersion} · Preguntas y reportes'),
@@ -596,9 +629,11 @@ class _ProfileLinkRow extends StatelessWidget {
     required this.title,
     required this.subtitle,
     required this.onTap,
+    this.asset,
   });
 
   final IconData icon;
+  final String? asset;
   final Color color;
   final String title;
   final String subtitle;
@@ -614,7 +649,13 @@ class _ProfileLinkRow extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(14, 12, 10, 12),
           child: Row(
             children: [
-              AppIconBadge(icon: icon, color: color, size: 42, radius: 13),
+              AppIconBadge(
+                icon: icon,
+                asset: asset,
+                color: color,
+                size: 42,
+                radius: 13,
+              ),
               const SizedBox(width: 11),
               Expanded(
                 child: Column(
@@ -754,10 +795,12 @@ class _ProfileStat extends StatelessWidget {
     required this.color,
     required this.value,
     required this.label,
+    this.asset,
     this.hint,
   });
 
   final IconData icon;
+  final String? asset;
   final Color color;
   final String value;
   final String label;
@@ -771,7 +814,14 @@ class _ProfileStat extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: color, size: 20),
+          asset == null
+              ? Icon(icon, color: color, size: 20)
+              : AppFeatureIcon(
+                  asset: asset!,
+                  fallbackIcon: icon,
+                  color: color,
+                  size: 24,
+                ),
           const SizedBox(height: 5),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,

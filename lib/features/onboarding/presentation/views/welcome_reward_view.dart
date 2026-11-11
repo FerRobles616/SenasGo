@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
 
@@ -111,6 +112,7 @@ class _WelcomeRewardViewState extends State<WelcomeRewardView> {
                         Expanded(
                           child: _RewardStat(
                             icon: Icons.bolt_rounded,
+                            asset: AppFeatureAssets.xp,
                             color: AppColors.gold,
                             value: '${user.xp}',
                             label: 'XP total',
@@ -121,6 +123,7 @@ class _WelcomeRewardViewState extends State<WelcomeRewardView> {
                         Expanded(
                           child: _RewardStat(
                             icon: Icons.track_changes_rounded,
+                            asset: AppFeatureAssets.goal,
                             color: AppColors.success,
                             value: '${(accuracy * 100).round()}%',
                             label: 'precisión',
@@ -131,6 +134,7 @@ class _WelcomeRewardViewState extends State<WelcomeRewardView> {
                         Expanded(
                           child: _RewardStat(
                             icon: Icons.local_fire_department_rounded,
+                            asset: AppFeatureAssets.streak,
                             color: AppColors.streak,
                             value: '$streak',
                             label: streak == 1 ? 'día' : 'días',
@@ -162,9 +166,12 @@ class _WelcomeRewardViewState extends State<WelcomeRewardView> {
                               color: AppColors.primarySoft,
                               borderRadius: BorderRadius.circular(15),
                             ),
-                            child: Icon(Icons.redeem_rounded,
-                                color: AppColors.primary,
-                                size: compact ? 23 : 27),
+                            child: AppFeatureIcon(
+                              asset: AppFeatureAssets.reward,
+                              fallbackIcon: Icons.redeem_rounded,
+                              color: AppColors.primary,
+                              size: compact ? 28 : 32,
+                            ),
                           ),
                           SizedBox(width: compact ? 8 : 11),
                           Expanded(
@@ -212,18 +219,32 @@ class _WelcomeRewardViewState extends State<WelcomeRewardView> {
                       color: Colors.white,
                       shadowColor: const Color(0xFFB9D6FF),
                       height: compact ? 52 : 58,
-                      child: Text(
-                        claimed
-                            ? 'IR A MI CAMINO'
-                            : _claiming
-                                ? 'GUARDANDO…'
-                                : 'RECIBIR +${AppConstants.welcomeRewardXp} XP',
-                        style: TextStyle(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 15.5,
-                          letterSpacing: 0.4,
-                        ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (!claimed && !_claiming) ...[
+                            AppFeatureIcon(
+                              asset: AppFeatureAssets.celebrate,
+                              fallbackIcon: Icons.celebration_rounded,
+                              color: AppColors.primary,
+                              size: 22,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            claimed
+                                ? 'IR A MI CAMINO'
+                                : _claiming
+                                    ? 'GUARDANDO…'
+                                    : 'RECIBIR +${AppConstants.welcomeRewardXp} XP',
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 15.5,
+                              letterSpacing: 0.4,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 5),
@@ -262,10 +283,12 @@ class _RewardStat extends StatelessWidget {
     required this.color,
     required this.value,
     required this.label,
+    this.asset,
     this.compact = false,
   });
 
   final IconData icon;
+  final String? asset;
   final Color color;
   final String value;
   final String label;
@@ -283,7 +306,14 @@ class _RewardStat extends StatelessWidget {
       ),
       child: Column(
         children: [
-          Icon(icon, color: color, size: compact ? 19 : 22),
+          asset == null
+              ? Icon(icon, color: color, size: compact ? 19 : 22)
+              : AppFeatureIcon(
+                  asset: asset!,
+                  fallbackIcon: icon,
+                  color: color,
+                  size: compact ? 22 : 26,
+                ),
           const SizedBox(height: 4),
           Text(
             value,

@@ -4,6 +4,7 @@ import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
+import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 
 /// Retos locales: pequeñas metas diarias y semanales que dan XP extra.
@@ -30,6 +31,7 @@ class _ChallengesViewState extends State<ChallengesView> {
         subtitle:
             'Cada seña correcta suma ${AppConstants.xpPerCorrectSign} XP.',
         icon: Icons.bolt_rounded,
+        asset: AppFeatureAssets.xp,
         color: AppColors.primary,
         progress: HiveService.dailyXp,
         target: 20,
@@ -41,6 +43,7 @@ class _ChallengesViewState extends State<ChallengesView> {
         title: 'Practicá 3 señas distintas',
         subtitle: 'Durante esta semana.',
         icon: Icons.sign_language_rounded,
+        asset: AppFeatureAssets.progress,
         color: AppColors.teal,
         progress: HiveService.weeklyDistinctSigns,
         target: 3,
@@ -52,6 +55,7 @@ class _ChallengesViewState extends State<ChallengesView> {
         title: 'Entrená el fin de semana',
         subtitle: 'Sumá 2 prácticas entre sábado y domingo.',
         icon: Icons.weekend_rounded,
+        asset: AppFeatureAssets.calendar,
         color: AppColors.sky,
         progress: HiveService.weekendPracticeCount,
         target: 2,
@@ -63,6 +67,7 @@ class _ChallengesViewState extends State<ChallengesView> {
         title: 'Mantené una racha de 3 días',
         subtitle: 'La constancia vale más que la prisa.',
         icon: Icons.local_fire_department_rounded,
+        asset: AppFeatureAssets.streak,
         color: AppColors.streak,
         progress: HiveService.streak,
         target: 3,
@@ -83,7 +88,12 @@ class _ChallengesViewState extends State<ChallengesView> {
       ..showSnackBar(SnackBar(
         content: Row(
           children: [
-            Icon(Icons.bolt_rounded, color: AppColors.gold),
+            AppFeatureIcon(
+              asset: AppFeatureAssets.xp,
+              fallbackIcon: Icons.bolt_rounded,
+              color: AppColors.gold,
+              size: 20,
+            ),
             const SizedBox(width: 8),
             Expanded(
               child: Text(
@@ -114,7 +124,12 @@ class _ChallengesViewState extends State<ChallengesView> {
             tooltip: 'Ayuda y comentarios',
             onPressed: () =>
                 SupportSheet.show(context, contextLabel: 'Pantalla de retos'),
-            icon: const Icon(Icons.support_agent_rounded),
+            icon: AppFeatureIcon(
+              asset: AppFeatureAssets.help,
+              fallbackIcon: Icons.support_agent_rounded,
+              color: AppColors.primary,
+              size: 26,
+            ),
           ),
           const SizedBox(width: 6),
         ],
@@ -136,8 +151,14 @@ class _ChallengesViewState extends State<ChallengesView> {
                       color: Colors.white.withValues(alpha: 0.3),
                     ),
                   ),
-                  child: const Icon(Icons.emoji_events_rounded,
-                      color: Colors.white, size: 34),
+                  child: const Center(
+                    child: AppFeatureIcon(
+                      asset: AppFeatureAssets.reward,
+                      fallbackIcon: Icons.emoji_events_rounded,
+                      color: Colors.white,
+                      size: 40,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -252,6 +273,7 @@ class _Challenge {
     required this.title,
     required this.subtitle,
     required this.icon,
+    required this.asset,
     required this.color,
     required this.progress,
     required this.target,
@@ -263,6 +285,7 @@ class _Challenge {
   final String title;
   final String subtitle;
   final IconData icon;
+  final String asset;
   final Color color;
   final int progress;
   final int target;
@@ -302,7 +325,11 @@ class _ChallengeCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              AppIconBadge(icon: challenge.icon, color: challenge.color),
+              AppIconBadge(
+                icon: challenge.icon,
+                asset: challenge.asset,
+                color: challenge.color,
+              ),
               const SizedBox(width: 12),
               Expanded(
                 child: Column(
@@ -394,8 +421,12 @@ class _ChallengeCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.check_circle_rounded,
-                    color: AppColors.success, size: 16),
+                AppFeatureIcon(
+                  asset: AppFeatureAssets.correct,
+                  fallbackIcon: Icons.check_circle_rounded,
+                  color: AppColors.success,
+                  size: 16,
+                ),
                 const SizedBox(width: 5),
                 Text(
                   'Recompensa reclamada',
