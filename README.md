@@ -8,7 +8,9 @@ Supabase/PostgreSQL.
 ## Qué incluye
 
 La navegación principal tiene cinco pestañas: **Aprender**, **Biblioteca**,
-**Retos**, **Progreso** y **Ayuda**.
+**Retos**, **Progreso** y **Ayuda**. Cada una usa un icono ilustrado propio
+(casa, libro, trofeo, gráfico y jaguar con auriculares) con halo, escala y
+atenuación; la animación respeta la opción de reducir movimiento.
 
 La identidad visual **“Selva eléctrica”** combina verde profundo, turquesa,
 ámbar jaguar y coral. Incluye fondos con gradientes suaves, tarjetas con
@@ -30,13 +32,13 @@ animaciones respetan la opción de reducir movimiento del sistema.
 - **Racha**: calendario de constancia, mejor racha y protectores locales.
 - **Recordatorios**: en Android/iOS se puede agendar una práctica semanal en
   el calendario del teléfono. En web se informa que requiere la app móvil.
-- **Perfil**: sin sesión se muestra como **Invitado** y el apodo es local; con
-  cuenta se sincroniza. Incluye meta diaria editable, calendario, liga de
-  práctica y comunidad offline. No hay amigos ni rankings inventados: la liga
-  compara tu XP semanal contra metas personales.
-- **Progreso en la nube (opcional)**: con Supabase/PostgreSQL se puede crear
-  una cuenta y recuperar XP, rachas, señas y cofres en otro teléfono. La app
-  sigue funcionando sin conexión y sin cuenta; el detalle de configuración
+- **Perfil**: siempre hay una cuenta iniciada; el apodo y el progreso se
+  sincronizan. Incluye meta diaria editable, calendario, liga de práctica y
+  comunidad offline. No hay amigos ni rankings inventados: la liga compara tu
+  XP semanal contra metas personales.
+- **Progreso en la nube**: con Supabase/PostgreSQL la cuenta guarda y recupera
+  XP, rachas, señas y cofres en otro teléfono. La app sigue funcionando sin
+  conexión y conserva la sesión en el teléfono; el detalle de configuración
   está en `docs/SUPABASE.md`.
 - **Apariencia**: modo **Oscuro**, **Claro** o **Según el sistema**, con
   persistencia local y adaptación de fondos, tarjetas, textos y navegación.

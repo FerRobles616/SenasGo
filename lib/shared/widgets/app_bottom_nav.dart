@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
+import 'package:senasgo/shared/widgets/app_nav_icon.dart';
 
 /// Navegación principal: Aprender · Biblioteca · Retos · Progreso · Ayuda.
 ///
 /// La tienda se retiró: todo lo que la app ofrece (lecciones, práctica,
 /// retos, progreso y soporte) está pensado para la persona que aprende LSPy.
 ///
-/// Cada sección tiene su color (siempre visible, también sin seleccionar) y
-/// la actual se marca con una baldosa redondeada de ese color.
+/// Cada sección tiene su color y su icono ilustrado. La pestaña actual se
+/// distingue por el icono a color, un halo suave y una escala breve; las demás
+/// quedan atenuadas para que la barra no compita con el contenido.
 class AppBottomNav extends StatelessWidget {
   const AppBottomNav({
     required this.currentIndex,
@@ -34,12 +36,37 @@ class AppBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = [
-      (Icons.home_rounded, 'Aprender', AppColors.primary),
-      (Icons.menu_book_rounded, 'Biblioteca', AppColors.teal),
-      (Icons.emoji_events_rounded, 'Retos', AppColors.gold),
-      (Icons.insights_rounded, 'Progreso', AppColors.indigo),
-      (Icons.support_agent_rounded, 'Ayuda', AppColors.heart),
+    final items = <_NavDestination>[
+      _NavDestination(
+        asset: 'assets/icons/nav/nav_learn.png',
+        fallbackIcon: Icons.home_rounded,
+        label: 'Aprender',
+        color: AppColors.streak,
+      ),
+      _NavDestination(
+        asset: 'assets/icons/nav/nav_library.png',
+        fallbackIcon: Icons.menu_book_rounded,
+        label: 'Biblioteca',
+        color: AppColors.teal,
+      ),
+      _NavDestination(
+        asset: 'assets/icons/nav/nav_challenges.png',
+        fallbackIcon: Icons.emoji_events_rounded,
+        label: 'Retos',
+        color: AppColors.gold,
+      ),
+      _NavDestination(
+        asset: 'assets/icons/nav/nav_progress.png',
+        fallbackIcon: Icons.insights_rounded,
+        label: 'Progreso',
+        color: AppColors.success,
+      ),
+      _NavDestination(
+        asset: 'assets/icons/nav/nav_help.png',
+        fallbackIcon: Icons.support_agent_rounded,
+        label: 'Ayuda',
+        color: AppColors.heart,
+      ),
     ];
     // Hero: todas las pestañas comparten esta barra; durante la transición
     // queda quieta en su lugar en vez de desvanecerse con la pantalla.
@@ -54,7 +81,7 @@ class AppBottomNav extends StatelessWidget {
 
   static const heroTag = 'app-bottom-nav';
 
-  Widget _bar(List<(IconData, String, Color)> items, BuildContext context) {
+  Widget _bar(List<_NavDestination> items, BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
         color: AppColors.surface,
@@ -77,9 +104,7 @@ class AppBottomNav extends StatelessWidget {
               for (var i = 0; i < items.length; i++)
                 Expanded(
                   child: _NavItem(
-                    icon: items[i].$1,
-                    label: items[i].$2,
-                    color: items[i].$3,
+                    destination: items[i],
                     selected: i == currentIndex,
                     onTap: () => _go(context, i),
                   ),
@@ -92,18 +117,28 @@ class AppBottomNav extends StatelessWidget {
   }
 }
 
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
+class _NavDestination {
+  const _NavDestination({
+    required this.asset,
+    required this.fallbackIcon,
     required this.label,
     required this.color,
+  });
+
+  final String asset;
+  final IconData fallbackIcon;
+  final String label;
+  final Color color;
+}
+
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.destination,
     required this.selected,
     required this.onTap,
   });
 
-  final IconData icon;
-  final String label;
-  final Color color;
+  final _NavDestination destination;
   final bool selected;
   final VoidCallback onTap;
 
@@ -111,53 +146,75 @@ class _NavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     final duration =
-        reduceMotion ? Duration.zero : const Duration(milliseconds: 220);
+        reduceMotion ? Duration.zero : const Duration(milliseconds: 200);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final compact = MediaQuery.sizeOf(context).width < 350;
+    final accent = destination.color;
+    final haloAlpha = selected ? (isDark ? 0.20 : 0.12) : 0.0;
+    final labelStyle = DefaultTextStyle.of(context).style.copyWith(
+          fontSize: compact ? 10.6 : 11.5,
+          height: 1.05,
+          fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
+          color: selected ? AppColors.ink : AppColors.muted,
+        );
+
     return Semantics(
       button: true,
       selected: selected,
-      label: label,
+      label: destination.label,
+      onTap: onTap,
       excludeSemantics: true,
       child: InkResponse(
         onTap: onTap,
-        radius: 36,
+        radius: 38,
+        splashColor: accent.withValues(alpha: 0.14),
+        highlightColor: accent.withValues(alpha: 0.08),
+        hoverColor: accent.withValues(alpha: 0.06),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             AnimatedContainer(
               duration: duration,
               curve: Curves.easeOutCubic,
-              width: 54,
-              height: 38,
+              width: 56,
+              height: 42,
               decoration: BoxDecoration(
-                color: selected
-                    ? color.withValues(alpha: AppColors.isDark ? 0.18 : 0.13)
-                    : Colors.transparent,
-                borderRadius: BorderRadius.circular(14),
+                color: accent.withValues(alpha: haloAlpha),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: selected ? color : Colors.transparent,
-                  width: 2,
+                  color: selected
+                      ? accent.withValues(alpha: isDark ? 0.38 : 0.26)
+                      : Colors.transparent,
+                  width: 1.2,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: accent.withValues(
+                      alpha: selected ? (isDark ? 0.22 : 0.10) : 0.0,
+                    ),
+                    blurRadius: selected ? 16 : 0,
+                    spreadRadius: selected ? 1 : 0,
+                  ),
+                ],
               ),
-              child: AnimatedScale(
-                duration: duration,
-                curve: Curves.easeOutBack,
-                scale: selected ? 1.1 : 1,
-                child: Icon(
-                  icon,
-                  size: 25,
-                  color: selected ? color : color.withValues(alpha: 0.7),
+              child: Center(
+                child: AppNavIcon(
+                  asset: destination.asset,
+                  fallbackIcon: destination.fallbackIcon,
+                  selected: selected,
+                  color: accent,
                 ),
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 11.5,
-                fontWeight: selected ? FontWeight.w900 : FontWeight.w700,
-                color: selected ? color : AppColors.muted,
+            const SizedBox(height: 3),
+            AnimatedDefaultTextStyle(
+              duration: duration,
+              curve: Curves.easeOutCubic,
+              style: labelStyle,
+              child: Text(
+                destination.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
