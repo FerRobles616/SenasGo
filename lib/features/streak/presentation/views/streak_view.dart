@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:lottie/lottie.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:senasgo/core/services/hive_service.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
@@ -52,6 +53,7 @@ class _StreakViewState extends State<StreakView> {
   Widget build(BuildContext context) {
     final todayDone = HiveService.practicedToday;
     final compact = MediaQuery.sizeOf(context).width < 360;
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi racha'),
@@ -89,11 +91,29 @@ class _StreakViewState extends State<StreakView> {
                     ),
                   ),
                   child: Center(
-                    child: AppFeatureIcon(
-                      asset: AppFeatureAssets.streak,
-                      fallbackIcon: Icons.local_fire_department_rounded,
-                      color: Colors.white,
-                      size: compact ? 46 : 58,
+                    child: ExcludeSemantics(
+                      child: reduceMotion
+                          ? AppFeatureIcon(
+                              asset: AppFeatureAssets.streak,
+                              fallbackIcon: Icons.local_fire_department_rounded,
+                              color: Colors.white,
+                              size: compact ? 46 : 58,
+                            )
+                          : Lottie.asset(
+                              'assets/animations/streak_flame.json',
+                              width: compact ? 66 : 82,
+                              height: compact ? 66 : 82,
+                              fit: BoxFit.contain,
+                              repeat: true,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  AppFeatureIcon(
+                                asset: AppFeatureAssets.streak,
+                                fallbackIcon:
+                                    Icons.local_fire_department_rounded,
+                                color: Colors.white,
+                                size: compact ? 46 : 58,
+                              ),
+                            ),
                     ),
                   ),
                 ),
