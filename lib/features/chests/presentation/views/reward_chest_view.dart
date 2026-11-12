@@ -8,6 +8,7 @@ import 'package:senasgo/core/theme/app_theme.dart';
 import 'package:senasgo/shared/models/lesson_model.dart';
 import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
+import 'package:senasgo/shared/widgets/celebration_confetti.dart';
 
 /// Cofre de recompensa local al completar una unidad.
 ///
@@ -39,6 +40,7 @@ class _RewardChestViewState extends State<RewardChestView>
   late bool _claimed = HiveService.isChestClaimed(_chestId);
   bool _opened = false;
   bool _claiming = false;
+  bool _celebrate = false;
 
   String get _chestId => 'unit_${widget.lessonId}';
 
@@ -123,6 +125,7 @@ class _RewardChestViewState extends State<RewardChestView>
       setState(() => _opened = true);
     } else {
       await _controller.forward();
+      if (mounted) setState(() => _celebrate = true);
     }
   }
 
@@ -150,83 +153,112 @@ class _RewardChestViewState extends State<RewardChestView>
           icon: const Icon(Icons.close_rounded),
         ),
       ),
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
-            child: Column(
-              children: [
-                _RarityPill(rarity: reward.rarity),
-                const SizedBox(height: 18),
-                AnimatedBuilder(
-                  animation: _controller,
-                  builder: (context, _) => _ChestArt(
-                    progress: _controller.value,
-                    opened: opened,
-                    rarity: reward.rarity,
-                    shake: !opened && !reduceMotion
-                        ? math.sin(_controller.value * math.pi * 8) * 0.03
-                        : 0,
-                  ),
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.fromLTRB(24, 12, 24, 32),
+                child: Column(
+                  children: [
+                    _RarityPill(rarity: reward.rarity),
+                    const SizedBox(height: 18),
+                    AnimatedBuilder(
+                      animation: _controller,
+                      builder: (context, _) => _ChestArt(
+                        progress: _controller.value,
+                        opened: opened,
+                        rarity: reward.rarity,
+                        shake: !opened && !reduceMotion
+                            ? math.sin(_controller.value * math.pi * 8) * 0.03
+                            : 0,
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Text(
+                      lesson?.title ?? 'Unidad',
+                      style: TextStyle(
+                        color: AppColors.ink,
+                        fontSize: 26,
+                        fontWeight: FontWeight.w900,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      _complete
+                          ? opened
+                              ? 'Recompensa reclamada'
+                              : 'Completaste esta unidad.'
+                          : 'Todavía faltan señas para completar esta unidad.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          color: AppColors.muted, fontSize: 13.5, height: 1.35),
+                    ),
+                    if (opened) ...[
+                      const SizedBox(height: 18),
+                      TweenAnimationBuilder<double>(
+                        tween: Tween<double>(begin: 0, end: 1),
+                        duration: reduceMotion
+                            ? Duration.zero
+                            : const Duration(milliseconds: 480),
+                        curve: Curves.easeOutBack,
+                        builder: (context, value, child) {
+                          final opacity = value.clamp(0.0, 1.0).toDouble();
+                          return Opacity(
+                            opacity: opacity,
+                            child: Transform.scale(
+                              scale: 0.84 + value * 0.16,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: _RewardCard(reward: reward),
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton.icon(
+                        onPressed: _leave,
+                        icon: const Icon(Icons.arrow_forward_rounded),
+                        label: const Text('VOLVER AL CAMINO'),
+                      ),
+                    ] else ...[
+                      const SizedBox(height: 22),
+                      FilledButton.icon(
+                        onPressed: _complete && !_claiming ? _open : null,
+                        icon: _claiming
+                            ? const Icon(Icons.hourglass_top_rounded)
+                            : _complete
+                                ? const AppFeatureIcon(
+                                    asset: AppFeatureAssets.reward,
+                                    fallbackIcon: Icons.redeem_rounded,
+                                    color: Colors.white,
+                                    size: 22,
+                                  )
+                                : const Icon(Icons.redeem_rounded),
+                        label: Text(_claiming ? 'ABRIENDO…' : 'ABRIR COFRE'),
+                      ),
+                    ],
+                    if (!_complete && lesson != null) ...[
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        onPressed: () =>
+                            context.push('/lesson-guide/${lesson.id}'),
+                        icon: const Icon(Icons.menu_book_rounded),
+                        label: const Text('VER LA GUÍA'),
+                      ),
+                    ],
+                  ],
                 ),
-                const SizedBox(height: 20),
-                Text(
-                  lesson?.title ?? 'Unidad',
-                  style: TextStyle(
-                    color: AppColors.ink,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w900,
-                  ),
-                ),
-                const SizedBox(height: 5),
-                Text(
-                  _complete
-                      ? opened
-                          ? 'Recompensa reclamada'
-                          : 'Completaste esta unidad.'
-                      : 'Todavía faltan señas para completar esta unidad.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                      color: AppColors.muted, fontSize: 13.5, height: 1.35),
-                ),
-                if (opened) ...[
-                  const SizedBox(height: 18),
-                  _RewardCard(reward: reward),
-                  const SizedBox(height: 16),
-                  FilledButton.icon(
-                    onPressed: _leave,
-                    icon: const Icon(Icons.arrow_forward_rounded),
-                    label: const Text('VOLVER AL CAMINO'),
-                  ),
-                ] else ...[
-                  const SizedBox(height: 22),
-                  FilledButton.icon(
-                    onPressed: _complete && !_claiming ? _open : null,
-                    icon: _claiming
-                        ? const Icon(Icons.hourglass_top_rounded)
-                        : _complete
-                            ? const AppFeatureIcon(
-                                asset: AppFeatureAssets.reward,
-                                fallbackIcon: Icons.redeem_rounded,
-                                color: Colors.white,
-                                size: 22,
-                              )
-                            : const Icon(Icons.redeem_rounded),
-                    label: Text(_claiming ? 'ABRIENDO…' : 'ABRIR COFRE'),
-                  ),
-                ],
-                if (!_complete && lesson != null) ...[
-                  const SizedBox(height: 10),
-                  OutlinedButton.icon(
-                    onPressed: () => context.push('/lesson-guide/${lesson.id}'),
-                    icon: const Icon(Icons.menu_book_rounded),
-                    label: const Text('VER LA GUÍA'),
-                  ),
-                ],
-              ],
+              ),
             ),
           ),
-        ),
+          Positioned.fill(
+            child: CelebrationConfetti(
+              active: _celebrate,
+              particleCount: 28,
+              duration: const Duration(milliseconds: 1500),
+            ),
+          ),
+        ],
       ),
     );
   }

@@ -6,6 +6,7 @@ import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/widgets/app_bottom_nav.dart';
 import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
+import 'package:senasgo/shared/widgets/celebration_confetti.dart';
 
 /// Retos locales: pequeñas metas diarias y semanales que dan XP extra.
 ///
@@ -21,6 +22,7 @@ class ChallengesView extends StatefulWidget {
 class _ChallengesViewState extends State<ChallengesView> {
   bool _claiming = false;
   bool _showClaimed = false;
+  int _celebration = 0;
 
   List<_Challenge> _buildChallenges() {
     final claimed = HiveService.claimedChallenges;
@@ -82,7 +84,11 @@ class _ChallengesViewState extends State<ChallengesView> {
     setState(() => _claiming = true);
     await HiveService.claimChallenge(challenge.id, challenge.reward);
     if (!mounted) return;
-    setState(() => _claiming = false);
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    setState(() {
+      _claiming = false;
+      if (!reduceMotion) _celebration++;
+    });
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
       ..showSnackBar(SnackBar(
@@ -134,130 +140,142 @@ class _ChallengesViewState extends State<ChallengesView> {
           const SizedBox(width: 6),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+      body: Stack(
         children: [
-          AppHeroHeader(
-            colors: const [Color(0xFF0B3B2E), Color(0xFF0F766E)],
-            child: Row(
-              children: [
-                Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.16),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.3),
-                    ),
-                  ),
-                  child: const Center(
-                    child: AppFeatureIcon(
-                      asset: AppFeatureAssets.reward,
-                      fallbackIcon: Icons.emoji_events_rounded,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Retos de la semana',
-                        style: TextStyle(
+          ListView(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 28),
+            children: [
+              AppHeroHeader(
+                colors: const [Color(0xFF0B3B2E), Color(0xFF0F766E)],
+                child: Row(
+                  children: [
+                    Container(
+                      width: 62,
+                      height: 62,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
+                      ),
+                      child: const Center(
+                        child: AppFeatureIcon(
+                          asset: AppFeatureAssets.reward,
+                          fallbackIcon: Icons.emoji_events_rounded,
                           color: Colors.white,
-                          fontWeight: FontWeight.w900,
-                          fontSize: 22,
-                          height: 1.1,
+                          size: 40,
                         ),
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        '$claimed de ${challenges.length} recompensas reclamadas',
-                        style: TextStyle(
-                          color: Colors.white.withValues(alpha: 0.86),
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
-                        ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text(
+                            'Retos de la semana',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 22,
+                              height: 1.1,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '$claimed de ${challenges.length} recompensas reclamadas',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.86),
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 18),
-          AppSectionTitle(
-            'Tus retos',
-            subtitle: completed > 0
-                ? 'Tenés $completed ${completed == 1 ? 'recompensa lista' : 'recompensas listas'} para reclamar.'
-                : 'Se renuevan con tu actividad.',
-          ),
-          const SizedBox(height: 10),
-          if (active.isEmpty)
-            AppCard(
-              padding: const EdgeInsets.all(16),
-              child: Text(
-                'Ya reclamaste todos los retos disponibles. Volvé cuando '
-                'avances en tu práctica.',
-                style: TextStyle(
-                  color: AppColors.muted,
-                  fontSize: 13,
-                  height: 1.4,
-                  fontWeight: FontWeight.w600,
+                    ),
+                  ],
                 ),
               ),
-            )
-          else
-            for (final challenge in active) ...[
-              _ChallengeCard(
-                challenge: challenge,
-                claiming: _claiming,
-                onClaim: () => _claim(challenge),
+              const SizedBox(height: 18),
+              AppSectionTitle(
+                'Tus retos',
+                subtitle: completed > 0
+                    ? 'Tenés $completed ${completed == 1 ? 'recompensa lista' : 'recompensas listas'} para reclamar.'
+                    : 'Se renuevan con tu actividad.',
               ),
               const SizedBox(height: 10),
-            ],
-          if (claimedChallenges.isNotEmpty) ...[
-            const SizedBox(height: 2),
-            if (!_showClaimed)
-              TextButton.icon(
-                onPressed: () => setState(() => _showClaimed = true),
-                icon: const Icon(Icons.expand_more_rounded),
-                label: Text('Ver completados ($claimed)'),
-              )
-            else ...[
-              const SizedBox(height: 6),
-              AppSectionTitle(
-                'Completados',
-                subtitle: 'Ya no necesitan acción.',
-              ),
-              const SizedBox(height: 8),
-              for (final challenge in claimedChallenges) ...[
-                _ChallengeCard(
-                  challenge: challenge,
-                  claiming: _claiming,
-                  onClaim: () {},
-                ),
-                const SizedBox(height: 10),
+              if (active.isEmpty)
+                AppCard(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(
+                    'Ya reclamaste todos los retos disponibles. Volvé cuando '
+                    'avances en tu práctica.',
+                    style: TextStyle(
+                      color: AppColors.muted,
+                      fontSize: 13,
+                      height: 1.4,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                )
+              else
+                for (final challenge in active) ...[
+                  _ChallengeCard(
+                    challenge: challenge,
+                    claiming: _claiming,
+                    onClaim: () => _claim(challenge),
+                  ),
+                  const SizedBox(height: 10),
+                ],
+              if (claimedChallenges.isNotEmpty) ...[
+                const SizedBox(height: 2),
+                if (!_showClaimed)
+                  TextButton.icon(
+                    onPressed: () => setState(() => _showClaimed = true),
+                    icon: const Icon(Icons.expand_more_rounded),
+                    label: Text('Ver completados ($claimed)'),
+                  )
+                else ...[
+                  const SizedBox(height: 6),
+                  AppSectionTitle(
+                    'Completados',
+                    subtitle: 'Ya no necesitan acción.',
+                  ),
+                  const SizedBox(height: 8),
+                  for (final challenge in claimedChallenges) ...[
+                    _ChallengeCard(
+                      challenge: challenge,
+                      claiming: _claiming,
+                      onClaim: () {},
+                    ),
+                    const SizedBox(height: 10),
+                  ],
+                  TextButton.icon(
+                    onPressed: () => setState(() => _showClaimed = false),
+                    icon: const Icon(Icons.expand_less_rounded),
+                    label: const Text('Ocultar completados'),
+                  ),
+                ],
               ],
-              TextButton.icon(
-                onPressed: () => setState(() => _showClaimed = false),
-                icon: const Icon(Icons.expand_less_rounded),
-                label: const Text('Ocultar completados'),
+              const SizedBox(height: 12),
+              Text(
+                'Los retos son locales y no compiten con otras personas.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: AppColors.muted,
+                  fontSize: 11.5,
+                  height: 1.35,
+                ),
               ),
             ],
-          ],
-          const SizedBox(height: 12),
-          Text(
-            'Los retos son locales y no compiten con otras personas.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              color: AppColors.muted,
-              fontSize: 11.5,
-              height: 1.35,
+          ),
+          Positioned.fill(
+            child: CelebrationConfetti(
+              key: ValueKey(_celebration),
+              active: _celebration > 0,
+              particleCount: 22,
+              duration: const Duration(milliseconds: 1200),
             ),
           ),
         ],
