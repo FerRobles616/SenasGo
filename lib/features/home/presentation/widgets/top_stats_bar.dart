@@ -140,7 +140,7 @@ class _LanguageBadge extends StatelessWidget {
   }
 }
 
-class _Stat extends StatelessWidget {
+class _Stat extends StatefulWidget {
   const _Stat({
     required this.icon,
     required this.color,
@@ -162,36 +162,74 @@ class _Stat extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<_Stat> createState() => _StatState();
+}
+
+class _StatState extends State<_Stat> with SingleTickerProviderStateMixin {
+  late final AnimationController _bump = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 520),
+  );
+
+  late final Animation<double> _scale = TweenSequence<double>([
+    TweenSequenceItem(
+      tween: Tween<double>(begin: 1, end: 1.18)
+          .chain(CurveTween(curve: Curves.easeOutCubic)),
+      weight: 35,
+    ),
+    TweenSequenceItem(
+      tween: Tween<double>(begin: 1.18, end: 1)
+          .chain(CurveTween(curve: Curves.elasticOut)),
+      weight: 65,
+    ),
+  ]).animate(_bump);
+
+  @override
+  void didUpdateWidget(covariant _Stat oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.value != widget.value &&
+        !(MediaQuery.maybeDisableAnimationsOf(context) ?? false)) {
+      _bump.forward(from: 0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _bump.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final content = Tooltip(
-      message: help,
+      message: widget.help,
       triggerMode: TooltipTriggerMode.tap,
       showDuration: const Duration(seconds: 3),
       child: Semantics(
-        label: '$label: $value. $help',
+        label: '${widget.label}: ${widget.value}. ${widget.help}',
         excludeSemantics: true,
-        button: onTap != null,
+        button: widget.onTap != null,
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               Opacity(
-                opacity: iconOpacity,
-                child: asset == null
-                    ? Icon(icon, color: color, size: 24)
+                opacity: widget.iconOpacity,
+                child: widget.asset == null
+                    ? Icon(widget.icon, color: widget.color, size: 24)
                     : AppFeatureIcon(
-                        asset: asset!,
-                        fallbackIcon: icon,
-                        color: color,
+                        asset: widget.asset!,
+                        fallbackIcon: widget.icon,
+                        color: widget.color,
                         size: 26,
                       ),
               ),
               const SizedBox(width: 2),
               Text(
-                value,
+                widget.value,
                 style: TextStyle(
-                  color: color,
+                  color: widget.color,
                   fontWeight: FontWeight.w900,
                   fontSize: 17,
                 ),
@@ -201,11 +239,20 @@ class _Stat extends StatelessWidget {
         ),
       ),
     );
-    if (onTap == null) return content;
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
+
+    final animated = AnimatedBuilder(
+      animation: _bump,
+      builder: (context, child) => Transform.scale(
+        scale: _scale.value,
+        child: child,
+      ),
       child: content,
+    );
+    if (widget.onTap == null) return animated;
+    return InkWell(
+      onTap: widget.onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: animated,
     );
   }
 }

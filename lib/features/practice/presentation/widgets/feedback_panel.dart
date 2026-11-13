@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:lottie/lottie.dart';
 import 'package:senasgo/core/constants/app_constants.dart';
 import 'package:flutter/services.dart';
 import 'package:senasgo/core/theme/app_theme.dart';
@@ -9,6 +10,7 @@ import 'package:senasgo/features/practice/domain/sign_reference.dart';
 import 'package:senasgo/features/practice/presentation/controllers/practice_controller.dart';
 import 'package:senasgo/features/support/presentation/support_actions.dart';
 import 'package:senasgo/shared/widgets/app_feature_icon.dart';
+import 'package:senasgo/shared/widgets/lottie_xp_burst.dart';
 
 /// Ícono grande de resultado (✓ / ✕) de los estados 9 y 10. Entra con un
 /// rebote; el acierto suelta una ráfaga de partículas y el error se sacude.
@@ -52,8 +54,26 @@ class _ResultIconState extends State<ResultIcon>
   @override
   Widget build(BuildContext context) {
     final success = widget.success;
-    final color = success ? AppColors.success : AppColors.error;
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final color = success ? AppColors.successInk : AppColors.error;
     final soft = success ? AppColors.successSoft : AppColors.errorSoft;
+    final glyph = success && !reduceMotion
+        ? ExcludeSemantics(
+            child: ColorFiltered(
+              colorFilter:
+                  ColorFilter.mode(AppColors.successInk, BlendMode.srcIn),
+              child: Lottie.asset(
+                'assets/animations/check_draw.json',
+                width: 132,
+                height: 132,
+                fit: BoxFit.contain,
+                repeat: false,
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.check, size: 64, color: color),
+              ),
+            ),
+          )
+        : Icon(success ? Icons.check : Icons.close, size: 64, color: color);
     final icon = Container(
       width: 200,
       height: 200,
@@ -64,8 +84,7 @@ class _ResultIconState extends State<ResultIcon>
           width: 140,
           height: 140,
           decoration: BoxDecoration(color: soft, shape: BoxShape.circle),
-          child:
-              Icon(success ? Icons.check : Icons.close, size: 64, color: color),
+          child: glyph,
         ),
       ),
     );
@@ -439,13 +458,23 @@ class CorrectFeedback extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              AppFeatureIcon(
-                asset: AppFeatureAssets.xp,
-                fallbackIcon: Icons.bolt,
-                color: AppColors.success,
-                size: 36,
+              SizedBox(
+                width: 64,
+                height: 64,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    const Positioned.fill(child: LottieXpBurst(size: 64)),
+                    AppFeatureIcon(
+                      asset: AppFeatureAssets.xp,
+                      fallbackIcon: Icons.bolt,
+                      color: AppColors.success,
+                      size: 36,
+                    ),
+                  ],
+                ),
               ),
-              SizedBox(width: 10),
+              SizedBox(width: 6),
               Text('+${AppConstants.xpPerCorrectSign} XP',
                   style: TextStyle(fontSize: 34, fontWeight: FontWeight.w800)),
               SizedBox(width: 12),

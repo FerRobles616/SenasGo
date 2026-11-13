@@ -67,12 +67,21 @@ class _JaguarPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final s = size.width;
     final t = idle.value;
-    // Balanceo suave de la cabeza y parpadeo breve.
-    final tilt = math.sin(t * 2 * math.pi) * 0.05;
+    // Balanceo suave de la cabeza y parpadeo breve. Al celebrar, el jaguareté
+    // da un pequeño salto para acompañar la recompensa sin mover el layout.
+    final tiltAmount = switch (mood) {
+      MascotMood.cheering => 0.075,
+      MascotMood.thinking => -0.035,
+      MascotMood.happy => 0.05,
+    };
+    final tilt = math.sin(t * 2 * math.pi) * tiltAmount;
+    final bob = mood == MascotMood.cheering
+        ? math.sin(t * 4 * math.pi).abs() * s * 0.02
+        : 0.0;
     final blink = (t > 0.9 && t < 0.96) ? 0.15 : 1.0;
 
     canvas.save();
-    canvas.translate(s / 2, s * 0.56);
+    canvas.translate(s / 2, s * 0.56 - bob);
     canvas.rotate(tilt);
 
     final fur = Paint()..color = _fur;

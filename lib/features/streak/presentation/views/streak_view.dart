@@ -11,6 +11,7 @@ import 'package:senasgo/shared/widgets/app_feature_icon.dart';
 import 'package:senasgo/shared/widgets/app_ui.dart';
 import 'package:senasgo/shared/widgets/jaguarete_mascot.dart';
 import 'package:senasgo/shared/widgets/pushable_button.dart';
+import 'package:senasgo/shared/widgets/rive_streak_flame.dart';
 
 /// Calendario de racha y protectores.
 ///
@@ -54,6 +55,20 @@ class _StreakViewState extends State<StreakView> {
     final todayDone = HiveService.practicedToday;
     final compact = MediaQuery.sizeOf(context).width < 360;
     final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
+    final pngFlame = AppFeatureIcon(
+      asset: AppFeatureAssets.streak,
+      fallbackIcon: Icons.local_fire_department_rounded,
+      color: Colors.white,
+      size: compact ? 46 : 58,
+    );
+    final lottieFlame = Lottie.asset(
+      'assets/animations/streak_flame.json',
+      width: compact ? 66 : 82,
+      height: compact ? 66 : 82,
+      fit: BoxFit.contain,
+      repeat: true,
+      errorBuilder: (context, error, stackTrace) => pngFlame,
+    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mi racha'),
@@ -93,26 +108,10 @@ class _StreakViewState extends State<StreakView> {
                   child: Center(
                     child: ExcludeSemantics(
                       child: reduceMotion
-                          ? AppFeatureIcon(
-                              asset: AppFeatureAssets.streak,
-                              fallbackIcon: Icons.local_fire_department_rounded,
-                              color: Colors.white,
-                              size: compact ? 46 : 58,
-                            )
-                          : Lottie.asset(
-                              'assets/animations/streak_flame.json',
-                              width: compact ? 66 : 82,
-                              height: compact ? 66 : 82,
-                              fit: BoxFit.contain,
-                              repeat: true,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  AppFeatureIcon(
-                                asset: AppFeatureAssets.streak,
-                                fallbackIcon:
-                                    Icons.local_fire_department_rounded,
-                                color: Colors.white,
-                                size: compact ? 46 : 58,
-                              ),
+                          ? pngFlame
+                          : RiveStreakFlame(
+                              size: compact ? 66 : 82,
+                              fallback: lottieFlame,
                             ),
                     ),
                   ),
@@ -455,6 +454,7 @@ class _MonthCalendar extends StatelessWidget {
     final daysInMonth = DateTime(now.year, now.month + 1, 0).day;
     final leading = first.weekday - 1;
     final practiced = days.map(_dayKey).toSet();
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
     const labels = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
 
     return Column(
@@ -501,7 +501,7 @@ class _MonthCalendar extends StatelessWidget {
             final day = DateTime(now.year, now.month, index - leading + 1);
             final active = practiced.contains(_dayKey(day));
             final isToday = _sameDay(day, now);
-            return Container(
+            final cell = Container(
               decoration: BoxDecoration(
                 color: active ? AppColors.streak.withValues(alpha: 0.14) : null,
                 shape: BoxShape.circle,
@@ -530,6 +530,17 @@ class _MonthCalendar extends StatelessWidget {
                     ),
                 ],
               ),
+            );
+            if (!isToday) return cell;
+            return TweenAnimationBuilder<double>(
+              tween: Tween<double>(begin: reduceMotion ? 1 : 0.78, end: 1),
+              duration: reduceMotion
+                  ? Duration.zero
+                  : const Duration(milliseconds: 650),
+              curve: Curves.elasticOut,
+              builder: (context, value, child) =>
+                  Transform.scale(scale: value, child: child),
+              child: cell,
             );
           },
         ),

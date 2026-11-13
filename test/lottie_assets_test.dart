@@ -6,12 +6,17 @@ import 'package:lottie/lottie.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('La llama Lottie se puede cargar sin conexión', () async {
-    final bytes =
-        await File('assets/animations/streak_flame.json').readAsBytes();
-    final composition = await LottieComposition.fromBytes(bytes);
+  for (final name in const [
+    'streak_flame.json',
+    'xp_burst.json',
+    'check_draw.json',
+  ]) {
+    test('La animación $name se puede cargar sin conexión', () async {
+      final bytes = await File('assets/animations/$name').readAsBytes();
+      final composition = await LottieComposition.fromBytes(bytes);
 
-    expect(composition.layers, isNotEmpty);
-    expect(composition.endFrame, greaterThan(0));
-  });
+      expect(composition.layers, isNotEmpty);
+      expect(composition.endFrame, greaterThan(0));
+    });
+  }
 }

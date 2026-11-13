@@ -70,6 +70,7 @@ class _LessonNodeState extends State<LessonNode>
     final locked = node.status == NodeStatus.locked;
     final face = locked ? AppColors.locked : widget.palette.face;
     final shade = locked ? AppColors.lockedShade : widget.palette.shade;
+    final reduceMotion = MediaQuery.maybeDisableAnimationsOf(context) ?? false;
 
     final icon = switch (node.status) {
       NodeStatus.completed => Icons.check_rounded,
@@ -91,8 +92,22 @@ class _LessonNodeState extends State<LessonNode>
       height: LessonNode.size - 6,
       depth: 6,
       semanticLabel: 'Seña ${node.sign.name}, $state',
-      child: Icon(icon,
-          size: 38, color: locked ? AppColors.lockedInk : Colors.white),
+      child: AnimatedSwitcher(
+        duration:
+            reduceMotion ? Duration.zero : const Duration(milliseconds: 320),
+        switchInCurve: Curves.easeOutBack,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: ScaleTransition(scale: animation, child: child),
+        ),
+        child: Icon(
+          icon,
+          key: ValueKey(node.status),
+          size: 38,
+          color: locked ? AppColors.lockedInk : Colors.white,
+        ),
+      ),
     );
 
     return SizedBox(
